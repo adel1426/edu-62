@@ -78,6 +78,14 @@ try {
         case $path === 'lessons/content' && $method === 'PUT':
             handle_lesson_content_put();
 
+        // ── إحصائيات الإدارة ──
+        case $path === 'admin/stats' && $method === 'GET':
+            handle_admin_stats();
+        case preg_match('#^admin/students/(\d+)/progress$#', $path, $m) && $method === 'GET':
+            handle_admin_student_progress((int)$m[1]);
+        case preg_match('#^admin/students/(\d+)$#', $path, $m) && $method === 'DELETE':
+            handle_admin_student_delete((int)$m[1]);
+
         // ── المنهج الدراسي (وحدات/دروس مخصصة) ──
         case $path === 'curriculum' && $method === 'GET':
             handle_curriculum_get();
@@ -703,4 +711,107 @@ function handle_progress_video() {
         ->execute([$points, $userId]);
 
     send_json(['ok' => true, 'points_earned' => $points]);
+}
+
+// ── إحصائيات الإدارة ──
+
+function handle_admin_stats() {
+    require_admin();
+    $pdo = db();
+
+    $students_count    = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    $total_completions = (int)$pdo->query("SELECT COUNT(*) FROM lesson_progress")->fetchColumn();
+    $total_videos      = 0;
+    try { $total_videos = (int)$pdo->query("SELECT COUNT(*) FROM video_progress")->fetchColumn(); } catch (Throwable $e) {}
+    $total_points      = (int)($pdo->query("SELECT COALESCE(SUM(total_points),0) FROM users")->fetchColumn());
+
+    // قائمة الطالبات مع إجمالياتهن
+    $stmt = $pdo->query(
+        "SELECT u.id, u.name, u.username, u.grade_level, u.total_points, u.created_at,
+                COUNT(DISTINCT lp.id) AS lessons_done
+         FROM users u
+         LEFT JOIN lesson_progress lp ON lp.user_id = u.id
+         GROUP BY u.id
+         ORDER BY u.total_points DESC, u.name ASC"
+    );
+    $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // إضافة مشاهدات الفيديو لكل طالبة
+    $vCounts = [];
+    try {
+        $vStmt = $pdo->query("SELECT user_id, COUNT(*) AS vc FROM video_progress GROUP BY user_id");
+        while ($row = $vStmt->fetch()) $vCounts[(int)$row['user_id']] = (int)$row['vc'];
+    } catch (Throwable $e) {}
+
+    foreach ($students as &$s) {
+        $s['id']           = (int)$s['id'];
+        $s['total_points'] = (int)$s['total_points'];
+        $s['lessons_done'] = (int)$s['lessons_done'];
+        $s['videos_done']  = $vCounts[(int)$s['id']] ?? 0;
+    }
+    unset($s);
+
+    // أكثر الدروس اكتمالاً
+    $topStmt = $pdo->query(
+        "SELECT grade_key, unit_index, lesson_index, COUNT(*) AS cnt
+         FROM lesson_progress
+         GROUP BY grade_key, unit_index, lesson_index
+         ORDER BY cnt DESC LIMIT 5"
+    );
+    $top_lessons = $topStmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($top_lessons as &$l) { $l['cnt'] = (int)$l['cnt']; $l['unit_index'] = (int)$l['unit_index']; $l['lesson_index'] = (int)$l['lesson_index']; }
+
+    // الدروس الأقل اكتمالاً (بين الدروس التي لها اكتمال ≤ 2)
+    $lowStmt = $pdo->query(
+        "SELECT grade_key, unit_index, lesson_index, COUNT(*) AS cnt
+         FROM lesson_progress
+         GROUP BY grade_key, unit_index, lesson_index
+         HAVING cnt <= 2
+         ORDER BY cnt ASC LIMIT 5"
+    );
+    $low_lessons = $lowStmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($low_lessons as &$l) { $l['cnt'] = (int)$l['cnt']; $l['unit_index'] = (int)$l['unit_index']; $l['lesson_index'] = (int)$l['lesson_index']; }
+
+    send_json([
+        'students_count'    => $students_count,
+        'total_completions' => $total_completions,
+        'total_videos'      => $total_videos,
+        'total_points'      => $total_points,
+        'students'          => $students,
+        'top_lessons'       => $top_lessons,
+        'low_lessons'       => $low_lessons,
+    ]);
+}
+
+function handle_admin_student_progress(int $userId) {
+    require_admin();
+    $pdo = db();
+
+    $stmt = $pdo->prepare(
+        "SELECT grade_key, unit_index, lesson_index FROM lesson_progress WHERE user_id = ?"
+    );
+    $stmt->execute([$userId]);
+    $completed = array_map(
+        fn($r) => $r['grade_key'] . '|' . $r['unit_index'] . '|' . $r['lesson_index'],
+        $stmt->fetchAll()
+    );
+
+    $videos = [];
+    try {
+        $vStmt = $pdo->prepare("SELECT grade_key, unit_index, lesson_index FROM video_progress WHERE user_id = ?");
+        $vStmt->execute([$userId]);
+        $videos = array_map(
+            fn($r) => $r['grade_key'] . '|' . $r['unit_index'] . '|' . $r['lesson_index'],
+            $vStmt->fetchAll()
+        );
+    } catch (Throwable $e) {}
+
+    send_json(['completed' => $completed, 'videos' => $videos]);
+}
+
+function handle_admin_student_delete(int $userId) {
+    require_admin();
+    if (!$userId) send_json(['error' => 'معرّف غير صالح'], 400);
+    db()->prepare("DELETE FROM users WHERE id = ?")->execute([$userId]);
+    send_json(['ok' => true]);
 }

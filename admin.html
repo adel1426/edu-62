@@ -426,7 +426,7 @@
 
       <div class="max-w-6xl mx-auto px-3 py-5">
         <!-- تبديل الصف -->
-        <div class="flex gap-2 mb-5">
+        <div class="flex gap-2 mb-5 flex-wrap">
           <button
             id="gtab-first"
             class="grade-tab on"
@@ -441,7 +441,17 @@
           >
             📗 الصف الثاني متوسط
           </button>
+          <button
+            id="gtab-stats"
+            class="grade-tab off"
+            onclick="switchToStats()"
+          >
+            📊 إحصائيات الطالبات
+          </button>
         </div>
+
+        <!-- ── عرض الأسئلة والمنهج ── -->
+        <div id="questions-view">
 
         <!-- ── تصدير / استيراد كامل المرحلة ── -->
         <div class="flex gap-2 mb-5">
@@ -994,9 +1004,96 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </div><!-- end flex layout -->
+        </div><!-- end questions-view -->
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <!-- لوحة إحصائيات الطالبات                           -->
+        <!-- ══════════════════════════════════════════════════ -->
+        <div id="stats-view" class="hidden">
+
+          <!-- بطاقات الإجمالي -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+            <div class="card text-center py-4">
+              <div class="text-3xl font-black mb-1" style="color:#7c3aed" id="s-students">—</div>
+              <div class="text-xs" style="color:#94a3b8">طالبة مسجّلة 👩‍🎓</div>
+            </div>
+            <div class="card text-center py-4">
+              <div class="text-3xl font-black mb-1" style="color:#10b981" id="s-completions">—</div>
+              <div class="text-xs" style="color:#94a3b8">درس مكتمل ✅</div>
+            </div>
+            <div class="card text-center py-4">
+              <div class="text-3xl font-black mb-1" style="color:#059669" id="s-videos">—</div>
+              <div class="text-xs" style="color:#94a3b8">فيديو مُشاهَد 📹</div>
+            </div>
+            <div class="card text-center py-4">
+              <div class="text-3xl font-black mb-1" style="color:#ec4899" id="s-points">—</div>
+              <div class="text-xs" style="color:#94a3b8">نقطة موزّعة ⭐</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col lg:flex-row gap-4">
+
+            <!-- جدول الطالبات -->
+            <div class="flex-1 min-w-0">
+              <div class="card">
+                <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                  <div class="font-black text-sm" style="color:#7c3aed">👩‍🎓 الطالبات المسجّلات</div>
+                  <div class="flex gap-2">
+                    <input id="s-search" type="text" placeholder="🔍 بحث بالاسم..."
+                           oninput="filterStudents()"
+                           class="border rounded-xl px-3 py-1.5 text-sm"
+                           style="border-color:rgba(124,58,237,0.25);outline:none;font-family:inherit;width:160px;">
+                    <button onclick="exportStudentsCSV()"
+                            class="text-xs px-3 py-1.5 rounded-xl font-bold flex-shrink-0"
+                            style="background:rgba(5,150,105,0.08);color:#059669;border:1px solid rgba(5,150,105,0.2)">
+                      📋 تصدير CSV
+                    </button>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr style="border-bottom:2px solid rgba(124,58,237,0.1);">
+                        <th class="text-right px-3 py-2 text-xs font-black" style="color:#94a3b8">الاسم</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">الصف</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">النقاط ⭐</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">دروس ✅</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">فيديو 📹</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="students-tbody">
+                      <tr><td colspan="6" class="text-center py-10 text-slate-400">جاري التحميل...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- جانب أيمن: أكثر الدروس + آخر إحصاءات -->
+            <div class="lg:w-72 flex-shrink-0 space-y-4">
+              <!-- أكثر الدروس إكمالاً -->
+              <div class="card">
+                <div class="font-black text-sm mb-3" style="color:#7c3aed">🏆 أكثر الدروس اكتمالاً</div>
+                <div id="top-lessons-list">
+                  <div class="text-center text-slate-400 text-xs py-4">جاري التحميل...</div>
+                </div>
+              </div>
+              <!-- الدروس الأقل اكتمالاً -->
+              <div class="card">
+                <div class="font-black text-sm mb-3" style="color:#ef4444">⚠️ دروس لم تُكتمل بعد</div>
+                <div id="low-lessons-list">
+                  <div class="text-center text-slate-400 text-xs py-4">جاري التحميل...</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- end stats-view -->
+
+      </div><!-- end max-w-6xl -->
+    </div><!-- end admin-panel -->
 
     <div id="toast" class="toast hidden"></div>
 
@@ -2249,6 +2346,249 @@
         );
       }
 
+      // ══════════════════════════════════════════════════════
+      // إحصائيات الطالبات
+      // ══════════════════════════════════════════════════════
+      let _statsData = null, _statsFiltered = [];
+
+      function switchToStats() {
+        document.getElementById('gtab-first').className  = 'grade-tab off';
+        document.getElementById('gtab-second').className = 'grade-tab off';
+        document.getElementById('gtab-stats').className  = 'grade-tab on';
+        document.getElementById('questions-view').classList.add('hidden');
+        document.getElementById('stats-view').classList.remove('hidden');
+        if (!_statsData) loadStats();
+      }
+
+      // تعديل switchGrade لإخفاء لوحة الإحصائيات عند العودة
+      const _origSwitchGrade = switchGrade;
+      switchGrade = function(g) {
+        document.getElementById('stats-view').classList.add('hidden');
+        document.getElementById('questions-view').classList.remove('hidden');
+        document.getElementById('gtab-stats').className = 'grade-tab off';
+        _origSwitchGrade(g);
+      };
+
+      async function loadStats() {
+        document.getElementById('students-tbody').innerHTML =
+          '<tr><td colspan="6" class="text-center py-10 text-slate-400">جاري التحميل...</td></tr>';
+        try {
+          const r = await fetch(`${API}/admin/stats`, { credentials: 'include' });
+          if (!r.ok) throw new Error();
+          _statsData = await r.json();
+          _statsFiltered = [..._statsData.students];
+          renderStats();
+        } catch {
+          document.getElementById('students-tbody').innerHTML =
+            '<tr><td colspan="6" class="text-center py-10 text-red-400">فشل تحميل البيانات</td></tr>';
+        }
+      }
+
+      function renderStats() {
+        if (!_statsData) return;
+        document.getElementById('s-students').textContent    = _statsData.students_count;
+        document.getElementById('s-completions').textContent = _statsData.total_completions;
+        document.getElementById('s-videos').textContent      = _statsData.total_videos;
+        document.getElementById('s-points').textContent      = _statsData.total_points;
+        renderStudentsTable();
+        renderTopLessons();
+        renderLowLessons();
+      }
+
+      function renderStudentsTable() {
+        const tbody = document.getElementById('students-tbody');
+        if (!_statsFiltered.length) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-sm">لا توجد نتائج</td></tr>';
+          return;
+        }
+        tbody.innerHTML = _statsFiltered.map(s => {
+          const gradeLabel = s.grade_level === 'first' ? 'الأول' : 'الثاني';
+          const bar = s.max_lessons > 0
+            ? Math.round(s.lessons_done / s.max_lessons * 100) : 0;
+          return `<tr class="border-b cursor-pointer transition hover:bg-purple-50/40"
+                      onclick="showStudentModal(${s.id})" style="border-color:rgba(124,58,237,0.07)">
+            <td class="px-3 py-3">
+              <div class="font-bold text-sm" style="color:#2d2640">${escapeHtml(s.name)}</div>
+              <div class="text-xs" style="color:#94a3b8">@${escapeHtml(s.username)}</div>
+            </td>
+            <td class="px-3 py-3 text-center">
+              <span class="text-xs px-2 py-0.5 rounded-lg font-bold"
+                    style="background:rgba(124,58,237,0.08);color:#7c3aed">${gradeLabel}</span>
+            </td>
+            <td class="px-3 py-3 text-center font-black text-sm" style="color:#ec4899">${s.total_points}</td>
+            <td class="px-3 py-3 text-center font-bold text-sm" style="color:#10b981">${s.lessons_done}</td>
+            <td class="px-3 py-3 text-center font-bold text-sm" style="color:#059669">${s.videos_done}</td>
+            <td class="px-3 py-3 text-center">
+              <button onclick="event.stopPropagation();deleteStudent(${s.id},'${escapeHtml(s.name)}')"
+                      class="text-xs px-2 py-1 rounded-lg"
+                      style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.2)">
+                🗑️
+              </button>
+            </td>
+          </tr>`;
+        }).join('');
+      }
+
+      function renderTopLessons() {
+        const el = document.getElementById('top-lessons-list');
+        if (!_statsData.top_lessons.length) {
+          el.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">لا توجد بيانات بعد</p>';
+          return;
+        }
+        const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+        el.innerHTML = _statsData.top_lessons.map((l, i) => {
+          const unitTitle   = CUR[l.grade_key]?.units[l.unit_index]?.title   || `وحدة ${+l.unit_index+1}`;
+          const lessonTitle = CUR[l.grade_key]?.units[l.unit_index]?.lessons[l.lesson_index]
+                              || `درس ${+l.lesson_index+1}`;
+          const gl = l.grade_key === 'first' ? 'الأول' : 'الثاني';
+          return `<div class="flex items-center gap-2 py-2 border-b last:border-0" style="border-color:rgba(124,58,237,0.07)">
+            <span class="text-base flex-shrink-0">${medals[i]||'•'}</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold truncate" style="color:#2d2640">${escapeHtml(lessonTitle)}</div>
+              <div class="text-[10px]" style="color:#94a3b8">${gl} متوسط</div>
+            </div>
+            <span class="text-xs font-black flex-shrink-0" style="color:#7c3aed">${l.cnt}</span>
+          </div>`;
+        }).join('');
+      }
+
+      function renderLowLessons() {
+        const el = document.getElementById('low-lessons-list');
+        if (!_statsData.low_lessons || !_statsData.low_lessons.length) {
+          el.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">لا توجد بيانات</p>';
+          return;
+        }
+        el.innerHTML = _statsData.low_lessons.slice(0,5).map(l => {
+          const unitTitle   = CUR[l.grade_key]?.units[l.unit_index]?.title   || `وحدة ${+l.unit_index+1}`;
+          const lessonTitle = CUR[l.grade_key]?.units[l.unit_index]?.lessons[l.lesson_index]
+                              || `درس ${+l.lesson_index+1}`;
+          const gl = l.grade_key === 'first' ? 'الأول' : 'الثاني';
+          return `<div class="flex items-center gap-2 py-2 border-b last:border-0" style="border-color:rgba(239,68,68,0.07)">
+            <span class="text-base flex-shrink-0">⚠️</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold truncate" style="color:#2d2640">${escapeHtml(lessonTitle)}</div>
+              <div class="text-[10px]" style="color:#94a3b8">${gl} متوسط — ${escapeHtml(unitTitle)}</div>
+            </div>
+            <span class="text-xs font-black flex-shrink-0" style="color:#ef4444">${l.cnt} فقط</span>
+          </div>`;
+        }).join('');
+      }
+
+      function filterStudents() {
+        const q = document.getElementById('s-search').value.trim().toLowerCase();
+        _statsFiltered = q
+          ? _statsData.students.filter(s =>
+              s.name.toLowerCase().includes(q) || s.username.toLowerCase().includes(q))
+          : [..._statsData.students];
+        renderStudentsTable();
+      }
+
+      async function deleteStudent(id, name) {
+        if (!confirm(`هل أنت متأكدة من حذف حساب "${name}"؟\nسيُحذف تقدمها ونقاطها نهائياً.`)) return;
+        try {
+          const r = await fetch(`${API}/admin/students/${id}`, {
+            method: 'DELETE', credentials: 'include',
+          });
+          if (r.ok) {
+            showToast(`✅ تم حذف "${name}"`);
+            _statsData.students = _statsData.students.filter(s => s.id !== id);
+            _statsFiltered      = _statsFiltered.filter(s => s.id !== id);
+            _statsData.students_count = Math.max(0, _statsData.students_count - 1);
+            renderStats();
+          } else { showToast('❌ فشل الحذف', 'error'); }
+        } catch { showToast('❌ خطأ في الاتصال', 'error'); }
+      }
+
+      function exportStudentsCSV() {
+        if (!_statsData?.students?.length) { showToast('لا توجد بيانات', 'warn'); return; }
+        const header = ['الاسم','اسم_المستخدم','الصف','النقاط','الدروس_المكتملة','الفيديوهات'];
+        const rows = _statsData.students.map(s => [
+          s.name, s.username,
+          s.grade_level === 'first' ? 'الأول_متوسط' : 'الثاني_متوسط',
+          s.total_points, s.lessons_done, s.videos_done,
+        ]);
+        const csv = '﻿' + [header, ...rows].map(r => r.join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        a.download = `students_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+      }
+
+      async function showStudentModal(id) {
+        const s = _statsData?.students?.find(x => x.id === id);
+        if (!s) return;
+        const gl = s.grade_level === 'first' ? 'الأول متوسط' : 'الثاني متوسط';
+        document.getElementById('sm-body').innerHTML = '<div class="text-center py-8 text-slate-400">جاري التحميل...</div>';
+        document.getElementById('student-modal').classList.remove('hidden');
+
+        let progress = { completed: [], videos: [] };
+        try {
+          const r = await fetch(`${API}/admin/students/${id}/progress`, { credentials: 'include' });
+          if (r.ok) progress = await r.json();
+        } catch {}
+        const completedSet = new Set(progress.completed || []);
+        const videoSet     = new Set(progress.videos    || []);
+
+        const units = CUR[s.grade_level]?.units || [];
+        let unitsHtml = units.map((unit, ui) => {
+          const lessons = unit.lessons || [];
+          const doneCount  = lessons.filter((_, li) => completedSet.has(`${s.grade_level}|${ui}|${li}`)).length;
+          const videoCount = lessons.filter((_, li) => videoSet.has(`${s.grade_level}|${ui}|${li}`)).length;
+          const pct = lessons.length > 0 ? Math.round(doneCount / lessons.length * 100) : 0;
+          const rows = lessons.map((lesson, li) => {
+            const done  = completedSet.has(`${s.grade_level}|${ui}|${li}`);
+            const video = videoSet.has(`${s.grade_level}|${ui}|${li}`);
+            return `<div class="flex items-center justify-between px-3 py-1.5 text-xs border-b last:border-0" style="border-color:rgba(0,0,0,0.04)">
+              <span style="color:#4b5563">${lesson}</span>
+              <span class="flex gap-1.5">
+                <span style="opacity:${done?1:0.2}">✅</span>
+                <span style="opacity:${video?1:0.2}">📹</span>
+              </span>
+            </div>`;
+          }).join('');
+          return `<div class="mb-3 rounded-xl overflow-hidden" style="border:1px solid rgba(124,58,237,0.1)">
+            <div class="flex items-center justify-between px-3 py-2" style="background:rgba(124,58,237,0.05)">
+              <span class="text-xs font-black" style="color:#7c3aed">${unit.emoji||'📚'} ${unit.title}</span>
+              <span class="text-xs font-bold" style="color:${pct>=100?'#16a34a':'#7c3aed'}">${doneCount}/${lessons.length}</span>
+            </div>
+            <div class="w-full h-1" style="background:rgba(124,58,237,0.1)">
+              <div class="h-full" style="width:${pct}%;background:${pct>=100?'#16a34a':'linear-gradient(90deg,#7c3aed,#ec4899)'};transition:width .8s"></div>
+            </div>
+            ${rows}
+          </div>`;
+        }).join('');
+
+        document.getElementById('sm-body').innerHTML = `
+          <div class="flex items-center gap-4 mb-4 pb-4 border-b" style="border-color:rgba(124,58,237,0.1)">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+                 style="background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(236,72,153,0.12))">👩‍🎓</div>
+            <div>
+              <div class="font-black text-base" style="color:#2d2640">${escapeHtml(s.name)}</div>
+              <div class="text-xs" style="color:#94a3b8">${gl} · @${escapeHtml(s.username)}</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="rounded-xl p-2 text-center" style="background:rgba(236,72,153,0.06);border:1px solid rgba(236,72,153,0.15)">
+              <div class="font-black text-lg" style="color:#ec4899">${s.total_points}</div>
+              <div class="text-[10px]" style="color:#94a3b8">نقطة ⭐</div>
+            </div>
+            <div class="rounded-xl p-2 text-center" style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15)">
+              <div class="font-black text-lg" style="color:#10b981">${s.lessons_done}</div>
+              <div class="text-[10px]" style="color:#94a3b8">درس ✅</div>
+            </div>
+            <div class="rounded-xl p-2 text-center" style="background:rgba(5,150,105,0.06);border:1px solid rgba(5,150,105,0.15)">
+              <div class="font-black text-lg" style="color:#059669">${s.videos_done}</div>
+              <div class="text-[10px]" style="color:#94a3b8">فيديو 📹</div>
+            </div>
+          </div>
+          <div class="text-xs font-black mb-3" style="color:#7c3aed">📚 التقدم بالوحدات</div>
+          <div class="overflow-y-auto" style="max-height:300px">${unitsHtml}</div>`;
+      }
+
+      function closeStudentModal() {
+        document.getElementById('student-modal').classList.add('hidden');
+      }
+
       // ── تحميل المنهج من قاعدة البيانات وتطبيقه على CUR ─────
       async function loadCurriculumFromDB() {
         for (const g of ['first', 'second']) {
@@ -2356,6 +2696,18 @@
 
       checkAuth();
     </script>
+
+    <!-- نافذة تفاصيل الطالبة -->
+    <div id="student-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeStudentModal()">
+      <div class="bg-white rounded-2xl shadow-2xl w-full mx-4 overflow-y-auto" style="max-width:440px;max-height:90vh;">
+        <div class="p-6">
+          <div id="sm-body"></div>
+          <button onclick="closeStudentModal()"
+                  class="w-full mt-4 py-2 rounded-xl text-sm font-bold"
+                  style="background:rgba(124,58,237,0.08);color:#7c3aed;border:1px solid rgba(124,58,237,0.15)">إغلاق</button>
+        </div>
+      </div>
+    </div>
 
     <!-- نافذة تعديل المنهج -->
     <div id="c-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeCurricModal()">

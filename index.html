@@ -469,6 +469,40 @@
             />
           </div>
         </div>
+        <!-- شريط معلومات المستخدم -->
+        <div id="user-bar" class="hidden max-w-lg mx-auto px-4 pb-2 flex items-center justify-between gap-2"
+             style="border-top:1px solid rgba(124,58,237,0.06)">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">👩🏻‍🎓</span>
+            <div>
+              <p id="nav-user-name" class="text-xs font-black" style="color:#7c3aed"></p>
+              <p id="nav-user-grade" class="text-[10px]" style="color:#94a3b8"></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1 px-2 py-1 rounded-xl" style="background:rgba(124,58,237,0.08)">
+              <span class="text-sm">⭐</span>
+              <span id="nav-user-points" class="text-xs font-black" style="color:#7c3aed">0</span>
+            </div>
+            <button onclick="doLogout()" class="text-xs px-3 py-1 rounded-xl font-bold transition"
+                    style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.15)">
+              خروج
+            </button>
+          </div>
+        </div>
+        <!-- زر تسجيل الدخول للزوار -->
+        <div id="guest-bar" class="hidden max-w-lg mx-auto px-4 pb-2 flex items-center justify-end gap-2">
+          <button onclick="showAuthModal('login')"
+                  class="text-xs px-3 py-1.5 rounded-xl font-bold transition"
+                  style="background:rgba(124,58,237,0.08);color:#7c3aed;border:1px solid rgba(124,58,237,0.2)">
+            دخول
+          </button>
+          <button onclick="showAuthModal('register')"
+                  class="text-xs px-3 py-1.5 rounded-xl font-bold text-white transition"
+                  style="background:linear-gradient(135deg,#7c3aed,#ec4899)">
+            تسجيل مجاني 🚀
+          </button>
+        </div>
       </nav>
       <section id="hero-section" class="hero-pattern relative px-4 pt-10 pb-14">
         <!-- Decorative blobs -->
@@ -499,8 +533,34 @@
           "
         ></div>
         <div class="relative z-10 w-full max-w-lg mx-auto fade-in">
-          <!-- Greeting row -->
-          <div class="flex items-start justify-between mb-5">
+          <!-- بطاقة الترحيب الشخصية (تظهر عند تسجيل الدخول) -->
+          <div id="hero-user-card" class="hidden mb-5 rounded-3xl p-5"
+               style="background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3)">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <p class="text-white font-black text-lg" id="hero-user-greeting">أهلاً! 👋</p>
+                <p class="text-white/75 text-xs" id="hero-user-grade-label"></p>
+              </div>
+              <div class="text-left">
+                <p class="text-white font-black text-2xl" id="hero-progress-pct">0%</p>
+                <p class="text-white/65 text-xs">إنجازك</p>
+              </div>
+            </div>
+            <div class="w-full rounded-full mb-2" style="height:6px;background:rgba(255,255,255,0.25)">
+              <div id="hero-progress-bar" class="rounded-full h-full transition-all" style="width:0%;background:white"></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-white/70 text-xs" id="hero-progress-label">أتممتِ ٠ من ٠ درس</p>
+              <div class="flex items-center gap-1">
+                <span class="text-sm">⭐</span>
+                <span class="text-white font-black text-sm" id="hero-points">0</span>
+                <span class="text-white/65 text-xs">نقطة</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Greeting row (للزوار) -->
+          <div id="hero-guest-row" class="flex items-start justify-between mb-5">
             <div>
               <h1
                 id="hero-heading"
@@ -514,15 +574,12 @@
             </div>
             <div
               class="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl"
-              style="
-                background: rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(8px);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-              "
+              style="background:rgba(255,255,255,0.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);"
             >
               👩🏻‍🎓
             </div>
           </div>
+
           <!-- CTA button -->
           <button
             onclick="startJourney()"
@@ -586,7 +643,7 @@
         </div>
       </section>
 
-      <!-- مودال إدخال الاسم -->
+      <!-- مودال إدخال الاسم (للزوار) -->
       <div
         id="name-modal"
         class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
@@ -598,12 +655,8 @@
         >
           <div class="text-center mb-6">
             <div class="text-5xl mb-3">✏️</div>
-            <h3 class="text-xl font-black" style="color: #7c3aed">
-              أدخلي اسمك
-            </h3>
-            <p class="text-sm mt-1" style="color: #94a3b8">
-              سيظهر اسمك في لوحة الشرف ✨
-            </p>
+            <h3 class="text-xl font-black" style="color: #7c3aed">أدخلي اسمك</h3>
+            <p class="text-sm mt-1" style="color: #94a3b8">سيظهر اسمك في لوحة الشرف ✨</p>
           </div>
           <input
             id="student-name-input"
@@ -611,28 +664,138 @@
             maxlength="50"
             placeholder="اسمك الكامل..."
             class="w-full border rounded-2xl px-4 py-3 text-center text-lg font-bold mb-4 focus:outline-none"
-            style="
-              background: #fffbf7;
-              border-color: rgba(124, 58, 237, 0.2);
-              color: #2d2640;
-              font-family: Cairo, sans-serif;
-            "
+            style="background:#fffbf7;border-color:rgba(124,58,237,0.2);color:#2d2640;font-family:Cairo,sans-serif;"
           />
-          <div
-            id="name-error"
-            class="hidden text-sm text-center mb-3"
-            style="color: #ef4444"
-          >
+          <div id="name-error" class="hidden text-sm text-center mb-3" style="color:#ef4444">
             الرجاء إدخال اسمك أولاً
           </div>
-          <button
-            onclick="confirmName()"
-            class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold text-lg"
-          >
+          <button onclick="confirmName()" class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold text-lg mb-3">
             ابدأ التعلم 🚀
           </button>
+          <p class="text-center text-xs" style="color:#94a3b8">
+            أو
+            <button onclick="document.getElementById('name-modal').classList.add('hidden');showAuthModal('register')"
+                    class="font-black" style="color:#7c3aed;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif;">
+              سجّلي حساباً مجانياً
+            </button>
+            لحفظ تقدّمك وكسب نقاط
+          </p>
         </div>
       </div>
+
+      <!-- مودال تسجيل / دخول -->
+      <div
+        id="auth-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+        style="background:rgba(45,38,64,0.65);backdrop-filter:blur(12px)"
+      >
+        <div class="rounded-3xl max-w-sm w-full shadow-2xl fade-in overflow-hidden"
+             style="background:white;border:1px solid rgba(124,58,237,0.15);max-height:90vh;overflow-y:auto">
+          <!-- التبويبات -->
+          <div class="flex" style="border-bottom:1px solid rgba(124,58,237,0.1)">
+            <button id="tab-register" onclick="switchAuthTab('register')"
+                    class="flex-1 py-4 text-sm font-black transition"
+                    style="color:#7c3aed;border-bottom:2px solid #7c3aed">
+              تسجيل جديد
+            </button>
+            <button id="tab-login" onclick="switchAuthTab('login')"
+                    class="flex-1 py-4 text-sm font-black transition"
+                    style="color:#94a3b8;border-bottom:2px solid transparent">
+              دخول
+            </button>
+          </div>
+
+          <!-- نموذج التسجيل -->
+          <div id="form-register" class="p-6">
+            <p class="text-center text-3xl mb-4">🌸</p>
+            <div class="space-y-3">
+              <div>
+                <label class="text-xs font-bold mb-1 block" style="color:#64748b">الاسم الكامل</label>
+                <input id="reg-name" type="text" placeholder="فاطمة الأسمري"
+                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+              </div>
+              <div>
+                <label class="text-xs font-bold mb-1 block" style="color:#64748b">اسم المستخدم</label>
+                <input id="reg-username" type="text" placeholder="fatima123" dir="ltr"
+                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+              </div>
+              <div>
+                <label class="text-xs font-bold mb-1 block" style="color:#64748b">المرحلة الدراسية</label>
+                <select id="reg-grade"
+                        class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                        style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640;background:white">
+                  <option value="">اختاري المرحلة</option>
+                  <option value="first">الأول متوسط</option>
+                  <option value="second">الثاني متوسط</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-bold mb-1 block" style="color:#64748b">كلمة المرور</label>
+                <input id="reg-password" type="password" placeholder="٦ أحرف على الأقل" dir="ltr"
+                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+              </div>
+            </div>
+            <div id="reg-error" class="hidden mt-3 text-xs text-center px-3 py-2 rounded-xl" style="background:#fee2e2;color:#ef4444"></div>
+            <button onclick="doRegister()"
+                    class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold mt-4">
+              إنشاء حساب 🚀
+            </button>
+            <button onclick="document.getElementById('auth-modal').classList.add('hidden')"
+                    class="w-full py-2 mt-2 text-xs font-bold rounded-2xl transition"
+                    style="color:#94a3b8;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif">
+              متابعة بدون حساب
+            </button>
+          </div>
+
+          <!-- نموذج الدخول -->
+          <div id="form-login" class="p-6 hidden">
+            <p class="text-center text-3xl mb-4">👋</p>
+            <div class="space-y-3">
+              <div>
+                <label class="text-xs font-bold mb-1 block" style="color:#64748b">اسم المستخدم</label>
+                <input id="login-username" type="text" placeholder="fatima123" dir="ltr"
+                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+              </div>
+              <div>
+                <label class="text-xs font-bold mb-1 block" style="color:#64748b">كلمة المرور</label>
+                <input id="login-password-student" type="password" placeholder="كلمة المرور" dir="ltr"
+                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+              </div>
+            </div>
+            <div id="login-error" class="hidden mt-3 text-xs text-center px-3 py-2 rounded-xl" style="background:#fee2e2;color:#ef4444"></div>
+            <button onclick="doStudentLogin()"
+                    class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold mt-4">
+              دخول ✨
+            </button>
+            <button onclick="document.getElementById('auth-modal').classList.add('hidden')"
+                    class="w-full py-2 mt-2 text-xs font-bold rounded-2xl transition"
+                    style="color:#94a3b8;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif">
+              متابعة بدون حساب
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- قسم النتائج الشخصية -->
+      <section id="results-section" class="px-4 py-8 hidden" style="background:#fffbf7">
+        <div class="max-w-lg mx-auto">
+          <div class="flex items-center gap-3 mb-6">
+            <button onclick="goHome()" class="w-9 h-9 flex items-center justify-center rounded-xl transition"
+                    style="background:rgba(124,58,237,0.08)">
+              <i data-lucide="arrow-right" style="width:18px;height:18px;color:#7c3aed"></i>
+            </button>
+            <h2 class="text-2xl font-black" style="color:#2d2640">📊 نتائجي</h2>
+          </div>
+          <div id="results-content">
+            <div class="text-center py-12 text-slate-400">جاري التحميل...</div>
+          </div>
+        </div>
+      </section>
 
       <section id="subjects-section" class="px-4 py-8 md:py-12 hidden">
         <div class="max-w-lg mx-auto fade-in">
@@ -3043,6 +3206,7 @@
           "lessons-section",
           "lesson-content-section",
           "quiz-section",
+          "results-section",
         ];
         sections.forEach((s) =>
           document.getElementById(s).classList.add("hidden"),
@@ -3066,6 +3230,369 @@
 
       // تهيئة: تحميل المتصدرين عند فتح الصفحة
       loadLeaderboard("first");
+
+      // ══════════════════════════════════════════════════════
+      // نظام المصادقة والتقدم
+      // ══════════════════════════════════════════════════════
+
+      let currentUser = null;
+      let completedLessons = new Set(); // "gradeKey|unitIdx|lessonIdx"
+
+      // ── تهيئة الجلسة عند فتح الصفحة ──
+      async function initAuth() {
+        try {
+          const r = await fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' });
+          const d = await r.json();
+          if (d.user) {
+            currentUser = d.user;
+            await loadProgress();
+          }
+        } catch (e) {}
+        updateAuthUI();
+      }
+
+      // ── تحميل التقدم ──
+      async function loadProgress() {
+        if (!currentUser) return;
+        try {
+          const r = await fetch('/api/progress', { credentials: 'include', cache: 'no-store' });
+          const d = await r.json();
+          completedLessons = new Set(d.completed || []);
+          currentUser.total_points = d.total_points || currentUser.total_points;
+        } catch (e) {}
+      }
+
+      // ── تحديث واجهة المستخدم حسب حالة الدخول ──
+      function updateAuthUI() {
+        const gradeLabels = { first: 'الأول متوسط', second: 'الثاني متوسط' };
+        if (currentUser) {
+          // شريط المستخدم
+          document.getElementById('user-bar').classList.remove('hidden');
+          document.getElementById('guest-bar').classList.add('hidden');
+          document.getElementById('nav-user-name').textContent = currentUser.name;
+          document.getElementById('nav-user-grade').textContent = gradeLabels[currentUser.grade_level] || '';
+          document.getElementById('nav-user-points').textContent = currentUser.total_points;
+
+          // Hero card
+          document.getElementById('hero-user-card').classList.remove('hidden');
+          document.getElementById('hero-guest-row').classList.add('hidden');
+          const firstName = currentUser.name.split(' ')[0];
+          document.getElementById('hero-user-greeting').textContent = `أهلاً ${firstName}! 👋`;
+          document.getElementById('hero-user-grade-label').textContent = gradeLabels[currentUser.grade_level] || '';
+          document.getElementById('hero-points').textContent = currentUser.total_points;
+          updateHeroProgress();
+        } else {
+          document.getElementById('user-bar').classList.add('hidden');
+          document.getElementById('guest-bar').classList.remove('hidden');
+          document.getElementById('hero-user-card').classList.add('hidden');
+          document.getElementById('hero-guest-row').classList.remove('hidden');
+        }
+      }
+
+      function updateHeroProgress() {
+        if (!currentUser) return;
+        const grade = currentUser.grade_level;
+        const data = curriculumData[grade];
+        if (!data) return;
+        let total = 0, done = 0;
+        data.units.forEach((u, ui) => {
+          u.lessons.forEach((_, li) => {
+            total++;
+            if (completedLessons.has(`${grade}|${ui}|${li}`)) done++;
+          });
+        });
+        const pct = total > 0 ? Math.round(done / total * 100) : 0;
+        document.getElementById('hero-progress-pct').textContent = pct + '%';
+        document.getElementById('hero-progress-bar').style.width = pct + '%';
+        document.getElementById('hero-progress-label').textContent =
+          `أتممتِ ${toArabicDigits(done)} من ${toArabicDigits(total)} درس`;
+      }
+
+      // ── نافذة المصادقة ──
+      function showAuthModal(tab = 'register') {
+        document.getElementById('auth-modal').classList.remove('hidden');
+        switchAuthTab(tab);
+      }
+
+      function switchAuthTab(tab) {
+        const isRegister = tab === 'register';
+        document.getElementById('form-register').classList.toggle('hidden', !isRegister);
+        document.getElementById('form-login').classList.toggle('hidden', isRegister);
+        document.getElementById('tab-register').style.cssText =
+          isRegister ? 'color:#7c3aed;border-bottom:2px solid #7c3aed;flex:1;padding:1rem;font-size:.875rem;font-weight:900;transition:all .2s'
+                     : 'color:#94a3b8;border-bottom:2px solid transparent;flex:1;padding:1rem;font-size:.875rem;font-weight:900;transition:all .2s';
+        document.getElementById('tab-login').style.cssText =
+          !isRegister ? 'color:#7c3aed;border-bottom:2px solid #7c3aed;flex:1;padding:1rem;font-size:.875rem;font-weight:900;transition:all .2s'
+                      : 'color:#94a3b8;border-bottom:2px solid transparent;flex:1;padding:1rem;font-size:.875rem;font-weight:900;transition:all .2s';
+      }
+
+      // ── تسجيل حساب جديد ──
+      async function doRegister() {
+        const name     = document.getElementById('reg-name').value.trim();
+        const username = document.getElementById('reg-username').value.trim();
+        const grade    = document.getElementById('reg-grade').value;
+        const password = document.getElementById('reg-password').value;
+        const errEl    = document.getElementById('reg-error');
+        errEl.classList.add('hidden');
+        if (!name || !username || !grade || !password) {
+          errEl.textContent = 'يرجى تعبئة جميع الحقول';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        try {
+          const r = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name, username, grade_level: grade, password }),
+          });
+          const d = await r.json();
+          if (!r.ok) {
+            errEl.textContent = d.error || 'حدث خطأ';
+            errEl.classList.remove('hidden');
+            return;
+          }
+          currentUser = d.user;
+          completedLessons = new Set();
+          document.getElementById('auth-modal').classList.add('hidden');
+          updateAuthUI();
+          showToastMsg('🎉 أهلاً ' + currentUser.name + '! تم إنشاء حسابك');
+        } catch (e) {
+          errEl.textContent = 'تعذّر الاتصال بالخادم';
+          errEl.classList.remove('hidden');
+        }
+      }
+
+      // ── تسجيل دخول ──
+      async function doStudentLogin() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password-student').value;
+        const errEl    = document.getElementById('login-error');
+        errEl.classList.add('hidden');
+        if (!username || !password) {
+          errEl.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        try {
+          const r = await fetch('/api/auth/student-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username, password }),
+          });
+          const d = await r.json();
+          if (!r.ok) {
+            errEl.textContent = d.error || 'بيانات غير صحيحة';
+            errEl.classList.remove('hidden');
+            return;
+          }
+          currentUser = d.user;
+          await loadProgress();
+          document.getElementById('auth-modal').classList.add('hidden');
+          updateAuthUI();
+          showToastMsg('👋 مرحباً بعودتك ' + currentUser.name + '!');
+        } catch (e) {
+          errEl.textContent = 'تعذّر الاتصال بالخادم';
+          errEl.classList.remove('hidden');
+        }
+      }
+
+      // ── تسجيل خروج ──
+      async function doLogout() {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        } catch (e) {}
+        currentUser = null;
+        completedLessons = new Set();
+        updateAuthUI();
+        showToastMsg('تم تسجيل الخروج');
+      }
+
+      // ── إظهار صفحة النتائج الشخصية ──
+      async function showMyResults() {
+        if (!currentUser) {
+          showAuthModal('login');
+          return;
+        }
+        const sections = ['hero-section','leaderboard-section','subjects-section',
+          'units-section','lessons-section','lesson-content-section','quiz-section'];
+        sections.forEach(s => document.getElementById(s).classList.add('hidden'));
+        document.getElementById('results-section').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        await renderResults();
+        lucide.createIcons();
+      }
+
+      async function renderResults() {
+        const el = document.getElementById('results-content');
+        el.innerHTML = '<div class="text-center py-12 text-slate-400">جاري التحميل...</div>';
+        await loadProgress();
+        updateAuthUI();
+
+        const grade = currentUser.grade_level;
+        const data  = curriculumData[grade];
+        const gradeLabels = { first: 'الأول متوسط', second: 'الثاني متوسط' };
+        let total = 0, done = 0;
+        data.units.forEach((u, ui) => {
+          u.lessons.forEach((_, li) => {
+            total++;
+            if (completedLessons.has(`${grade}|${ui}|${li}`)) done++;
+          });
+        });
+        const pct = total > 0 ? Math.round(done / total * 100) : 0;
+        const motivational = pct >= 80 ? 'رائعة! أنتِ على وشك إتمام المنهج 🏆'
+                           : pct >= 50 ? 'أكثر من نصف الطريق، استمري! ⭐'
+                           : pct >= 20 ? 'تقدّم ملحوظ، واصلي الإنجاز! 💪'
+                           :             'كل رحلة تبدأ بخطوة، ابدئي الآن! ✨';
+
+        let html = `
+          <!-- بطاقة الإنجاز الكلي -->
+          <div class="mb-5 rounded-3xl p-6 text-white overflow-hidden relative"
+               style="background:linear-gradient(135deg,#7c3aed 0%,#ec4899 100%)">
+            <div class="absolute inset-0" style="background:radial-gradient(circle at 85% 15%,rgba(255,255,255,0.15) 0%,transparent 50%)"></div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <p class="text-white/80 text-sm mb-1">الإنجاز الكلي</p>
+                  <p class="text-5xl font-black">${pct}%</p>
+                </div>
+                <div class="text-left">
+                  <p class="text-white/80 text-xs mb-1">الدروس المكتملة</p>
+                  <p class="text-3xl font-black">${toArabicDigits(done)}<span class="text-lg text-white/70">/${toArabicDigits(total)}</span></p>
+                </div>
+              </div>
+              <div class="w-full rounded-full mb-3" style="height:8px;background:rgba(255,255,255,0.25)">
+                <div class="rounded-full h-full" style="width:${pct}%;background:white;transition:width 1s ease"></div>
+              </div>
+              <p class="text-white/90 text-sm">${motivational}</p>
+            </div>
+          </div>
+
+          <!-- إحصائيات -->
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="rounded-2xl p-4 text-center" style="background:white;border:1px solid rgba(124,58,237,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+              <p class="text-2xl font-black" style="color:#7c3aed">${toArabicDigits(done)}</p>
+              <p class="text-xs text-slate-500 mt-1">درس مكتمل</p>
+            </div>
+            <div class="rounded-2xl p-4 text-center" style="background:white;border:1px solid rgba(236,72,153,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+              <p class="text-2xl font-black" style="color:#ec4899">${toArabicDigits(currentUser.total_points)}</p>
+              <p class="text-xs text-slate-500 mt-1">نقطة مكتسبة ⭐</p>
+            </div>
+          </div>
+
+          <!-- التقدم بالوحدات -->
+          <h3 class="text-lg font-black mb-4" style="color:#2d2640">📚 التقدم بالوحدات — ${gradeLabels[grade] || ''}</h3>
+        `;
+
+        data.units.forEach((unit, ui) => {
+          const uTotal = unit.lessons.length;
+          const uDone  = unit.lessons.filter((_, li) => completedLessons.has(`${grade}|${ui}|${li}`)).length;
+          const uPct   = uTotal > 0 ? Math.round(uDone / uTotal * 100) : 0;
+          html += `
+            <div class="mb-4 rounded-2xl overflow-hidden" style="background:white;border:1px solid rgba(124,58,237,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+              <div class="p-4" style="background:linear-gradient(135deg,rgba(124,58,237,0.04),rgba(236,72,153,0.04))">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">${unit.emoji}</span>
+                    <span class="font-black text-sm" style="color:#2d2640">${unit.title}</span>
+                  </div>
+                  <span class="text-xs font-black" style="color:${uPct >= 100 ? '#16a34a' : '#7c3aed'}">${uPct >= 100 ? '✅ مكتملة' : toArabicDigits(uDone) + '/' + toArabicDigits(uTotal)}</span>
+                </div>
+                <div class="w-full rounded-full" style="height:6px;background:rgba(124,58,237,0.1)">
+                  <div class="rounded-full h-full" style="width:${uPct}%;background:${uPct >= 100 ? '#16a34a' : 'linear-gradient(90deg,#7c3aed,#ec4899)'};transition:width 1s ease"></div>
+                </div>
+              </div>
+              <div class="divide-y" style="border-top:1px solid rgba(124,58,237,0.06)">
+                ${unit.lessons.map((lesson, li) => {
+                  const isDone = completedLessons.has(`${grade}|${ui}|${li}`);
+                  return `<div class="px-4 py-2.5 flex items-center justify-between">
+                    <span class="text-xs" style="color:#2d2640">${lesson.title}</span>
+                    <span class="text-sm">${isDone ? '✅' : '○'}</span>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        el.innerHTML = html;
+      }
+
+      // ── دالة توست مساعدة ──
+      function showToastMsg(msg) {
+        const t = document.createElement('div');
+        t.className = 'fixed top-20 left-1/2 z-[9999] px-5 py-3 rounded-2xl text-white text-sm font-bold shadow-xl fade-in';
+        t.style.cssText = 'transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#ec4899);max-width:320px;text-align:center';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+
+      // ── دمج تسجيل النقاط مع التقدم ──
+      const _origSubmitScore = submitScore;
+      submitScore = async function() {
+        const state = window._quizState;
+        const name  = currentUser ? currentUser.name : getStudentName(currentGrade);
+        if (!name) return;
+        try {
+          const r = await fetch('/api/scores', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              studentName: name,
+              gradeKey:    currentGrade,
+              unitIndex:   currentUnitIndex,
+              lessonIndex: window._currentLessonIndex,
+              score:       state.score,
+              total:       state.quiz.length,
+            }),
+          });
+          const d = await r.json();
+          if (currentUser && d.points_earned > 0) {
+            currentUser.total_points += d.points_earned;
+            const key = `${currentGrade}|${currentUnitIndex}|${window._currentLessonIndex}`;
+            completedLessons.add(key);
+            updateAuthUI();
+          }
+          loadLeaderboard(currentGrade);
+        } catch (e) {}
+      };
+
+      // ── تحديث showUnits لاستخدام اسم المستخدم المسجّل ──
+      const _origShowUnits = showUnits;
+      showUnits = function(grade) {
+        if (currentUser) {
+          _proceedToUnits(grade);
+        } else {
+          _origShowUnits(grade);
+        }
+      };
+
+      // ── تحديث بطاقات الدروس لإظهار علامة الإتمام ──
+      const _origShowLessons = showLessons;
+      showLessons = async function(unitIdx) {
+        await _origShowLessons(unitIdx);
+        // أضف علامة الإتمام على الدروس المكتملة
+        if (!currentUser) return;
+        const unit = curriculumData[currentGrade].units[unitIdx];
+        unit.lessons.forEach((_, li) => {
+          const key = `${currentGrade}|${unitIdx}|${li}`;
+          if (completedLessons.has(key)) {
+            const countEl = document.getElementById(`q-count-${unitIdx}-${li}`);
+            if (countEl) {
+              const existing = countEl.innerHTML;
+              if (!existing.includes('✅ مكتمل')) {
+                countEl.innerHTML += ' <span style="color:#16a34a;font-weight:900;">✓ مكتمل</span>';
+              }
+            }
+          }
+        });
+      };
+
+      // تهيئة المصادقة عند تحميل الصفحة
+      initAuth();
 
       lucide.createIcons();
     </script>
@@ -3106,7 +3633,7 @@
           >
         </button>
         <button
-          onclick="startJourney()"
+          onclick="showMyResults()"
           class="flex flex-col items-center gap-1"
         >
           <div class="w-12 h-9 rounded-2xl flex items-center justify-center">
@@ -3121,12 +3648,13 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
             </svg>
           </div>
           <span class="text-[10px] font-bold" style="color: #94a3b8"
-            >دروسي</span
+            >نتائجي</span
           >
         </button>
         <a

@@ -72,6 +72,33 @@ if ($step === 'install') {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         ok("✅ جدول محتوى الدروس (lesson_content) جاهز");
 
+        // جدول الطالبات (حسابات شخصية)
+        $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            username VARCHAR(50) NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            grade_level VARCHAR(20) NOT NULL DEFAULT 'first',
+            total_points INT NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_username (username)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        ok("✅ جدول الطالبات (users) جاهز");
+
+        // جدول تتبع التقدم
+        $pdo->exec("CREATE TABLE IF NOT EXISTS lesson_progress (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            grade_key VARCHAR(20) NOT NULL,
+            unit_index INT NOT NULL,
+            lesson_index INT NOT NULL,
+            completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_progress (user_id, grade_key, unit_index, lesson_index),
+            INDEX idx_user (user_id),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        ok("✅ جدول التقدم (lesson_progress) جاهز");
+
         // ── خطوة 2: استيراد بيانات الأسئلة ──
         $sqlFile = __DIR__ . '/data.sql';
         if (!file_exists($sqlFile)) {

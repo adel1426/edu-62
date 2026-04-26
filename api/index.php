@@ -37,6 +37,18 @@ try {
             handle_logout();
         case $path === 'auth/me' && $method === 'GET':
             handle_me();
+        case $path === 'auth/register' && $method === 'POST':
+            handle_register();
+        case $path === 'auth/student-login' && $method === 'POST':
+            handle_student_login();
+
+        // ── التقدم ──
+        case $path === 'progress' && $method === 'POST':
+            handle_progress_mark();
+        case $path === 'progress' && $method === 'GET':
+            handle_progress_get();
+        case $path === 'progress/summary' && $method === 'GET':
+            handle_progress_summary();
 
         // ── الأسئلة ──
         case $path === 'questions/counts' && $method === 'GET':
@@ -106,7 +118,83 @@ function handle_logout() {
 
 function handle_me() {
     start_session_safe();
-    send_json(['isAdmin' => !empty($_SESSION['is_admin'])]);
+    $isAdmin = !empty($_SESSION['is_admin']);
+    $studentId = $_SESSION['student_id'] ?? null;
+    if ($studentId) {
+        $stmt = db()->prepare("SELECT id, name, grade_level, total_points FROM users WHERE id = ?");
+        $stmt->execute([$studentId]);
+        $u = $stmt->fetch();
+        send_json(['isAdmin' => $isAdmin, 'user' => $u ? [
+            'id'           => (int)$u['id'],
+            'name'         => $u['name'],
+            'grade_level'  => $u['grade_level'],
+            'total_points' => (int)$u['total_points'],
+        ] : null]);
+    }
+    send_json(['isAdmin' => $isAdmin, 'user' => null]);
+}
+
+function handle_register() {
+    $b = read_json_body();
+    $name     = trim($b['name'] ?? '');
+    $username = strtolower(trim($b['username'] ?? ''));
+    $password = $b['password'] ?? '';
+    $grade    = $b['grade_level'] ?? '';
+    if (!$name || !$username || !$password || !$grade) {
+        send_json(['error' => 'جميع الحقول مطلوبة'], 400);
+    }
+    if (!in_array($grade, ['first', 'second'])) {
+        send_json(['error' => 'المرحلة الدراسية غير صحيحة'], 400);
+    }
+    if (mb_strlen($password) < 6) {
+        send_json(['error' => 'كلمة المرور يجب أن تكون ٦ أحرف على الأقل'], 400);
+    }
+    $check = db()->prepare("SELECT id FROM users WHERE username = ?");
+    $check->execute([$username]);
+    if ($check->fetch()) {
+        send_json(['error' => 'اسم المستخدم مستخدم بالفعل، جرّبي اسماً آخر'], 409);
+    }
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $stmt = db()->prepare(
+        "INSERT INTO users (name, username, password_hash, grade_level) VALUES (?,?,?,?)"
+    );
+    $stmt->execute([$name, $username, $hash, $grade]);
+    $id = (int)db()->lastInsertId();
+    start_session_safe();
+    $_SESSION['student_id']    = $id;
+    $_SESSION['student_name']  = $name;
+    $_SESSION['student_grade'] = $grade;
+    send_json(['success' => true, 'user' => [
+        'id'           => $id,
+        'name'         => $name,
+        'grade_level'  => $grade,
+        'total_points' => 0,
+    ]], 201);
+}
+
+function handle_student_login() {
+    $b        = read_json_body();
+    $username = strtolower(trim($b['username'] ?? ''));
+    $password = $b['password'] ?? '';
+    if (!$username || !$password) {
+        send_json(['error' => 'اسم المستخدم وكلمة المرور مطلوبان'], 400);
+    }
+    $stmt = db()->prepare("SELECT * FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $u = $stmt->fetch();
+    if (!$u || !password_verify($password, $u['password_hash'])) {
+        send_json(['error' => 'اسم المستخدم أو كلمة المرور غير صحيحة'], 401);
+    }
+    start_session_safe();
+    $_SESSION['student_id']    = (int)$u['id'];
+    $_SESSION['student_name']  = $u['name'];
+    $_SESSION['student_grade'] = $u['grade_level'];
+    send_json(['success' => true, 'user' => [
+        'id'           => (int)$u['id'],
+        'name'         => $u['name'],
+        'grade_level'  => $u['grade_level'],
+        'total_points' => (int)$u['total_points'],
+    ]]);
 }
 
 // ── الأسئلة ──
@@ -270,13 +358,23 @@ function handle_questions_bulk() {
 // ── النتائج ──
 
 function handle_score_submit() {
-    $b = read_json_body();
-    $name = trim((string)($b['studentName'] ?? ''));
-    $grade = $b['gradeKey'] ?? '';
-    $unit = $b['unitIndex'] ?? null;
+    start_session_safe();
+    $b      = read_json_body();
+    $grade  = $b['gradeKey'] ?? '';
+    $unit   = $b['unitIndex'] ?? null;
     $lesson = $b['lessonIndex'] ?? null;
-    $score = $b['score'] ?? null;
-    $total = $b['total'] ?? null;
+    $score  = $b['score'] ?? null;
+    $total  = $b['total'] ?? null;
+
+    $studentId = $_SESSION['student_id'] ?? null;
+
+    // اسم الطالبة: إما من الحساب أو من الحقل المرسل
+    if ($studentId) {
+        $name = $_SESSION['student_name'] ?? '';
+    } else {
+        $name = trim((string)($b['studentName'] ?? ''));
+    }
+
     if ($name === '' || !$grade || $unit === null || $lesson === null || $score === null || $total === null) {
         send_json(['error' => 'بيانات ناقصة'], 400);
     }
@@ -286,12 +384,87 @@ function handle_score_submit() {
         "INSERT INTO student_scores (student_name, grade_key, unit_index, lesson_index, score, total)
          VALUES (?,?,?,?,?,?)
          ON DUPLICATE KEY UPDATE
-           score = GREATEST(score, VALUES(score)),
-           total = VALUES(total),
+           score = GREATEST(score, score + 0),
+           total = total,
            created_at = NOW()"
     );
     $stmt->execute([$name, $grade, (int)$unit, (int)$lesson, (int)$score, (int)$total]);
+
+    $pointsEarned = 0;
+    if ($studentId) {
+        // نقاط = ١٠ لكل إجابة صحيحة
+        $pointsEarned = (int)$score * 10;
+        db()->prepare("UPDATE users SET total_points = total_points + ? WHERE id = ?")
+            ->execute([$pointsEarned, $studentId]);
+        // تسجيل إتمام الدرس
+        db()->prepare(
+            "INSERT IGNORE INTO lesson_progress (user_id, grade_key, unit_index, lesson_index) VALUES (?,?,?,?)"
+        )->execute([$studentId, $grade, (int)$unit, (int)$lesson]);
+    }
+
+    send_json(['success' => true, 'points_earned' => $pointsEarned]);
+}
+
+// ── التقدم ──
+
+function handle_progress_mark() {
+    start_session_safe();
+    $studentId = $_SESSION['student_id'] ?? null;
+    if (!$studentId) send_json(['error' => 'يجب تسجيل الدخول أولاً'], 401);
+    $b      = read_json_body();
+    $grade  = $b['grade_key'] ?? '';
+    $unit   = isset($b['unit_index'])   ? (int)$b['unit_index']   : null;
+    $lesson = isset($b['lesson_index']) ? (int)$b['lesson_index'] : null;
+    if (!$grade || $unit === null || $lesson === null) {
+        send_json(['error' => 'بيانات ناقصة'], 400);
+    }
+    db()->prepare(
+        "INSERT IGNORE INTO lesson_progress (user_id, grade_key, unit_index, lesson_index) VALUES (?,?,?,?)"
+    )->execute([$studentId, $grade, $unit, $lesson]);
     send_json(['success' => true]);
+}
+
+function handle_progress_get() {
+    start_session_safe();
+    $studentId = $_SESSION['student_id'] ?? null;
+    if (!$studentId) send_json(['completed' => [], 'total_points' => 0]);
+    $grade = $_GET['gradeKey'] ?? null;
+    $sql    = "SELECT grade_key, unit_index, lesson_index FROM lesson_progress WHERE user_id = ?";
+    $params = [$studentId];
+    if ($grade) { $sql .= " AND grade_key = ?"; $params[] = $grade; }
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $completed = array_map(
+        fn($r) => $r['grade_key'] . '|' . $r['unit_index'] . '|' . $r['lesson_index'],
+        $stmt->fetchAll()
+    );
+    $pts = db()->prepare("SELECT total_points FROM users WHERE id = ?");
+    $pts->execute([$studentId]);
+    $row = $pts->fetch();
+    send_json(['completed' => $completed, 'total_points' => $row ? (int)$row['total_points'] : 0]);
+}
+
+function handle_progress_summary() {
+    start_session_safe();
+    $studentId = $_SESSION['student_id'] ?? null;
+    if (!$studentId) send_json(['error' => 'غير مسجّل'], 401);
+    $stmt = db()->prepare(
+        "SELECT grade_key, unit_index, lesson_index FROM lesson_progress WHERE user_id = ? ORDER BY completed_at DESC"
+    );
+    $stmt->execute([$studentId]);
+    $rows = $stmt->fetchAll();
+    $byGrade = [];
+    foreach ($rows as $r) {
+        $byGrade[$r['grade_key']][] = ['unit' => (int)$r['unit_index'], 'lesson' => (int)$r['lesson_index']];
+    }
+    $u = db()->prepare("SELECT name, grade_level, total_points FROM users WHERE id = ?");
+    $u->execute([$studentId]);
+    $user = $u->fetch();
+    send_json([
+        'user'     => $user,
+        'progress' => $byGrade,
+        'total'    => count($rows),
+    ]);
 }
 
 function handle_leaderboard() {

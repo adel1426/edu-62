@@ -1,0 +1,2160 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة إدارة الأسئلة - منصة رحلتك التفاعلية نحو التميز</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Cairo", sans-serif;
+        background: #fffbf7;
+        color: #2d2640;
+        min-height: 100vh;
+      }
+      select,
+      input,
+      textarea {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        color: #2d2640;
+        border-radius: 10px;
+        padding: 10px 14px;
+        width: 100%;
+        font-family: "Cairo", sans-serif;
+        font-size: 15px;
+      }
+      select:focus,
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+      }
+      select option {
+        background: white;
+        color: #2d2640;
+      }
+      .btn {
+        cursor: pointer;
+        border: none;
+        font-family: "Cairo", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 10px 22px;
+        transition: all 0.2s;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        color: white;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+      .btn-danger {
+        background: rgba(239, 68, 68, 0.08);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+      }
+      .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.15);
+      }
+      .btn-edit {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+      }
+      .btn-edit:hover {
+        background: rgba(245, 158, 11, 0.18);
+      }
+      .btn-cancel {
+        background: rgba(124, 58, 237, 0.06);
+        color: #7c3aed;
+        border: 1px solid rgba(124, 58, 237, 0.15);
+      }
+      .btn-cancel:hover {
+        background: rgba(124, 58, 237, 0.1);
+      }
+      .btn-logout {
+        background: rgba(239, 68, 68, 0.07);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        font-size: 13px;
+        padding: 7px 14px;
+      }
+      .btn-logout:hover {
+        background: rgba(239, 68, 68, 0.14);
+      }
+      .card {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      }
+      .lesson-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        background: #fffbf7;
+        border: 2px solid rgba(124, 58, 237, 0.1);
+        border-radius: 12px;
+        padding: 12px 14px;
+        cursor: pointer;
+        transition: all 0.18s;
+        text-align: right;
+      }
+      .lesson-btn:hover {
+        border-color: rgba(124, 58, 237, 0.4);
+        background: rgba(124, 58, 237, 0.04);
+      }
+      .lesson-btn.active {
+        border-color: #7c3aed;
+        background: rgba(124, 58, 237, 0.08);
+      }
+      .cnt {
+        background: rgba(124, 58, 237, 0.12);
+        color: #7c3aed;
+        border: 1px solid rgba(124, 58, 237, 0.25);
+        border-radius: 20px;
+        padding: 1px 9px;
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .cnt.zero {
+        background: rgba(0, 0, 0, 0.04);
+        color: #94a3b8;
+        border-color: rgba(0, 0, 0, 0.08);
+      }
+      .grade-tab {
+        cursor: pointer;
+        padding: 9px 20px;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 14px;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+      }
+      .grade-tab.on {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        color: white;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+      }
+      .grade-tab.off {
+        background: rgba(124, 58, 237, 0.06);
+        color: #94a3b8;
+        border-color: rgba(124, 58, 237, 0.12);
+      }
+      .grade-tab.off:hover {
+        background: rgba(124, 58, 237, 0.1);
+        color: #7c3aed;
+      }
+      .q-card {
+        background: #fffbf7;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 10px;
+      }
+      .q-card:hover {
+        border-color: rgba(124, 58, 237, 0.25);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.3);
+        color: #2d2640;
+        padding: 11px 22px;
+        border-radius: 12px;
+        font-weight: 700;
+        z-index: 9999;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        animation: su 0.25s ease;
+      }
+      @keyframes su {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+      .login-box {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.15);
+        border-radius: 24px;
+        padding: 36px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(124, 58, 237, 0.12);
+      }
+      label {
+        color: #64748b;
+      }
+      /* ── Excel Drop Zone ── */
+      .xl-drop {
+        border: 2px dashed rgba(16, 185, 129, 0.3);
+        border-radius: 14px;
+        background: rgba(16, 185, 129, 0.03);
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      .xl-drop:hover,
+      .xl-drop.drag-over {
+        border-color: rgba(16, 185, 129, 0.6);
+        background: rgba(16, 185, 129, 0.07);
+      }
+      .xl-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 900;
+      }
+      /* ── Lesson Content Editor ── */
+      .content-editor {
+        font-family: "Cairo", monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 10px;
+        padding: 10px 14px;
+        width: 100%;
+        color: #2d2640;
+        background: #faf9ff;
+        resize: vertical;
+        min-height: 160px;
+      }
+      .content-editor:focus {
+        outline: none;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+      }
+      .collapse-btn {
+        cursor: pointer;
+        user-select: none;
+      }
+      .grade-dl-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        border: 1.5px solid;
+        font-family: "Cairo", sans-serif;
+        transition: all 0.18s;
+      }
+      .grade-slim-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 18px 10px;
+        border-radius: 14px;
+        border-width: 1.5px;
+        border-style: solid;
+        cursor: pointer;
+        font-family: "Cairo", sans-serif;
+        transition: all 0.18s;
+        text-align: center;
+        user-select: none;
+      }
+      .grade-slim-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(124, 58, 237, 0.13);
+      }
+      .grade-slim-btn:active {
+        transform: translateY(0);
+      }
+      .grade-icon-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 12px 18px;
+        border-radius: 14px;
+        cursor: pointer;
+        font-family: "Cairo", sans-serif;
+        transition: all 0.18s;
+        min-width: 90px;
+        text-align: center;
+        user-select: none;
+      }
+      .grade-icon-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(0.95);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      .grade-icon-btn:active {
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── شاشة تسجيل الدخول ───────────────────────────── -->
+    <div
+      id="login-screen"
+      class="min-h-screen flex items-center justify-center px-4"
+      style="background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)"
+    >
+      <div class="login-box">
+        <div class="text-center mb-7">
+          <img
+            src="https://i.imgur.com/5qv4Tvq.png"
+            alt=" منصة رحلتك التفاعلية نحو التميز"
+            class="h-14 mx-auto mb-4 rounded-xl"
+          />
+          <h1 class="text-2xl font-black" style="color: #7c3aed">
+            دخول المشرفة
+          </h1>
+          <p class="text-sm mt-1" style="color: #94a3b8">
+            منصة رحلتك التفاعلية نحو التميز
+          </p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold mb-1.5"
+              >اسم المستخدم</label
+            >
+            <input
+              id="login-user"
+              type="text"
+              placeholder="أدخل اسم المستخدم"
+              autocomplete="username"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1.5"
+              >كلمة المرور</label
+            >
+            <input
+              id="login-pass"
+              type="password"
+              placeholder="أدخل كلمة المرور"
+              autocomplete="current-password"
+            />
+          </div>
+          <div
+            id="login-error"
+            class="hidden text-sm text-center rounded-xl p-3"
+            style="
+              color: #ef4444;
+              background: rgba(239, 68, 68, 0.08);
+              border: 1px solid rgba(239, 68, 68, 0.2);
+            "
+          ></div>
+          <button
+            class="btn btn-primary w-full py-3.5 rounded-2xl text-base"
+            onclick="doLogin()"
+          >
+            🔐 تسجيل الدخول
+          </button>
+        </div>
+        <div class="mt-5 text-center">
+          <a
+            href="/"
+            class="text-sm font-semibold transition"
+            style="color: #7c3aed"
+            >← العودة للموقع</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- ── لوحة التحكم ─────────────────────────────────── -->
+    <div id="admin-panel" class="hidden min-h-screen">
+      <!-- رأس الصفحة -->
+      <div
+        style="
+          background: white;
+          border-bottom: 2px solid rgba(124, 58, 237, 0.1);
+        "
+        class="sticky top-0 z-50 shadow-sm"
+      >
+        <div
+          class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3"
+        >
+          <div class="flex items-center gap-3 min-w-0">
+            <img
+              src="https://i.imgur.com/5qv4Tvq.png"
+              alt=" منصة رحلتك التفاعلية نحو التميز"
+              class="h-9 w-auto flex-shrink-0 rounded-lg"
+            />
+            <div class="min-w-0">
+              <div class="font-black text-base truncate" style="color: #7c3aed">
+                لوحة إدارة الأسئلة
+              </div>
+              <div id="hdr-total" class="text-xs" style="color: #94a3b8">
+                جاري تحميل بيانات الأسئلة...
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2 flex-shrink-0">
+            <a href="/" class="btn btn-cancel py-2 px-3 text-sm">← الموقع</a>
+            <button class="btn btn-logout" onclick="doLogout()">خروج 🚪</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-6xl mx-auto px-3 py-5">
+        <!-- تبديل الصف -->
+        <div class="flex gap-2 mb-5">
+          <button
+            id="gtab-first"
+            class="grade-tab on"
+            onclick="switchGrade('first')"
+          >
+            📘 الصف الأول متوسط
+          </button>
+          <button
+            id="gtab-second"
+            class="grade-tab off"
+            onclick="switchGrade('second')"
+          >
+            📗 الصف الثاني متوسط
+          </button>
+        </div>
+
+        <!-- ── تصدير / استيراد كامل المرحلة ── -->
+        <div class="flex gap-2 mb-5">
+          <!-- زر التصدير -->
+          <button
+            onclick="downloadGradeTemplate(grade)"
+            class="grade-slim-btn flex-1"
+            style="
+              border-color: rgba(124, 58, 237, 0.25);
+              background: rgba(124, 58, 237, 0.05);
+              color: #7c3aed;
+            "
+          >
+            <span class="text-2xl">📥</span>
+            <span class="text-sm font-black">تصدير</span>
+            <span class="text-xs leading-tight" style="color: #94a3b8"
+              >جميع دروس المرحلة</span
+            >
+          </button>
+          <!-- زر الاستيراد -->
+          <button
+            onclick="document.getElementById('g-file-'+grade).click()"
+            class="grade-slim-btn flex-1"
+            style="
+              border-style: dashed;
+              border-color: rgba(236, 72, 153, 0.35);
+              background: rgba(236, 72, 153, 0.04);
+              color: #ec4899;
+            "
+          >
+            <span class="text-2xl">📤</span>
+            <span class="text-sm font-black">استيراد</span>
+            <span class="text-xs leading-tight" style="color: #94a3b8"
+              >جميع دروس المرحلة</span
+            >
+          </button>
+          <!-- inputs مخفية لكل صف -->
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            class="hidden"
+            id="g-file-first"
+            onchange="onGradeExcelFile('first',this)"
+          />
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            class="hidden"
+            id="g-file-second"
+            onchange="onGradeExcelFile('second',this)"
+          />
+        </div>
+
+        <!-- نتيجة الاستيراد — تظهر تحت الأزرار مباشرة -->
+        <div id="g-preview-first" class="hidden card mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span>📘</span>
+            <div
+              id="g-info-first"
+              class="text-sm font-bold"
+              style="color: #2d2640"
+            ></div>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="btn btn-primary py-2 px-4 text-sm flex-1"
+              onclick="confirmGradeImport('first')"
+              style="background: linear-gradient(135deg, #7c3aed, #ec4899)"
+            >
+              ✅ استيراد للأول متوسط
+            </button>
+            <button
+              class="btn btn-cancel py-2 px-3 text-sm"
+              onclick="clearGradeExcel('first')"
+            >
+              إلغاء
+            </button>
+          </div>
+        </div>
+        <div
+          id="g-result-first"
+          class="hidden rounded-xl p-3 text-sm font-bold mb-4"
+        ></div>
+
+        <div id="g-preview-second" class="hidden card mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span>📗</span>
+            <div
+              id="g-info-second"
+              class="text-sm font-bold"
+              style="color: #2d2640"
+            ></div>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="btn btn-primary py-2 px-4 text-sm flex-1"
+              onclick="confirmGradeImport('second')"
+              style="background: linear-gradient(135deg, #059669, #10b981)"
+            >
+              ✅ استيراد للثاني متوسط
+            </button>
+            <button
+              class="btn btn-cancel py-2 px-3 text-sm"
+              onclick="clearGradeExcel('second')"
+            >
+              إلغاء
+            </button>
+          </div>
+        </div>
+        <div
+          id="g-result-second"
+          class="hidden rounded-xl p-3 text-sm font-bold mb-4"
+        ></div>
+
+        <!-- تخطيط رئيسي: شريط جانبي + منطقة محتوى -->
+        <div class="flex flex-col lg:flex-row gap-5">
+          <!-- ── شريط الدروس (يسار في RTL) ── -->
+          <div class="lg:w-72 flex-shrink-0">
+            <div class="card">
+              <div
+                class="text-xs font-black mb-3 flex items-center gap-2"
+                style="color: #7c3aed"
+              >
+                <span class="text-base">📋</span> اختر درساً لعرض أسئلته
+              </div>
+              <div id="lessons-tree" class="space-y-4">
+                <div class="text-center text-slate-500 py-6 text-sm">
+                  جاري التحميل...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── منطقة المحتوى ── -->
+          <div class="flex-1 min-w-0 space-y-4">
+            <!-- حالة: لم يتم اختيار درس بعد -->
+            <div
+              id="no-sel"
+              class="card flex flex-col items-center justify-center py-16 text-center"
+            >
+              <div class="text-5xl mb-4">👆</div>
+              <div class="font-black text-lg mb-2" style="color: #2d2640">
+                اختر درساً من القائمة
+              </div>
+              <div class="text-sm max-w-xs" style="color: #94a3b8">
+                انقر على اسم أي درس من القائمة على اليسار لعرض أسئلته وتعديلها
+                أو إضافة أسئلة جديدة
+              </div>
+            </div>
+
+            <!-- حالة: درس محدد -->
+            <div id="sel-panel" class="hidden space-y-4">
+              <!-- عنوان الدرس -->
+              <div class="card flex items-center justify-between gap-3">
+                <div>
+                  <div
+                    id="sel-title"
+                    class="font-black text-lg"
+                    style="color: #7c3aed"
+                  ></div>
+                  <div
+                    id="sel-unit"
+                    class="text-sm mt-0.5"
+                    style="color: #94a3b8"
+                  ></div>
+                </div>
+                <div id="sel-count" class="cnt text-base px-3 py-1">—</div>
+              </div>
+
+              <!-- ── تعديل شرح الدرس (قابل للطي) ── -->
+              <div class="card">
+                <div
+                  class="flex items-center justify-between collapse-btn"
+                  onclick="toggleSection('content-body','content-arrow')"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">📝</span>
+                    <span class="font-black text-sm" style="color: #7c3aed"
+                      >تعديل شرح الدرس</span
+                    >
+                    <span
+                      id="content-saved-badge"
+                      class="hidden xl-badge"
+                      style="
+                        background: rgba(16, 185, 129, 0.1);
+                        color: #059669;
+                        border: 1px solid rgba(16, 185, 129, 0.25);
+                      "
+                      >✅ محفوظ</span
+                    >
+                  </div>
+                  <span
+                    id="content-arrow"
+                    class="text-slate-400 font-bold text-lg transition-transform"
+                    >▼</span
+                  >
+                </div>
+                <div id="content-body" class="hidden mt-4 space-y-3">
+                  <p class="text-xs" style="color: #94a3b8">
+                    هنا تظهر الشرح الذي يراه الطالب قبل الاختبار. يمكنك تعديله
+                    بالنص أو HTML. إذا تركته فارغاً سيظهر الشرح الافتراضي.
+                  </p>
+                  <textarea
+                    id="lesson-content-editor"
+                    class="content-editor"
+                    rows="8"
+                    placeholder="اكتب شرح الدرس هنا... (يدعم HTML مثل <b>عريض</b> و<br> لسطر جديد)"
+                  ></textarea>
+                  <div
+                    id="content-status"
+                    class="text-xs"
+                    style="color: #94a3b8"
+                  ></div>
+                  <div class="flex gap-2 flex-wrap">
+                    <button
+                      class="btn btn-primary py-2 px-4 text-sm"
+                      onclick="saveContent()"
+                    >
+                      💾 حفظ الشرح
+                    </button>
+                    <button
+                      class="btn btn-cancel py-2 px-4 text-sm"
+                      onclick="resetContent()"
+                    >
+                      🔄 العودة للشرح الافتراضي
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- قائمة الأسئلة -->
+              <div class="card">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-sm font-black" style="color: #2d2640">
+                    أسئلة الدرس
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      class="grade-dl-btn"
+                      id="tpl-dl-btn"
+                      style="
+                        background: rgba(16, 185, 129, 0.07);
+                        color: #059669;
+                        border-color: rgba(16, 185, 129, 0.25);
+                      "
+                      onclick="downloadTemplate()"
+                    >
+                      <span id="tpl-grade-icon">📘</span> تحميل قالب Excel
+                    </button>
+                  </div>
+                </div>
+                <div id="q-list">
+                  <div class="text-center text-slate-500 py-8 text-sm">
+                    جاري تحميل الأسئلة...
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── استيراد دفعي من Excel ── -->
+              <div class="card">
+                <div
+                  class="flex items-center justify-between collapse-btn"
+                  onclick="toggleSection('xl-body','xl-arrow')"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">📤</span>
+                    <span class="font-black text-sm" style="color: #059669"
+                      >رفع أسئلة من Excel (دفعة واحدة)</span
+                    >
+                  </div>
+                  <span
+                    id="xl-arrow"
+                    class="text-slate-400 font-bold text-lg transition-transform"
+                    >▼</span
+                  >
+                </div>
+                <div id="xl-body" class="hidden mt-4 space-y-3">
+                  <div
+                    class="rounded-xl p-3 text-xs space-y-1"
+                    style="
+                      background: rgba(16, 185, 129, 0.06);
+                      border: 1px solid rgba(16, 185, 129, 0.15);
+                      color: #059669;
+                    "
+                  >
+                    <p class="font-bold">📋 تعليمات:</p>
+                    <p>١. حمّلي القالب بالزر أعلاه</p>
+                    <p>٢. أضيفي الأسئلة في الصفوف (١=أ، ١=ب، ٢=ج، ٣=د)</p>
+                    <p>
+                      ٣. ارفعي الملف هنا — ستُضاف الأسئلة لهذا الدرس تلقائياً
+                    </p>
+                  </div>
+                  <label
+                    class="xl-drop flex flex-col items-center justify-center py-7 px-4 text-center"
+                    id="xl-drop-label"
+                  >
+                    <div id="xl-drop-icon" class="text-3xl mb-2">📊</div>
+                    <div
+                      id="xl-drop-text"
+                      class="font-bold text-sm"
+                      style="color: #059669"
+                    >
+                      اضغطي أو اسحبي ملف Excel هنا
+                    </div>
+                    <div class="text-xs mt-1" style="color: #94a3b8">
+                      .xlsx أو .xls
+                    </div>
+                    <input
+                      id="xl-file-input"
+                      type="file"
+                      accept=".xlsx,.xls"
+                      class="hidden"
+                      onchange="onExcelFile(this)"
+                    />
+                  </label>
+                  <div id="xl-preview" class="hidden space-y-2">
+                    <div
+                      id="xl-preview-info"
+                      class="text-sm font-bold"
+                      style="color: #2d2640"
+                    ></div>
+                    <div
+                      id="xl-rows-preview"
+                      class="space-y-1 max-h-48 overflow-y-auto"
+                    ></div>
+                    <div class="flex gap-2 pt-1">
+                      <button
+                        class="btn btn-primary py-2 px-4 text-sm"
+                        onclick="confirmBulkImport()"
+                        style="
+                          background: linear-gradient(135deg, #059669, #10b981);
+                        "
+                      >
+                        ✅ استيراد الأسئلة
+                      </button>
+                      <button
+                        class="btn btn-cancel py-2 px-4 text-sm"
+                        onclick="clearExcel()"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    id="xl-result"
+                    class="hidden rounded-xl p-3 text-sm font-bold"
+                    style="
+                      background: rgba(16, 185, 129, 0.08);
+                      color: #059669;
+                      border: 1px solid rgba(16, 185, 129, 0.2);
+                    "
+                  ></div>
+                </div>
+              </div>
+
+              <!-- نموذج الإضافة / التعديل -->
+              <div class="card">
+                <h2
+                  id="form-title"
+                  class="text-base font-black mb-4"
+                  style="color: #7c3aed"
+                >
+                  ➕ إضافة سؤال جديد
+                </h2>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm text-slate-400 mb-1.5"
+                      >نص السؤال *</label
+                    >
+                    <textarea
+                      id="f-q"
+                      rows="2"
+                      placeholder="اكتب نص السؤال هنا..."
+                    ></textarea>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs text-slate-400 mb-1"
+                        >الخيار أ *</label
+                      ><input id="f-a" type="text" placeholder="الخيار الأول" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-slate-400 mb-1"
+                        >الخيار ب *</label
+                      ><input
+                        id="f-b"
+                        type="text"
+                        placeholder="الخيار الثاني"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-slate-400 mb-1"
+                        >الخيار ج *</label
+                      ><input
+                        id="f-c"
+                        type="text"
+                        placeholder="الخيار الثالث"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-slate-400 mb-1"
+                        >الخيار د *</label
+                      ><input
+                        id="f-d"
+                        type="text"
+                        placeholder="الخيار الرابع"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-sm text-slate-400 mb-1.5"
+                      >الإجابة الصحيحة *</label
+                    >
+                    <select id="f-ans">
+                      <option value="0">أ - الخيار الأول</option>
+                      <option value="1">ب - الخيار الثاني</option>
+                      <option value="2">ج - الخيار الثالث</option>
+                      <option value="3">د - الخيار الرابع</option>
+                    </select>
+                  </div>
+                  <!-- الصورة -->
+                  <div>
+                    <label class="block text-sm text-slate-400 mb-1.5"
+                      >الصورة (اختياري)</label
+                    >
+                    <div class="flex gap-2 mb-2">
+                      <button
+                        type="button"
+                        id="itab-url"
+                        onclick="siTab('url')"
+                        class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        style="
+                          background: rgba(124, 58, 237, 0.15);
+                          color: #7c3aed;
+                          border: 1px solid rgba(124, 58, 237, 0.4);
+                        "
+                      >
+                        🔗 رابط URL
+                      </button>
+                      <button
+                        type="button"
+                        id="itab-file"
+                        onclick="siTab('file')"
+                        class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
+                        style="
+                          background: rgba(0, 0, 0, 0.04);
+                          color: #94a3b8;
+                          border: 1px solid rgba(0, 0, 0, 0.1);
+                        "
+                      >
+                        📎 رفع ملف
+                      </button>
+                    </div>
+                    <div id="iurl-sec">
+                      <input
+                        id="f-img"
+                        type="url"
+                        placeholder="https://example.com/image.png"
+                      />
+                    </div>
+                    <div id="ifile-sec" class="hidden">
+                      <label
+                        class="flex flex-col items-center justify-center w-full h-20 rounded-xl border-2 border-dashed cursor-pointer transition-all"
+                        style="
+                          border-color: rgba(124, 58, 237, 0.25);
+                          background: rgba(124, 58, 237, 0.03);
+                        "
+                        id="drop-label"
+                      >
+                        <span
+                          id="drop-text"
+                          class="text-xs text-center px-4"
+                          style="color: #94a3b8"
+                          >🖼️ اضغط أو اسحب صورة هنا<br /><span
+                            style="color: #cbd5e1"
+                            >PNG, JPG, WebP – حد 5MB</span
+                          ></span
+                        >
+                        <input
+                          id="f-img-file"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          onchange="onFile(this)"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div id="img-prev" class="hidden">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-xs text-slate-400">معاينة الصورة</span>
+                      <button
+                        type="button"
+                        onclick="clearImg()"
+                        class="text-xs text-red-400 hover:text-red-300"
+                      >
+                        🗑️ حذف
+                      </button>
+                    </div>
+                    <img
+                      id="prev-img"
+                      src=""
+                      alt="معاينة"
+                      class="max-h-36 rounded-xl border border-white/10"
+                    />
+                  </div>
+                  <div class="flex gap-3 pt-1">
+                    <button class="btn btn-primary" onclick="saveQ()">
+                      💾 حفظ السؤال
+                    </button>
+                    <button
+                      id="btn-cancel"
+                      class="btn btn-cancel hidden"
+                      onclick="cancelEdit()"
+                    >
+                      إلغاء التعديل
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script>
+      const API = "/api";
+
+      const CUR = {
+        first: {
+          name: "الأول متوسط",
+          units: [
+            {
+              title: "الأعداد والعمليات عليها",
+              lessons: [
+                "القوى والأسس",
+                "ترتيب العمليات",
+                "الأعداد الصحيحة والقيمة المطلقة",
+                "العمليات على الأعداد الصحيحة",
+                "الكسور الاعتيادية والعشرية",
+                "النسبة والتناسب",
+                "النسبة المئوية",
+              ],
+            },
+            {
+              title: "الجبر والدوال",
+              lessons: [
+                "المتغيرات والتعابير الجبرية",
+                "الخصائص",
+                "المعادلات الجبرية",
+                "الدوال",
+                "المتتابعات الحسابية",
+              ],
+            },
+            {
+              title: "الهندسة والقياس",
+              lessons: [
+                "الزوايا: العلاقات بين الزوايا",
+                "المثلثات: تصنيف المثلثات",
+                "الأشكال الرباعية",
+                "المحيط والمساحة",
+                "القياس (النظام المتري)",
+                "الأشكال الثلاثية الأبعاد",
+              ],
+            },
+            {
+              title: "الإحصاء والاحتمالات",
+              lessons: [
+                "مقاييس النزعة المركزية",
+                "تمثيل البيانات",
+                "الاحتمال: حساب احتمال وقوع حدث بسيط",
+                "فضاء العينة",
+              ],
+            },
+          ],
+        },
+        second: {
+          name: "الثاني متوسط",
+          units: [
+            {
+              title: "الأعداد والعمليات عليها",
+              lessons: [
+                "الأعداد النسبية",
+                "القوى والأسس",
+                "الجذور التربيعية",
+                "الأعداد الحقيقية",
+                "التناسب المئوي",
+              ],
+            },
+            {
+              title: "الجبر والدوال",
+              lessons: [
+                "المعادلات والمتباينات",
+                "المتباينات الخطية",
+                "الدوال الخطية",
+                "أنظمة المعادلات الخطية",
+                "كثيرات الحدود",
+              ],
+            },
+            {
+              title: "الهندسة والقياس",
+              lessons: [
+                "نظرية فيثاغورس",
+                "التحويلات الهندسية",
+                "التشابه والتطابق",
+                "حجم المنشور والأسطوانة",
+                "مساحة سطح المنشور والأسطوانة",
+              ],
+            },
+            {
+              title: "الإحصاء والاحتمالات",
+              lessons: [
+                "المدى والانحراف المعياري",
+                "الاحتمالات المركبة",
+                "التمثيلات البيانية المتقدمة",
+                "العد والتوافيق",
+              ],
+            },
+          ],
+        },
+      };
+
+      let grade = "first",
+        selU = -1,
+        selL = -1,
+        editId = null,
+        questions = [],
+        counts = {};
+
+      // ── Auth ─────────────────────────────────────────────
+      async function checkAuth() {
+        try {
+          const r = await fetch(`${API}/auth/me`, {
+            credentials: "include",
+            cache: "no-store",
+          });
+          const d = await r.json();
+          if (d.isAdmin) {
+            await openPanel();
+          } else {
+            showLogin();
+          }
+        } catch (e) {
+          showLogin();
+        }
+      }
+
+      function showLogin() {
+        document.getElementById("login-screen").classList.remove("hidden");
+        document.getElementById("admin-panel").classList.add("hidden");
+      }
+
+      async function openPanel() {
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("admin-panel").classList.remove("hidden");
+        await loadCounts();
+        buildTree();
+        await pick(0, 0);
+      }
+
+      async function doLogin() {
+        const u = document.getElementById("login-user").value.trim();
+        const p = document.getElementById("login-pass").value.trim();
+        const err = document.getElementById("login-error");
+        err.classList.add("hidden");
+        if (!u || !p) {
+          err.textContent = "يرجى إدخال بيانات الدخول";
+          err.classList.remove("hidden");
+          return;
+        }
+        try {
+          const r = await fetch(`${API}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ username: u, password: p }),
+          });
+          const d = await r.json();
+          if (d.success) {
+            document.getElementById("login-user").value = "";
+            document.getElementById("login-pass").value = "";
+            await openPanel();
+          } else {
+            err.textContent = d.error || "بيانات غير صحيحة";
+            err.classList.remove("hidden");
+          }
+        } catch (e) {
+          err.textContent = "خطأ في الاتصال";
+          err.classList.remove("hidden");
+        }
+      }
+
+      async function doLogout() {
+        await fetch(`${API}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+        showLogin();
+      }
+
+      document.getElementById("login-pass").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doLogin();
+      });
+
+      // ── تحميل العدادات (مع إعادة المحاولة تلقائياً) ─────
+      async function loadCounts(retry = true) {
+        try {
+          document.getElementById("hdr-total").textContent =
+            "جاري تحميل بيانات الأسئلة...";
+          const r = await fetch(`${API}/questions`, {
+            credentials: "include",
+            cache: "no-store",
+          });
+          if (!r.ok) throw new Error("not ok");
+          const all = await r.json();
+          counts = {};
+          let total = 0;
+          all.forEach((q) => {
+            const k = `${q.grade_key}|${q.unit_index}|${q.lesson_index}`;
+            counts[k] = (counts[k] || 0) + 1;
+            total++;
+          });
+          document.getElementById("hdr-total").innerHTML =
+            `✅ ${total} سؤال في قاعدة البيانات &nbsp;<button onclick="refreshAll()" style="color:#7C3AED;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-size:inherit;">🔄 تحديث</button>`;
+          return total;
+        } catch (e) {
+          if (retry) {
+            await new Promise((res) => setTimeout(res, 800));
+            return loadCounts(false);
+          }
+          document.getElementById("hdr-total").innerHTML =
+            '⚠️ تعذّر تحميل الأسئلة &nbsp;<button onclick="refreshAll()" style="color:#ef4444;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-size:inherit;">🔄 إعادة المحاولة</button>';
+          return 0;
+        }
+      }
+
+      async function refreshAll() {
+        await loadCounts();
+        buildTree();
+        if (selU >= 0 && selL >= 0) await loadQ();
+      }
+
+      function cnt(g, u, l) {
+        return counts[`${g}|${u}|${l}`] || 0;
+      }
+
+      // ── شجرة الدروس ─────────────────────────────────────
+      function switchGrade(g) {
+        grade = g;
+        selU = -1;
+        selL = -1;
+        document.getElementById("gtab-first").className =
+          "grade-tab " + (g === "first" ? "on" : "off");
+        document.getElementById("gtab-second").className =
+          "grade-tab " + (g === "second" ? "on" : "off");
+        document.getElementById("sel-panel").classList.add("hidden");
+        document.getElementById("no-sel").classList.remove("hidden");
+        buildTree();
+      }
+
+      function buildTree() {
+        const tree = document.getElementById("lessons-tree");
+        tree.innerHTML = CUR[grade].units
+          .map(
+            (unit, ui) => `
+      <div>
+        <div class="text-xs font-black mb-2 px-1" style="color:#94a3b8;">الوحدة ${ui + 1}: ${unit.title}</div>
+        <div class="space-y-1.5">
+          ${unit.lessons
+            .map((lesson, li) => {
+              const c = cnt(grade, ui, li);
+              const active = selU === ui && selL === li;
+              return `<button class="lesson-btn ${active ? "active" : ""}" onclick="pick(${ui},${li})">
+              <span class="text-sm font-bold leading-snug text-right" style="color:${active ? "#7C3AED" : "#2D2640"};">${lesson}</span>
+              <span class="cnt ${c === 0 ? "zero" : ""}">${c}</span>
+            </button>`;
+            })
+            .join("")}
+        </div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      // ── اختيار درس ──────────────────────────────────────
+      async function pick(ui, li) {
+        selU = ui;
+        selL = li;
+        const unit = CUR[grade].units[ui];
+        const lesson = unit.lessons[li];
+        document.getElementById("sel-title").textContent = lesson;
+        document.getElementById("sel-unit").textContent =
+          `الوحدة ${ui + 1}: ${unit.title}`;
+        document.getElementById("sel-count").textContent = "...";
+        document.getElementById("no-sel").classList.add("hidden");
+        document.getElementById("sel-panel").classList.remove("hidden");
+        buildTree();
+        updateGradeIcon();
+        cancelEdit();
+        clearExcel();
+        // أغلق الأقسام القابلة للطي عند تغيير الدرس
+        ["content-body", "xl-body"].forEach((id) => {
+          document.getElementById(id).classList.add("hidden");
+        });
+        document.getElementById("content-arrow").textContent = "▼";
+        document.getElementById("xl-arrow").textContent = "▼";
+        await Promise.all([loadQ(), loadContent()]);
+        document
+          .getElementById("sel-panel")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // ── تحميل الأسئلة ────────────────────────────────────
+      async function loadQ() {
+        document.getElementById("q-list").innerHTML =
+          '<div class="text-center text-slate-500 py-8 text-sm">جاري تحميل الأسئلة...</div>';
+        try {
+          const r = await fetch(
+            `${API}/questions?gradeKey=${grade}&unitIndex=${selU}&lessonIndex=${selL}`,
+            { credentials: "include", cache: "no-store" },
+          );
+          if (!r.ok) throw new Error();
+          questions = await r.json();
+          renderQ();
+          document.getElementById("sel-count").textContent =
+            `${questions.length} سؤال`;
+        } catch (e) {
+          showToast("❌ خطأ في جلب الأسئلة", "error");
+        }
+      }
+
+      function renderQ() {
+        const el = document.getElementById("q-list");
+        if (questions.length === 0) {
+          el.innerHTML =
+            '<div class="text-center py-10"><div class="text-4xl mb-3">📝</div><div style="color:#94a3b8;">لا توجد أسئلة لهذا الدرس بعد</div><div class="text-sm mt-1" style="color:#cbd5e1;">أضف أول سؤال من النموذج أدناه</div></div>';
+          return;
+        }
+        const L = ["أ", "ب", "ج", "د"];
+        el.innerHTML = questions
+          .map(
+            (q, i) => `
+      <div class="q-card">
+        <div class="flex items-start justify-between gap-2 mb-3">
+          <div class="flex items-start gap-2 flex-1 min-w-0">
+            <span class="rounded-lg px-2 py-0.5 text-xs font-black flex-shrink-0 mt-0.5" style="background:rgba(124,58,237,0.12);color:#7C3AED;">${i + 1}</span>
+            <div class="font-bold text-sm leading-relaxed" style="color:#2D2640;">${esc(q.question_text)}</div>
+          </div>
+          <div class="flex gap-1.5 flex-shrink-0">
+            <button class="btn btn-edit py-1 px-2.5 text-xs" onclick="startEdit(${q.id})">✏️</button>
+            <button class="btn btn-danger py-1 px-2.5 text-xs" onclick="delQ(${q.id})">🗑️</button>
+          </div>
+        </div>
+        ${q.image_url ? `<img src="${esc(q.image_url)}" alt="صورة" class="max-h-28 rounded-lg mb-2 object-contain" style="border:1px solid rgba(124,58,237,0.15);">` : ""}
+        <div class="grid grid-cols-2 gap-1.5">
+          ${[q.option_a, q.option_b, q.option_c, q.option_d]
+            .map(
+              (o, idx) => `
+            <div class="rounded-lg px-2.5 py-1.5 text-xs" style="${idx === Number(q.correct_answer) ? "background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.25);font-weight:700;" : "background:rgba(0,0,0,0.04);color:#64748b;border:1px solid transparent;"}">
+              ${L[idx]}) ${esc(o)}
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      // ── CRUD ─────────────────────────────────────────────
+      function startEdit(id) {
+        const q = questions.find((x) => x.id === id);
+        if (!q) return;
+        editId = id;
+        document.getElementById("f-q").value = q.question_text;
+        document.getElementById("f-a").value = q.option_a;
+        document.getElementById("f-b").value = q.option_b;
+        document.getElementById("f-c").value = q.option_c;
+        document.getElementById("f-d").value = q.option_d;
+        document.getElementById("f-ans").value = q.correct_answer;
+        document.getElementById("f-img").value = q.image_url || "";
+        showImgPrev(q.image_url || "");
+        siTab("url");
+        document.getElementById("form-title").textContent = "✏️ تعديل السؤال";
+        document.getElementById("btn-cancel").classList.remove("hidden");
+        document
+          .querySelector(".card:last-child")
+          ?.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function cancelEdit() {
+        editId = null;
+        ["f-q", "f-a", "f-b", "f-c", "f-d", "f-img"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        const fa = document.getElementById("f-ans");
+        if (fa) fa.value = "0";
+        const ft = document.getElementById("form-title");
+        if (ft) ft.textContent = "➕ إضافة سؤال جديد";
+        const bc = document.getElementById("btn-cancel");
+        if (bc) bc.classList.add("hidden");
+        clearImg();
+        siTab("url");
+      }
+
+      async function saveQ() {
+        const q = document.getElementById("f-q").value.trim();
+        const a = document.getElementById("f-a").value.trim();
+        const b = document.getElementById("f-b").value.trim();
+        const c = document.getElementById("f-c").value.trim();
+        const d = document.getElementById("f-d").value.trim();
+        const ans = Number(document.getElementById("f-ans").value);
+        const img = document.getElementById("f-img").value.trim();
+        if (!q || !a || !b || !c || !d) {
+          showToast("⚠️ يرجى ملء جميع الحقول المطلوبة", "warn");
+          return;
+        }
+        const body = {
+          grade_key: grade,
+          unit_index: selU,
+          lesson_index: selL,
+          question_text: q,
+          option_a: a,
+          option_b: b,
+          option_c: c,
+          option_d: d,
+          correct_answer: ans,
+          image_url: img || null,
+        };
+        try {
+          const r = await fetch(
+            editId ? `${API}/questions/${editId}` : `${API}/questions`,
+            {
+              method: editId ? "PUT" : "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify(body),
+            },
+          );
+          if (r.status === 401) {
+            showToast("❌ انتهت جلستك، أعد تسجيل الدخول", "error");
+            showLogin();
+            return;
+          }
+          if (!r.ok) throw new Error();
+          showToast(editId ? "✅ تم تعديل السؤال" : "✅ تم إضافة السؤال");
+          cancelEdit();
+          await loadQ();
+          await loadCounts();
+          buildTree();
+        } catch (e) {
+          showToast("❌ حدث خطأ، حاول مرة أخرى", "error");
+        }
+      }
+
+      async function delQ(id) {
+        if (!confirm("هل أنت متأكد من حذف هذا السؤال؟")) return;
+        try {
+          const r = await fetch(`${API}/questions/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (r.status === 401) {
+            showToast("❌ انتهت جلستك", "error");
+            showLogin();
+            return;
+          }
+          if (!r.ok) throw new Error();
+          showToast("🗑️ تم حذف السؤال");
+          await loadQ();
+          await loadCounts();
+          buildTree();
+        } catch (e) {
+          showToast("❌ حدث خطأ في الحذف", "error");
+        }
+      }
+
+      // ── الصورة ───────────────────────────────────────────
+      document
+        .getElementById("f-img")
+        .addEventListener("input", (e) => showImgPrev(e.target.value.trim()));
+
+      function showImgPrev(url) {
+        const p = document.getElementById("img-prev"),
+          i = document.getElementById("prev-img");
+        if (url) {
+          i.src = url;
+          p.classList.remove("hidden");
+        } else p.classList.add("hidden");
+      }
+
+      function siTab(tab) {
+        const tu = document.getElementById("itab-url"),
+          tf = document.getElementById("itab-file");
+        const su = document.getElementById("iurl-sec"),
+          sf = document.getElementById("ifile-sec");
+        const onStyle =
+          "background:rgba(124,58,237,0.15);color:#7C3AED;border:1px solid rgba(124,58,237,0.4);";
+        const offStyle =
+          "background:rgba(0,0,0,0.04);color:#94a3b8;border:1px solid rgba(0,0,0,0.1);";
+        if (tab === "url") {
+          su.classList.remove("hidden");
+          sf.classList.add("hidden");
+          tu.style.cssText = onStyle;
+          tf.style.cssText = offStyle;
+        } else {
+          su.classList.add("hidden");
+          sf.classList.remove("hidden");
+          tf.style.cssText = onStyle;
+          tu.style.cssText = offStyle;
+        }
+      }
+
+      function onFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("⚠️ حجم الصورة أكبر من 5MB", "warn");
+          input.value = "";
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById("f-img").value = e.target.result;
+          document.getElementById("drop-text").innerHTML =
+            `✅ <span style="color:#7C3AED;">${file.name}</span><br><span class="text-xs" style="color:#94a3b8;">اضغط لتغيير الصورة</span>`;
+          showImgPrev(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function clearImg() {
+        const fi = document.getElementById("f-img");
+        if (fi) fi.value = "";
+        const ff = document.getElementById("f-img-file");
+        if (ff) ff.value = "";
+        const dt = document.getElementById("drop-text");
+        if (dt)
+          dt.innerHTML =
+            '🖼️ اضغط أو اسحب صورة هنا<br><span class="text-xs" style="color:#94a3b8;">PNG, JPG, WebP – حد 5MB</span>';
+        const ip = document.getElementById("img-prev");
+        if (ip) ip.classList.add("hidden");
+      }
+
+      const dropL = document.getElementById("drop-label");
+      if (dropL) {
+        dropL.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropL.style.borderColor = "rgba(124,58,237,0.5)";
+        });
+        dropL.addEventListener(
+          "dragleave",
+          () => (dropL.style.borderColor = "rgba(124,58,237,0.25)"),
+        );
+        dropL.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropL.style.borderColor = "rgba(124,58,237,0.25)";
+          const f = e.dataTransfer.files[0];
+          if (f && f.type.startsWith("image/")) {
+            const fi = document.getElementById("f-img-file");
+            const dt = new DataTransfer();
+            dt.items.add(f);
+            fi.files = dt.files;
+            onFile(fi);
+          }
+        });
+      }
+
+      // ── Toast ────────────────────────────────────────────
+      let tt;
+      function showToast(msg, type = "success") {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = "toast";
+        el.style.borderColor =
+          type === "error"
+            ? "rgba(239,68,68,0.4)"
+            : type === "warn"
+              ? "rgba(245,158,11,0.4)"
+              : "rgba(124,58,237,0.3)";
+        el.classList.remove("hidden");
+        clearTimeout(tt);
+        tt = setTimeout(() => el.classList.add("hidden"), 3500);
+      }
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // ── قسم قابل للطي ──────────────────────────────────
+      function toggleSection(bodyId, arrowId) {
+        const body = document.getElementById(bodyId);
+        const arrow = document.getElementById(arrowId);
+        const hidden = body.classList.toggle("hidden");
+        arrow.textContent = hidden ? "▼" : "▲";
+      }
+
+      // ── تحديث أيقونة الصف ─────────────────────────────
+      function updateGradeIcon() {
+        const icon = grade === "first" ? "📘" : "📗";
+        const el = document.getElementById("tpl-grade-icon");
+        if (el) el.textContent = icon;
+      }
+
+      // ── تحميل قالب Excel (يشمل الأسئلة الموجودة) ────────
+      async function downloadTemplate() {
+        const gradeLabel = grade === "first" ? "الأول_متوسط" : "الثاني_متوسط";
+        const unitName = CUR[grade].units[selU]?.title || `وحدة${selU + 1}`;
+        const lessonName =
+          CUR[grade].units[selU]?.lessons[selL] || `درس${selL + 1}`;
+
+        showToast("⏳ جاري تجهيز القالب...");
+
+        // جلب الأسئلة الموجودة لهذا الدرس
+        let existing = [];
+        try {
+          const r = await fetch(
+            `${API}/questions?gradeKey=${grade}&unitIndex=${selU}&lessonIndex=${selL}`,
+            { credentials: "include", cache: "no-store" },
+          );
+          existing = await r.json();
+        } catch {
+          /* ignore */
+        }
+
+        const headers = [
+          "نص_السؤال",
+          "الخيار_أ",
+          "الخيار_ب",
+          "الخيار_ج",
+          "الخيار_د",
+          "الإجابة_الصحيحة (0=أ  1=ب  2=ج  3=د)",
+        ];
+
+        const rows = [
+          ["الصف", CUR[grade].name],
+          ["الوحدة", unitName],
+          ["الدرس", lessonName],
+          [`عدد الأسئلة الموجودة`, existing.length],
+          [],
+          [
+            "── الأسئلة الموجودة في قاعدة البيانات (للمرجع — لا تُرفع مرة أخرى) ──",
+          ],
+          headers,
+        ];
+
+        if (existing.length > 0) {
+          existing.forEach((q, i) => {
+            rows.push([
+              q.question_text,
+              q.option_a,
+              q.option_b,
+              q.option_c,
+              q.option_d,
+              q.correct_answer,
+            ]);
+          });
+        } else {
+          rows.push(["(لا توجد أسئلة محفوظة لهذا الدرس بعد)"]);
+        }
+
+        rows.push([]);
+        rows.push(["── أضيفي الأسئلة الجديدة هنا (هذا القسم فقط يُرفع) ──"]);
+        rows.push(headers);
+        rows.push(["مثال: ما قيمة 2+2؟", "4", "3", "5", "6", "0"]);
+        rows.push([]); // صف فارغ للإضافة
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws["!cols"] = [60, 20, 20, 20, 20, 35].map((w) => ({ wch: w }));
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "أسئلة");
+        XLSX.writeFile(wb, `أسئلة_${gradeLabel}_${lessonName}.xlsx`);
+        showToast(`✅ تم تحميل القالب (${existing.length} سؤال موجود)`);
+      }
+
+      // ── رفع ملف Excel ────────────────────────────────
+      let parsedRows = [];
+
+      function onExcelFile(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const wb = XLSX.read(e.target.result, { type: "array" });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+
+            // ابحث عن قسم "أضيفي الأسئلة الجديدة" أولاً (للقوالب المحمّلة من النظام)
+            // ثم ابحث عن أي رأس يحتوي "نص_السؤال" (للملفات اليدوية)
+            let headerRow = -1;
+            for (let i = 0; i < raw.length; i++) {
+              if (
+                String(raw[i][0]).includes("أضيفي") ||
+                String(raw[i][0]).includes("اضيفي")
+              ) {
+                // الصف التالي هو رأس الأعمدة
+                if (
+                  i + 1 < raw.length &&
+                  String(raw[i + 1][0]).includes("نص")
+                ) {
+                  headerRow = i + 1;
+                  break;
+                }
+              }
+            }
+            // إذا لم يُوجد قسم "أضيفي"، ابحث عن آخر صف رأس (لتجنب أسئلة المرجع)
+            if (headerRow === -1) {
+              for (let i = raw.length - 1; i >= 0; i--) {
+                if (String(raw[i][0]).includes("نص")) {
+                  headerRow = i;
+                  break;
+                }
+              }
+            }
+            const dataStart = headerRow >= 0 ? headerRow + 1 : 1;
+            parsedRows = [];
+            for (let i = dataStart; i < raw.length; i++) {
+              const r = raw[i];
+              const q = String(r[0] || "").trim();
+              const a = String(r[1] || "").trim();
+              const b = String(r[2] || "").trim();
+              const c = String(r[3] || "").trim();
+              const d = String(r[4] || "").trim();
+              const ans = String(r[5] || "").trim();
+              if (!q || !a || !b || !c || !d || ans === "") continue;
+              // تخطّي سطر المثال
+              if (q.startsWith("مثال:")) continue;
+              parsedRows.push({
+                question_text: q,
+                option_a: a,
+                option_b: b,
+                option_c: c,
+                option_d: d,
+                correct_answer: Number(ans),
+              });
+            }
+            if (parsedRows.length === 0) {
+              showToast(
+                "⚠️ لم يتم العثور على أسئلة جديدة — تأكدي من إضافة الأسئلة في قسم «أضيفي الأسئلة الجديدة هنا»",
+                "warn",
+              );
+              return;
+            }
+            showExcelPreview();
+          } catch (err) {
+            showToast("❌ تعذّر قراءة الملف، تأكدي أنه xlsx أو xls", "error");
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function showExcelPreview() {
+        const L = ["أ", "ب", "ج", "د"];
+        document.getElementById("xl-preview-info").textContent =
+          `تم قراءة ${parsedRows.length} سؤال — مراجعة:`;
+        const container = document.getElementById("xl-rows-preview");
+        container.innerHTML =
+          parsedRows
+            .slice(0, 5)
+            .map(
+              (r, i) => `
+          <div class="rounded-lg px-3 py-2 text-xs" style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);">
+            <span class="font-bold" style="color:#059669;">${i + 1}.</span>
+            <span style="color:#2d2640;">${esc(r.question_text)}</span>
+            <span class="mr-2" style="color:#94a3b8;">✓ ${L[r.correct_answer] || "؟"}</span>
+          </div>`,
+            )
+            .join("") +
+          (parsedRows.length > 5
+            ? `<div class="text-xs text-center py-1" style="color:#94a3b8;">... و${parsedRows.length - 5} سؤال آخر</div>`
+            : "");
+        document.getElementById("xl-preview").classList.remove("hidden");
+        document.getElementById("xl-drop-icon").textContent = "✅";
+        document.getElementById("xl-drop-text").textContent =
+          `${parsedRows.length} سؤال جاهز للاستيراد`;
+      }
+
+      function clearExcel() {
+        parsedRows = [];
+        document.getElementById("xl-file-input").value = "";
+        document.getElementById("xl-preview").classList.add("hidden");
+        document.getElementById("xl-result").classList.add("hidden");
+        document.getElementById("xl-drop-icon").textContent = "📊";
+        document.getElementById("xl-drop-text").textContent =
+          "اضغطي أو اسحبي ملف Excel هنا";
+      }
+
+      async function confirmBulkImport() {
+        if (parsedRows.length === 0) return;
+        try {
+          const r = await fetch(`${API}/questions/bulk`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              grade_key: grade,
+              unit_index: selU,
+              lesson_index: selL,
+              questions: parsedRows,
+            }),
+          });
+          if (r.status === 401) {
+            showLogin();
+            return;
+          }
+          if (!r.ok) throw new Error();
+          const data = await r.json();
+          const res = document.getElementById("xl-result");
+          let msg = `✅ أُضيف ${data.inserted} سؤال`;
+          if (data.skipped > 0) msg += ` · تجاهلنا ${data.skipped} مكرر`;
+          if (data.errors && data.errors.length > 0)
+            msg += ` · ${data.errors.length} خطأ`;
+          res.textContent = msg;
+          res.className = "rounded-xl p-3 text-sm font-bold";
+          res.style.cssText = data.errors?.length
+            ? "background:rgba(245,158,11,0.1);color:#d97706;border:1px solid rgba(245,158,11,0.3);"
+            : "background:rgba(16,185,129,0.08);color:#059669;border:1px solid rgba(16,185,129,0.2);";
+          res.classList.remove("hidden");
+          clearExcel();
+          await loadQ();
+          await loadCounts();
+          buildTree();
+          showToast(`✅ تم استيراد ${data.inserted} سؤال`);
+        } catch {
+          showToast("❌ حدث خطأ أثناء الاستيراد", "error");
+        }
+      }
+
+      // ── Excel Drag & Drop ───────────────────────────────
+      // ملاحظة: label يحتوي input → الضغط على label يفتح الملف تلقائياً (لا داعي لـ .click() يدوي)
+      const xlDrop = document.getElementById("xl-drop-label");
+      xlDrop.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        xlDrop.classList.add("drag-over");
+      });
+      xlDrop.addEventListener("dragleave", () =>
+        xlDrop.classList.remove("drag-over"),
+      );
+      xlDrop.addEventListener("drop", (e) => {
+        e.preventDefault();
+        xlDrop.classList.remove("drag-over");
+        const f = e.dataTransfer.files[0];
+        if (f) {
+          const inp = document.getElementById("xl-file-input");
+          const dt = new DataTransfer();
+          dt.items.add(f);
+          inp.files = dt.files;
+          onExcelFile(inp);
+        }
+      });
+
+      // ── تعديل الشرح ────────────────────────────────────
+      async function loadContent() {
+        const editor = document.getElementById("lesson-content-editor");
+        const status = document.getElementById("content-status");
+        const badge = document.getElementById("content-saved-badge");
+        editor.value = "";
+        badge.classList.add("hidden");
+        status.textContent = "جاري تحميل الشرح...";
+        try {
+          const r = await fetch(
+            `${API}/lessons/content?gradeKey=${grade}&unitIndex=${selU}&lessonIndex=${selL}`,
+            { credentials: "include", cache: "no-store" },
+          );
+          const d = await r.json();
+          if (d.content) {
+            editor.value = d.content;
+            const dt = new Date(d.updated_at).toLocaleDateString("ar-SA");
+            status.textContent = `آخر تعديل: ${dt}`;
+            badge.classList.remove("hidden");
+          } else {
+            status.textContent =
+              "لا يوجد شرح مخصص — يُستخدم الشرح الافتراضي حالياً";
+          }
+        } catch {
+          status.textContent = "تعذّر تحميل الشرح";
+        }
+      }
+
+      async function saveContent() {
+        const content = document
+          .getElementById("lesson-content-editor")
+          .value.trim();
+        if (!content) {
+          showToast("⚠️ أدخلي محتوى الشرح أولاً", "warn");
+          return;
+        }
+        try {
+          const r = await fetch(`${API}/lessons/content`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              grade_key: grade,
+              unit_index: selU,
+              lesson_index: selL,
+              content,
+            }),
+          });
+          if (r.status === 401) {
+            showLogin();
+            return;
+          }
+          if (!r.ok) throw new Error();
+          document.getElementById("content-status").textContent =
+            "تم الحفظ للتو ✓";
+          document
+            .getElementById("content-saved-badge")
+            .classList.remove("hidden");
+          showToast("✅ تم حفظ الشرح");
+        } catch {
+          showToast("❌ حدث خطأ في الحفظ", "error");
+        }
+      }
+
+      async function resetContent() {
+        if (!confirm("هل تريدين حذف الشرح المخصص والعودة للشرح الافتراضي؟"))
+          return;
+        document.getElementById("lesson-content-editor").value = "";
+        document.getElementById("content-status").textContent = "جاري الحذف...";
+        try {
+          await fetch(`${API}/lessons/content`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              grade_key: grade,
+              unit_index: selU,
+              lesson_index: selL,
+              content: "__RESET__",
+            }),
+          });
+          document
+            .getElementById("content-saved-badge")
+            .classList.add("hidden");
+          document.getElementById("content-status").textContent =
+            "تم إزالة الشرح المخصص — يُستخدم الشرح الافتراضي الآن";
+          showToast("🔄 تم الرجوع للشرح الافتراضي");
+        } catch {
+          showToast("❌ حدث خطأ", "error");
+        }
+      }
+
+      // ── تصدير / استيراد كامل المرحلة ──────────────────────
+      const gradeImportRows = {};
+
+      async function downloadGradeTemplate(g) {
+        const gradeLabel = g === "first" ? "الأول_متوسط" : "الثاني_متوسط";
+        const gradeName = CUR[g].name;
+        showToast("⏳ جاري تجهيز ملف المرحلة...");
+        let all = [];
+        try {
+          const r = await fetch(`${API}/questions?gradeKey=${g}`, {
+            credentials: "include",
+            cache: "no-store",
+          });
+          all = await r.json();
+        } catch {
+          /* ignore */
+        }
+
+        const headers = [
+          "رقم_الوحدة",
+          "رقم_الدرس",
+          "اسم_الوحدة",
+          "اسم_الدرس",
+          "نص_السؤال",
+          "الخيار_أ",
+          "الخيار_ب",
+          "الخيار_ج",
+          "الخيار_د",
+          "الإجابة_الصحيحة (0=أ 1=ب 2=ج 3=د)",
+        ];
+        const rows = [
+          ["الصف", gradeName],
+          ["عدد الأسئلة الكلي", all.length],
+          [],
+          ["── الأسئلة الموجودة (للمرجع - لا تُرفع مرة أخرى) ──"],
+          headers,
+        ];
+        if (all.length > 0) {
+          all.forEach((q) => {
+            const uName =
+              CUR[g].units[q.unit_index]?.title || `وحدة${q.unit_index + 1}`;
+            const lName =
+              CUR[g].units[q.unit_index]?.lessons[q.lesson_index] ||
+              `درس${q.lesson_index + 1}`;
+            rows.push([
+              q.unit_index + 1,
+              q.lesson_index + 1,
+              uName,
+              lName,
+              q.question_text,
+              q.option_a,
+              q.option_b,
+              q.option_c,
+              q.option_d,
+              q.correct_answer,
+            ]);
+          });
+        } else {
+          rows.push(["(لا توجد أسئلة بعد)"]);
+        }
+        rows.push([]);
+        rows.push([
+          "── أضيفي الأسئلة الجديدة هنا (رقم_الوحدة ورقم_الدرس إلزاميان) ──",
+        ]);
+        rows.push(headers);
+        // سطر مثال لكل درس
+        CUR[g].units.forEach((unit, ui) => {
+          unit.lessons.forEach((lesson, li) => {
+            rows.push([
+              ui + 1,
+              li + 1,
+              unit.title,
+              lesson,
+              `مثال_سؤال`,
+              "خيار أ",
+              "خيار ب",
+              "خيار ج",
+              "خيار د",
+              "0",
+            ]);
+          });
+        });
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws["!cols"] = [12, 12, 28, 28, 55, 18, 18, 18, 18, 32].map((w) => ({
+          wch: w,
+        }));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "أسئلة_" + gradeName);
+        XLSX.writeFile(wb, `جميع_أسئلة_${gradeLabel}.xlsx`);
+        showToast(`✅ تم تحميل ملف ${gradeName} — ${all.length} سؤال موجود`);
+      }
+
+      function onGradeExcelFile(g, input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const wb = XLSX.read(e.target.result, { type: "array" });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+            let headerRow = -1;
+            for (let i = 0; i < raw.length; i++) {
+              const cell = String(raw[i][0]);
+              if (cell.includes("أضيفي") || cell.includes("اضيفي")) {
+                if (
+                  i + 1 < raw.length &&
+                  String(raw[i + 1][0]).includes("رقم")
+                ) {
+                  headerRow = i + 1;
+                  break;
+                }
+              }
+            }
+            if (headerRow === -1) {
+              for (let i = raw.length - 1; i >= 0; i--) {
+                if (String(raw[i][0]).includes("رقم")) {
+                  headerRow = i;
+                  break;
+                }
+              }
+            }
+            const dataStart = headerRow >= 0 ? headerRow + 1 : 1;
+            const parsed = [];
+            for (let i = dataStart; i < raw.length; i++) {
+              const r = raw[i];
+              const ui = parseInt(r[0]) - 1;
+              const li = parseInt(r[1]) - 1;
+              const q = String(r[4] || "").trim();
+              const a = String(r[5] || "").trim();
+              const b = String(r[6] || "").trim();
+              const c = String(r[7] || "").trim();
+              const d = String(r[8] || "").trim();
+              const ans = String(r[9] || "").trim();
+              if (
+                isNaN(ui) ||
+                isNaN(li) ||
+                !q ||
+                !a ||
+                !b ||
+                !c ||
+                !d ||
+                ans === ""
+              )
+                continue;
+              if (q.startsWith("مثال")) continue;
+              parsed.push({
+                unit_index: ui,
+                lesson_index: li,
+                question_text: q,
+                option_a: a,
+                option_b: b,
+                option_c: c,
+                option_d: d,
+                correct_answer: Number(ans),
+              });
+            }
+            gradeImportRows[g] = parsed;
+            if (parsed.length === 0) {
+              showToast(
+                "⚠️ لم يتم العثور على أسئلة جديدة — أضيفيها في قسم «أضيفي الأسئلة الجديدة»",
+                "warn",
+              );
+              return;
+            }
+            const unitCount = new Set(
+              parsed.map((r) => `${r.unit_index}|${r.lesson_index}`),
+            ).size;
+            document.getElementById(`g-info-${g}`).textContent =
+              `✅ ${parsed.length} سؤال في ${unitCount} درس — جاهز للاستيراد`;
+            document
+              .getElementById(`g-preview-${g}`)
+              .classList.remove("hidden");
+            // (لا عناصر drop icon/text في التصميم الجديد)
+          } catch {
+            showToast("❌ تعذّر قراءة الملف", "error");
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function clearGradeExcel(g) {
+        gradeImportRows[g] = [];
+        const fi = document.getElementById(`g-file-${g}`);
+        if (fi) fi.value = "";
+        document.getElementById(`g-preview-${g}`).classList.add("hidden");
+        document.getElementById(`g-result-${g}`).classList.add("hidden");
+      }
+
+      async function confirmGradeImport(g) {
+        const rows = gradeImportRows[g] || [];
+        if (rows.length === 0) return;
+        showToast("⏳ جاري الاستيراد...");
+        // تجميع الأسئلة حسب الوحدة والدرس
+        const groups = {};
+        rows.forEach((r) => {
+          const key = `${r.unit_index}|${r.lesson_index}`;
+          if (!groups[key])
+            groups[key] = {
+              unit_index: r.unit_index,
+              lesson_index: r.lesson_index,
+              questions: [],
+            };
+          groups[key].questions.push(r);
+        });
+        let totalInserted = 0,
+          totalSkipped = 0,
+          totalErrors = 0;
+        for (const key of Object.keys(groups)) {
+          const grp = groups[key];
+          try {
+            const r = await fetch(`${API}/questions/bulk`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                grade_key: g,
+                unit_index: grp.unit_index,
+                lesson_index: grp.lesson_index,
+                questions: grp.questions,
+              }),
+            });
+            if (r.status === 401) {
+              showLogin();
+              return;
+            }
+            if (r.ok) {
+              const d = await r.json();
+              totalInserted += d.inserted;
+              totalSkipped += d.skipped || 0;
+              totalErrors += d.errors?.length || 0;
+            } else totalErrors++;
+          } catch {
+            totalErrors++;
+          }
+        }
+        const res = document.getElementById(`g-result-${g}`);
+        let gMsg = `✅ أُضيف ${totalInserted} سؤال`;
+        if (totalSkipped > 0) gMsg += ` · تجاهلنا ${totalSkipped} مكرر`;
+        if (totalErrors > 0) gMsg += ` · ${totalErrors} خطأ`;
+        res.textContent = gMsg;
+        res.className = "rounded-xl p-3 text-sm font-bold";
+        res.style.cssText =
+          totalErrors > 0
+            ? "background:rgba(245,158,11,0.1);color:#d97706;border:1px solid rgba(245,158,11,0.3);"
+            : "background:rgba(16,185,129,0.08);color:#059669;border:1px solid rgba(16,185,129,0.2);";
+        res.classList.remove("hidden");
+        clearGradeExcel(g);
+        await loadCounts();
+        buildTree();
+        if (selU >= 0 && selL >= 0) await loadQ();
+        showToast(
+          `✅ أُضيف ${totalInserted} سؤال${totalSkipped > 0 ? ` (${totalSkipped} مكرر تجاهلناه)` : ""}`,
+        );
+      }
+
+      checkAuth();
+    </script>
+  </body>
+</html>

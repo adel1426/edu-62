@@ -1,0 +1,3160 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>منصة الثانية والستون التعليمية</title>
+    <meta
+      name="description"
+      content="منصة تعليمية تفاعلية لطالبات المرحلة المتوسطة — اكتشفي الدروس وتنافسي مع زميلاتك!"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="منصة رحلتك التفاعلية نحو التميز" />
+    <meta
+      property="og:description"
+      content="منصة تعليمية تفاعلية لطالبات المرحلة المتوسطة — اكتشفي الدروس وتنافسي مع زميلاتك!"
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="منصة رحلتك التفاعلية نحو التميز" />
+    <meta
+      name="twitter:description"
+      content="منصة تعليمية تفاعلية لطالبات المرحلة المتوسطة — اكتشفي الدروس وتنافسي مع زميلاتك!"
+    />
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: "Cairo", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        background: #fffbf7;
+        color: #2d2640;
+      }
+
+      :root {
+        --spacing: 16px;
+      }
+      @media (min-width: 640px) {
+        :root {
+          --spacing: 24px;
+        }
+      }
+
+      .hero-pattern {
+        background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+        position: relative;
+        overflow: hidden;
+        border-radius: 0 0 40px 40px;
+      }
+      .hero-pattern::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(255, 255, 255, 0.18) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 10% 85%,
+            rgba(236, 72, 153, 0.35) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+      }
+
+      .grade-card-1 {
+        cursor: pointer;
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 12px 24px -8px rgba(255, 154, 158, 0.5);
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .grade-card-1:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 32px -8px rgba(255, 154, 158, 0.6);
+      }
+      .grade-card-1:active {
+        transform: scale(0.97);
+      }
+
+      .grade-card-2 {
+        cursor: pointer;
+        background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 12px 24px -8px rgba(161, 196, 253, 0.5);
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .grade-card-2:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 32px -8px rgba(161, 196, 253, 0.6);
+      }
+      .grade-card-2:active {
+        transform: scale(0.97);
+      }
+
+      .subject-card {
+        cursor: pointer;
+        transition: transform 0.25s ease;
+      }
+      .subject-card:hover {
+        transform: translateY(-4px);
+      }
+      .subject-card:active {
+        transform: scale(0.97);
+      }
+
+      .unit-card {
+        cursor: pointer;
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      }
+      .unit-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15);
+      }
+      .unit-card:active {
+        transform: scale(0.97);
+      }
+
+      .lesson-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+      .lesson-card:hover {
+        background: rgba(124, 58, 237, 0.04);
+        transform: translateX(4px);
+        border-color: rgba(124, 58, 237, 0.2);
+      }
+      .lesson-card:active {
+        transform: scale(0.97);
+      }
+
+      .glow-btn {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+        min-height: 52px;
+      }
+      .glow-btn:hover {
+        box-shadow: 0 6px 30px rgba(124, 58, 237, 0.5);
+        transform: translateY(-2px);
+      }
+
+      /* ── زر "اكتشفي الدروس" المميز ── */
+      @keyframes pulse-ring {
+        0% {
+          transform: scale(1);
+          opacity: 0.6;
+        }
+        70% {
+          transform: scale(1.55);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1.55);
+          opacity: 0;
+        }
+      }
+      @keyframes shimmer {
+        0% {
+          left: -80%;
+        }
+        100% {
+          left: 130%;
+        }
+      }
+      @keyframes rocket-bounce {
+        0%,
+        100% {
+          transform: translateX(0) rotate(-15deg);
+        }
+        50% {
+          transform: translateX(5px) rotate(-15deg);
+        }
+      }
+      .hero-cta {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          #6d28d9 0%,
+          #9333ea 45%,
+          #ec4899 100%
+        );
+        box-shadow:
+          0 6px 32px rgba(124, 58, 237, 0.55),
+          0 2px 8px rgba(0, 0, 0, 0.12);
+        min-height: 60px;
+        font-size: 1.2rem;
+        letter-spacing: 0.02em;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease,
+          filter 0.25s ease;
+      }
+      /* حلقة نبضية خلف الزر */
+      .hero-cta::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: inherit;
+        animation: pulse-ring 2.2s ease-out infinite;
+        z-index: -1;
+      }
+      /* وميض لامع يمر على الزر */
+      .hero-cta::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -80%;
+        width: 55%;
+        height: 200%;
+        background: linear-gradient(
+          105deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.35) 50%,
+          transparent 70%
+        );
+        animation: shimmer 2.8s ease-in-out infinite;
+        pointer-events: none;
+      }
+      .hero-cta:hover {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow:
+          0 12px 48px rgba(124, 58, 237, 0.7),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+        filter: brightness(1.08);
+      }
+      .hero-cta:active {
+        transform: translateY(-1px) scale(0.99);
+        box-shadow: 0 5px 20px rgba(124, 58, 237, 0.45);
+      }
+      .hero-cta .rocket-icon {
+        display: inline-block;
+        animation: rocket-bounce 1.4s ease-in-out infinite;
+        font-style: normal;
+      }
+      .hero-cta:hover .rocket-icon {
+        animation-duration: 0.7s;
+      }
+
+      .back-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #64748b;
+        min-height: 44px;
+        padding: 8px 12px;
+        border-radius: 10px;
+      }
+      .back-btn:hover {
+        color: #7c3aed;
+      }
+      .back-btn:active {
+        background: rgba(124, 58, 237, 0.06);
+      }
+
+      .fade-in {
+        animation: fadeIn 0.4s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .quiz-option {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid rgba(124, 58, 237, 0.12);
+        background: white;
+        color: #2d2640;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 16px;
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+      @media (min-width: 640px) {
+        .quiz-option {
+          min-height: 56px;
+          padding: 14px 20px;
+          font-size: 1.05rem;
+        }
+      }
+      .quiz-option:hover {
+        border-color: rgba(124, 58, 237, 0.4);
+        background: rgba(124, 58, 237, 0.06);
+      }
+      .quiz-option.selected {
+        border-color: #7c3aed;
+        background: rgba(124, 58, 237, 0.12);
+      }
+      .quiz-option.correct {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+      }
+      .quiz-option.wrong {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.08);
+      }
+
+      .progress-ring {
+        transition: stroke-dashoffset 0.6s ease;
+      }
+
+      .icon-button svg {
+        width: 32px;
+        height: 32px;
+        stroke-width: 2;
+      }
+
+      .lb-on {
+        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        color: white;
+      }
+      .lb-off {
+        background: rgba(124, 58, 237, 0.06);
+        color: #94a3b8;
+        border: 1px solid rgba(124, 58, 237, 0.15);
+      }
+      .lb-off:hover {
+        background: rgba(124, 58, 237, 0.12);
+        color: #7c3aed;
+      }
+
+      .lb-card {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.08);
+        border-radius: 14px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+      .lb-rank-1 {
+        border-color: rgba(251, 191, 36, 0.45);
+        background: rgba(254, 249, 195, 0.5);
+      }
+      .lb-rank-2 {
+        border-color: rgba(148, 163, 184, 0.3);
+        background: white;
+      }
+      .lb-rank-3 {
+        border-color: rgba(205, 127, 50, 0.35);
+        background: rgba(255, 237, 213, 0.4);
+      }
+
+      #name-modal input:focus {
+        border-color: #7c3aed;
+      }
+
+      @media (max-width: 639px) {
+        .quiz-results-scroll {
+          max-height: 45vh !important;
+        }
+        .lb-card {
+          padding: 12px 14px;
+          gap: 10px;
+        }
+      }
+
+      @media (max-width: 359px) {
+        #subjects-grid {
+          grid-template-columns: 1fr !important;
+        }
+      }
+
+      nav {
+        padding-top: max(12px, env(safe-area-inset-top));
+      }
+      #app-wrapper {
+        padding-bottom: max(88px, calc(env(safe-area-inset-bottom) + 88px));
+        scroll-behavior: smooth;
+      }
+
+      @media (max-width: 479px) {
+        #lb-tab-first,
+        #lb-tab-second {
+          flex: 1;
+          text-align: center;
+        }
+      }
+
+      .glass-bottom-nav {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(124, 58, 237, 0.1);
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.07);
+      }
+
+      .quiz-content-card {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+      }
+    </style>
+  </head>
+  <body class="h-full" style="background: #fffbf7; color: #2d2640">
+    <div id="app-wrapper" class="w-full h-full overflow-auto">
+      <nav
+        class="sticky top-0 z-50"
+        style="
+          background: rgba(255, 251, 247, 0.92);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(124, 58, 237, 0.08);
+          box-shadow: 0 1px 12px rgba(0, 0, 0, 0.04);
+        "
+      >
+        <div
+          class="max-w-lg mx-auto px-4 py-2 flex items-center justify-between"
+        >
+          <div
+            class="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0"
+          >
+            <img
+              src="https://i.imgur.com/5qv4Tvq.png"
+              alt="شعار"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <h1 class="text-base font-black" style="color: #7c3aed">
+            منصة رحلتك التفاعلية نحو التميز
+          </h1>
+          <div
+            class="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden flex-shrink-0"
+          >
+            <img
+              src="https://i.imgur.com/H1ymLXw.png"
+              alt="شعار"
+              class="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      </nav>
+      <section id="hero-section" class="hero-pattern relative px-4 pt-10 pb-14">
+        <!-- Decorative blobs -->
+        <div
+          style="
+            position: absolute;
+            top: -10%;
+            left: -5%;
+            width: 220px;
+            height: 220px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+            filter: blur(40px);
+            pointer-events: none;
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            bottom: -10%;
+            right: -5%;
+            width: 180px;
+            height: 180px;
+            background: rgba(236, 72, 153, 0.25);
+            border-radius: 50%;
+            filter: blur(40px);
+            pointer-events: none;
+          "
+        ></div>
+        <div class="relative z-10 w-full max-w-lg mx-auto fade-in">
+          <!-- Greeting row -->
+          <div class="flex items-start justify-between mb-5">
+            <div>
+              <h1
+                id="hero-heading"
+                class="text-3xl sm:text-4xl font-black text-white mb-1 leading-tight"
+              >
+                رحلتُكِ نحو التميز ✨
+              </h1>
+              <p id="hero-subtitle" class="text-white/80 text-sm font-medium">
+                مرحباً بك! ابدئي رحلة تعلّمك التفاعلية
+              </p>
+            </div>
+            <div
+              class="w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-3xl"
+              style="
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(8px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+              "
+            >
+              👩🏻‍🎓
+            </div>
+          </div>
+          <!-- CTA button -->
+          <button
+            onclick="startJourney()"
+            class="hero-cta glow-btn w-full text-white font-bold rounded-3xl flex items-center justify-center gap-3 py-4"
+          >
+            <i class="rocket-icon">🚀</i>
+            <span>اكتشفي الدروس</span>
+          </button>
+          <!-- Credits -->
+          <div class="mt-5 text-center text-xs text-white/65 leading-relaxed">
+            <p>إعداد: فاطمة الأسمري · مريم الجبري · منى المخلفي</p>
+            <p class="mt-0.5">إشراف: زينب عسكر الحربي</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- قسم المتصدرين -->
+      <section
+        id="leaderboard-section"
+        class="px-4 py-8 md:py-10"
+        style="background: #fffbf7"
+      >
+        <div class="max-w-lg mx-auto">
+          <div class="flex items-center justify-between mb-1">
+            <h2
+              class="text-xl md:text-2xl font-black flex items-center gap-2"
+              style="color: #2d2640"
+            >
+              لوحة الشرف <span>🏆</span>
+            </h2>
+            <span
+              class="text-xs font-semibold px-2 py-1 rounded-full"
+              style="background: rgba(124, 58, 237, 0.08); color: #7c3aed"
+              >أعلى 5 طالبات</span
+            >
+          </div>
+          <p class="text-sm mb-5" style="color: #94a3b8">
+            الأكثر تميزاً في كل مرحلة دراسية
+          </p>
+          <div class="flex gap-2 justify-center mb-5">
+            <button
+              id="lb-tab-first"
+              onclick="switchLbTab('first')"
+              class="lb-tab lb-on px-4 py-2.5 rounded-2xl font-bold text-sm transition-all"
+            >
+              📘 الأول متوسط
+            </button>
+            <button
+              id="lb-tab-second"
+              onclick="switchLbTab('second')"
+              class="lb-tab lb-off px-4 py-2.5 rounded-2xl font-bold text-sm transition-all"
+            >
+              📗 الثاني متوسط
+            </button>
+          </div>
+          <div id="lb-body" class="space-y-2.5">
+            <div class="text-center py-8 text-sm" style="color: #94a3b8">
+              جاري تحميل الإحصائيات...
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- مودال إدخال الاسم -->
+      <div
+        id="name-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+        style="background: rgba(45, 38, 64, 0.6); backdrop-filter: blur(10px)"
+      >
+        <div
+          class="rounded-3xl p-8 max-w-sm w-full shadow-2xl fade-in"
+          style="background: white; border: 1px solid rgba(124, 58, 237, 0.15)"
+        >
+          <div class="text-center mb-6">
+            <div class="text-5xl mb-3">✏️</div>
+            <h3 class="text-xl font-black" style="color: #7c3aed">
+              أدخلي اسمك
+            </h3>
+            <p class="text-sm mt-1" style="color: #94a3b8">
+              سيظهر اسمك في لوحة الشرف ✨
+            </p>
+          </div>
+          <input
+            id="student-name-input"
+            type="text"
+            maxlength="50"
+            placeholder="اسمك الكامل..."
+            class="w-full border rounded-2xl px-4 py-3 text-center text-lg font-bold mb-4 focus:outline-none"
+            style="
+              background: #fffbf7;
+              border-color: rgba(124, 58, 237, 0.2);
+              color: #2d2640;
+              font-family: Cairo, sans-serif;
+            "
+          />
+          <div
+            id="name-error"
+            class="hidden text-sm text-center mb-3"
+            style="color: #ef4444"
+          >
+            الرجاء إدخال اسمك أولاً
+          </div>
+          <button
+            onclick="confirmName()"
+            class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold text-lg"
+          >
+            ابدأ التعلم 🚀
+          </button>
+        </div>
+      </div>
+
+      <section id="subjects-section" class="px-4 py-8 md:py-12 hidden">
+        <div class="max-w-lg mx-auto fade-in">
+          <h2
+            class="text-xl md:text-2xl font-black mb-1"
+            style="color: #2d2640"
+          >
+            اختاري دروسك 🚀
+          </h2>
+          <p class="text-sm mb-6" style="color: #94a3b8">
+            اضغطي على الصف لاستكشاف الوحدات الدراسية
+          </p>
+          <div class="flex flex-col gap-4" id="subjects-grid">
+            <div
+              class="grade-card-1 rounded-[28px] p-6"
+              onclick="showUnits('first')"
+            >
+              <div
+                style="
+                  position: absolute;
+                  top: -20px;
+                  right: -20px;
+                  width: 110px;
+                  height: 110px;
+                  background: rgba(255, 255, 255, 0.25);
+                  border-radius: 50%;
+                  filter: blur(20px);
+                "
+              ></div>
+              <div class="flex items-center justify-between relative z-10">
+                <div>
+                  <h3 class="text-2xl font-black mb-1" style="color: #8a2387">
+                    الأول متوسط
+                  </h3>
+                  <p
+                    class="text-sm font-medium"
+                    style="color: rgba(138, 35, 135, 0.7)"
+                  >
+                    الجبر · الهندسة · الإحصاء
+                  </p>
+                </div>
+                <div
+                  class="w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg"
+                  style="
+                    background: rgba(255, 255, 255, 0.55);
+                    backdrop-filter: blur(6px);
+                  "
+                >
+                  📐
+                </div>
+              </div>
+              <div
+                class="mt-5 inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl"
+                style="
+                  background: rgba(255, 255, 255, 0.4);
+                  color: #8a2387;
+                  backdrop-filter: blur(4px);
+                "
+              >
+                <span>دخول للدروس</span>
+                <i
+                  data-lucide="arrow-left"
+                  style="width: 16px; height: 16px"
+                ></i>
+              </div>
+            </div>
+            <div
+              class="grade-card-2 rounded-[28px] p-6"
+              onclick="showUnits('second')"
+            >
+              <div
+                style="
+                  position: absolute;
+                  bottom: -20px;
+                  left: -20px;
+                  width: 110px;
+                  height: 110px;
+                  background: rgba(255, 255, 255, 0.25);
+                  border-radius: 50%;
+                  filter: blur(20px);
+                "
+              ></div>
+              <div class="flex items-center justify-between relative z-10">
+                <div>
+                  <h3 class="text-2xl font-black mb-1" style="color: #1e3a8a">
+                    الثاني متوسط
+                  </h3>
+                  <p
+                    class="text-sm font-medium"
+                    style="color: rgba(30, 58, 138, 0.7)"
+                  >
+                    المعادلات · النسبة · التحويلات
+                  </p>
+                </div>
+                <div
+                  class="w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg"
+                  style="
+                    background: rgba(255, 255, 255, 0.55);
+                    backdrop-filter: blur(6px);
+                  "
+                >
+                  🧮
+                </div>
+              </div>
+              <div
+                class="mt-5 inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl"
+                style="
+                  background: rgba(255, 255, 255, 0.4);
+                  color: #1e3a8a;
+                  backdrop-filter: blur(4px);
+                "
+              >
+                <span>دخول للدروس</span>
+                <i
+                  data-lucide="arrow-left"
+                  style="width: 16px; height: 16px"
+                ></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="units-section" class="px-4 py-8 md:py-12 hidden">
+        <div class="max-w-lg mx-auto fade-in">
+          <div class="flex items-center gap-2 mb-6">
+            <button
+              onclick="goBack('subjects')"
+              class="back-btn flex items-center gap-1 text-sm"
+            >
+              <i data-lucide="arrow-right" style="width: 18px; height: 18px"></i
+              ><span>رجوع</span>
+            </button>
+            <h2
+              id="units-title"
+              class="text-xl md:text-2xl font-black"
+              style="color: #2d2640"
+            ></h2>
+          </div>
+          <div class="grid grid-cols-2 gap-3 md:gap-4" id="units-grid"></div>
+        </div>
+      </section>
+      <section id="lessons-section" class="px-4 py-8 md:py-12 hidden">
+        <div class="max-w-lg mx-auto fade-in">
+          <div class="flex items-center gap-2 mb-6">
+            <button
+              onclick="goBack('units')"
+              class="back-btn flex items-center gap-1 text-sm"
+            >
+              <i data-lucide="arrow-right" style="width: 18px; height: 18px"></i
+              ><span>رجوع</span>
+            </button>
+            <h2
+              id="lessons-title"
+              class="text-xl md:text-2xl font-black"
+              style="color: #2d2640"
+            ></h2>
+          </div>
+          <div id="lessons-grid" class="space-y-3"></div>
+        </div>
+      </section>
+      <section id="lesson-content-section" class="px-4 py-8 md:py-12 hidden">
+        <div class="max-w-lg mx-auto fade-in">
+          <div class="flex items-center gap-2 mb-6">
+            <button
+              onclick="goBack('lessons')"
+              class="back-btn flex items-center gap-1 text-sm"
+            >
+              <i data-lucide="arrow-right" style="width: 18px; height: 18px"></i
+              ><span>رجوع</span>
+            </button>
+            <h2
+              id="lesson-detail-title"
+              class="text-xl md:text-2xl font-black leading-snug"
+              style="color: #2d2640"
+            ></h2>
+          </div>
+          <div
+            id="lesson-detail-content"
+            class="quiz-content-card rounded-2xl p-4 md:p-6"
+          ></div>
+        </div>
+      </section>
+      <section id="quiz-section" class="px-3 py-4 md:px-4 md:py-10 hidden">
+        <div class="max-w-lg mx-auto">
+          <div id="quiz-view" class="fade-in">
+            <div
+              class="quiz-content-card rounded-2xl md:rounded-3xl p-4 md:p-8"
+            >
+              <div class="flex items-center justify-between mb-5 md:mb-8">
+                <button
+                  onclick="goBack('lessons')"
+                  class="back-btn flex items-center gap-1 text-sm px-3 py-2 rounded-xl"
+                >
+                  <i
+                    data-lucide="arrow-right"
+                    style="width: 18px; height: 18px"
+                  ></i
+                  ><span>إغلاق</span>
+                </button>
+                <div
+                  id="quiz-progress"
+                  class="text-sm font-semibold"
+                  style="color: #7c3aed"
+                >
+                  السؤال <span id="current-q">1</span> من
+                  <span id="total-q">5</span>
+                </div>
+              </div>
+              <div
+                id="quiz-progress-bar"
+                class="w-full rounded-full h-2 mb-5 md:mb-8"
+                style="background: rgba(124, 58, 237, 0.1)"
+              >
+                <div
+                  id="progress-fill"
+                  class="h-2 rounded-full transition-all duration-300"
+                  style="
+                    width: 20%;
+                    background: linear-gradient(135deg, #7c3aed, #ec4899);
+                  "
+                ></div>
+              </div>
+              <div id="quiz-question-container"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script>
+      const curriculumData = {
+        first: {
+          name: "الأول متوسط",
+          units: [
+            {
+              title: "الأعداد والعمليات عليها",
+              emoji: "🔢",
+              lessons: [
+                {
+                  title: "القوى والأسس",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">القوى والأسس</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 المفهوم:</p><p class="text-slate-300">الأس يعني ضرب العدد بنفسه عدة مرات</p><p class="text-slate-300 mt-2">2³ = 2 × 2 × 2 = 8</p></div><div class="bg-blue-900/30 rounded-xl p-4"><p class="text-cyan-200 font-bold mb-2">💡 قواعد مهمة:</p><ul class="text-slate-300 space-y-1 pr-4"><li>• أي عدد أس صفر = 1</li><li>• أي عدد أس واحد = العدد نفسه</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "ما قيمة 2⁵؟",
+                      options: ["10", "25", "32", "7"],
+                      answer: 2,
+                    },
+                    {
+                      q: "ما قيمة 3³؟",
+                      options: ["9", "27", "12", "6"],
+                      answer: 1,
+                    },
+                    {
+                      q: "ما قيمة 5⁰؟",
+                      options: ["0", "1", "5", "لا يمكن"],
+                      answer: 1,
+                    },
+                    {
+                      q: "4² + 2³ = ؟",
+                      options: ["12", "16", "24", "32"],
+                      answer: 2,
+                    },
+                    {
+                      q: "ما قيمة 10²؟",
+                      options: ["20", "100", "110", "1000"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "ترتيب العمليات",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">ترتيب العمليات</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الترتيب الصحيح (PEMDAS):</p><ul class="text-slate-300 space-y-1 pr-4"><li>1. الأقواس ( )</li><li>2. الأسس ²</li><li>3. الضرب والقسمة من اليسار لليمين</li><li>4. الجمع والطرح من اليسار لليمين</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "2 + 3 × 4 = ؟",
+                      options: ["14", "20", "11", "9"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(2 + 3) × 4 = ؟",
+                      options: ["14", "20", "11", "9"],
+                      answer: 1,
+                    },
+                    {
+                      q: "10 - 3 + 2 = ؟",
+                      options: ["5", "9", "15", "7"],
+                      answer: 1,
+                    },
+                    {
+                      q: "20 ÷ 4 × 2 = ؟",
+                      options: ["2.5", "10", "2", "40"],
+                      answer: 1,
+                    },
+                    {
+                      q: "2² + 3 × 2 = ؟",
+                      options: ["10", "13", "14", "7"],
+                      answer: 0,
+                    },
+                    {
+                      q: "15 - 6 ÷ 2 = ؟",
+                      options: ["4.5", "9", "12", "18"],
+                      answer: 2,
+                    },
+                    {
+                      q: "(8 - 2) × 3 = ؟",
+                      options: ["18", "22", "14", "10"],
+                      answer: 0,
+                    },
+                    {
+                      q: "24 ÷ 6 + 2 = ؟",
+                      options: ["2", "4", "6", "8"],
+                      answer: 2,
+                    },
+                    {
+                      q: "3 × 4 - 2 = ؟",
+                      options: ["5", "10", "12", "14"],
+                      answer: 1,
+                    },
+                    {
+                      q: "(5 + 3) ÷ 2 = ؟",
+                      options: ["4", "5", "6", "7"],
+                      answer: 0,
+                    },
+                    {
+                      q: "2 + 2² × 2 = ؟",
+                      options: ["6", "8", "10", "12"],
+                      answer: 2,
+                    },
+                    {
+                      q: "100 - 50 ÷ 5 = ؟",
+                      options: ["90", "95", "100", "10"],
+                      answer: 1,
+                    },
+                    {
+                      q: "(10 + 5) × 2 - 10 = ؟",
+                      options: ["20", "25", "30", "35"],
+                      answer: 2,
+                    },
+                    {
+                      q: "6 × 2 + 3 × 2 = ؟",
+                      options: ["12", "15", "18", "21"],
+                      answer: 2,
+                    },
+                    {
+                      q: "48 ÷ (2 + 4) = ؟",
+                      options: ["8", "12", "16", "24"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "الأعداد الصحيحة والقيمة المطلقة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الأعداد الصحيحة والقيمة المطلقة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 القيمة المطلقة:</p><p class="text-slate-300">هي بعد العدد عن الصفر على خط الأعداد</p><p class="text-slate-300 mt-2">|-5| = 5  و  |5| = 5</p></div>`,
+                  quiz: [
+                    {
+                      q: "ما القيمة المطلقة لـ -7؟",
+                      options: ["-7", "7", "0", "14"],
+                      answer: 1,
+                    },
+                    {
+                      q: "|-10| + |3| = ؟",
+                      options: ["7", "-7", "13", "-13"],
+                      answer: 2,
+                    },
+                    {
+                      q: "أي العبارات صحيحة؟",
+                      options: [
+                        "|-5| = 5",
+                        "|-5| = -5",
+                        "|-5| = 0",
+                        "|-5| < 0",
+                      ],
+                      answer: 0,
+                    },
+                    {
+                      q: "|x| = 8 فما قيمة x؟",
+                      options: ["8 فقط", "-8 فقط", "8 أو -8", "0"],
+                      answer: 2,
+                    },
+                    {
+                      q: "|-3| - |2| = ؟",
+                      options: ["5", "1", "-1", "0"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "العمليات على الأعداد الصحيحة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">العمليات على الأعداد الصحيحة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 قواعد الجمع والطرح:</p><ul class="text-slate-300 space-y-1 pr-4"><li>• موجب + موجب = موجب</li><li>• سالب + سالب = سالب</li><li>• موجب + سالب: نأخذ إشارة الأكبر</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "(-5) + (-3) = ؟",
+                      options: ["8", "-8", "2", "-2"],
+                      answer: 1,
+                    },
+                    {
+                      q: "7 + (-4) = ؟",
+                      options: ["3", "-3", "11", "-11"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(-6) - (-2) = ؟",
+                      options: ["-4", "4", "-8", "8"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(-3) × 4 = ؟",
+                      options: ["12", "-12", "1", "-1"],
+                      answer: 1,
+                    },
+                    {
+                      q: "(-12) ÷ (-3) = ؟",
+                      options: ["-4", "4", "-36", "-0.25"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "الكسور الاعتيادية والعشرية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الكسور الاعتيادية والعشرية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 التحويل:</p><p class="text-slate-300">1/2 = 0.5</p><p class="text-slate-300">1/4 = 0.25</p><p class="text-slate-300">3/4 = 0.75</p></div>`,
+                  quiz: [
+                    {
+                      q: "ما الكسر العشري للعدد 1/5؟",
+                      options: ["0.2", "0.5", "0.25", "0.1"],
+                      answer: 0,
+                    },
+                    {
+                      q: "ما الكسر الاعتيادي للعدد 0.75؟",
+                      options: ["1/4", "3/4", "1/2", "2/5"],
+                      answer: 1,
+                    },
+                    {
+                      q: "1/3 تقريباً يساوي:",
+                      options: ["0.25", "0.33", "0.5", "0.75"],
+                      answer: 1,
+                    },
+                    {
+                      q: "أيهما أكبر: 2/3 أم 0.6؟",
+                      options: ["2/3", "0.6", "متساويان", "لا يمكن المقارنة"],
+                      answer: 0,
+                    },
+                    {
+                      q: "0.125 = ؟",
+                      options: ["1/8", "1/6", "1/4", "1/3"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "النسبة والتناسب",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">النسبة والتناسب</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 مفاهيم:</p><p class="text-slate-300"><strong>النسبة:</strong> مقارنة بين كميتين (3:5)</p><p class="text-slate-300"><strong>التناسب:</strong> تساوي نسبتين (2/3 = 4/6)</p></div>`,
+                  quiz: [
+                    {
+                      q: "النسبة بين 4 و 12 بأبسط صورة:",
+                      options: ["1:3", "4:12", "2:6", "3:1"],
+                      answer: 0,
+                    },
+                    {
+                      q: "هل 2/3 = 4/6 يمثل تناسب؟",
+                      options: ["نعم", "لا", "غير محدد", "ربما"],
+                      answer: 0,
+                    },
+                    {
+                      q: "إذا كانت 3/5 = x/10، فما x؟",
+                      options: ["5", "6", "8", "9"],
+                      answer: 1,
+                    },
+                    {
+                      q: "النسبة 1:2 تعني:",
+                      options: ["1 من 2", "1 لـ 2", "جزء من كل", "كل ما سبق"],
+                      answer: 3,
+                    },
+                    {
+                      q: "هل 1/2 = 3/6 تناسب؟",
+                      options: ["نعم", "لا", "غير واضح", "ربما"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "النسبة المئوية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">النسبة المئوية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 التعريف:</p><p class="text-slate-300">النسبة المئوية = (الجزء ÷ الكل) × 100</p><p class="text-slate-300 mt-2">50% = 1/2 = 0.5</p></div>`,
+                  quiz: [
+                    {
+                      q: "ما 25% من 80؟",
+                      options: ["20", "25", "40", "60"],
+                      answer: 0,
+                    },
+                    {
+                      q: "50% من 200 = ؟",
+                      options: ["50", "100", "150", "200"],
+                      answer: 1,
+                    },
+                    {
+                      q: "ما النسبة المئوية لـ 1/4؟",
+                      options: ["25%", "50%", "75%", "100%"],
+                      answer: 0,
+                    },
+                    {
+                      q: "إذا كان 10% من x = 5، فما x؟",
+                      options: ["50", "5", "15", "0.5"],
+                      answer: 0,
+                    },
+                    {
+                      q: "100% من 60 = ؟",
+                      options: ["60", "30", "120", "0"],
+                      answer: 0,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: "الجبر والدوال",
+              emoji: "📐",
+              lessons: [
+                {
+                  title: "المتغيرات والتعابير الجبرية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المتغيرات والتعابير الجبرية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 المفاهيم:</p><ul class="text-slate-300 space-y-1 pr-4"><li>المتغير: رمز يمثل قيمة مجهولة</li><li>التعبير الجبري: تركيب يحتوي على متغيرات وأعداد</li><li>الحد: جزء مفصول بـ + أو -</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "كم عدد الحدود في 3س + 5؟",
+                      options: ["1", "2", "3", "4"],
+                      answer: 1,
+                    },
+                    {
+                      q: "معامل س في 2س - 7:",
+                      options: ["2", "-7", "7", "-2"],
+                      answer: 0,
+                    },
+                    {
+                      q: "قيمة 2س + 3 عند س = 5:",
+                      options: ["10", "13", "15", "8"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الحد الثابت في 4ص + 9:",
+                      options: ["4", "9", "ص", "لا يوجد"],
+                      answer: 1,
+                    },
+                    {
+                      q: "اكتب تعبير: مضاعف العدد زائد 5:",
+                      options: ["2 + س + 5", "2س + 5", "s + 5", "x/2 + 5"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "الخصائص",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">خصائص العمليات</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الخصائص المهمة:</p><ul class="text-slate-300 space-y-1 pr-4"><li>الخاصية الإبدالية: أ + ب = ب + أ</li><li>الخاصية التجميعية: (أ + ب) + ج = أ + (ب + ج)</li><li>خاصية التوزيع: أ(ب + ج) = أب + أج</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "أي مثال يوضح الخاصية الإبدالية؟",
+                      options: [
+                        "3+5 = 5+3",
+                        "(2+3)+4 = 2+(3+4)",
+                        "2(3+4) = 6+8",
+                        "لا شيء",
+                      ],
+                      answer: 0,
+                    },
+                    {
+                      q: "الخاصية التجميعية تتعلق بـ:",
+                      options: ["ترتيب", "تجميع", "توزيع", "محايد"],
+                      answer: 1,
+                    },
+                    {
+                      q: "3(2+5) = ؟",
+                      options: ["6+5", "6+15", "3+15", "21"],
+                      answer: 1,
+                    },
+                    {
+                      q: "أي من الخصائص: 4 + 0 = 4",
+                      options: ["إبدالية", "محايد جمعي", "توزيع", "تجميع"],
+                      answer: 1,
+                    },
+                    {
+                      q: "2 × (3 + 4) = 2×3 + 2×4 هي:",
+                      options: ["إبدالية", "تجميعية", "توزيعية", "محايد"],
+                      answer: 2,
+                    },
+                  ],
+                },
+                {
+                  title: "المعادلات الجبرية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المعادلات الجبرية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 حل المعادلات:</p><p class="text-slate-300">استخدم العمليات العكسية لعزل المتغير</p><p class="text-slate-300 mt-2">س + 3 = 10 → س = 7</p></div>`,
+                  quiz: [
+                    {
+                      q: "حل: س + 6 = 15",
+                      options: ["9", "21", "6", "لا حل"],
+                      answer: 0,
+                    },
+                    {
+                      q: "حل: 3س = 21",
+                      options: ["7", "18", "24", "3"],
+                      answer: 0,
+                    },
+                    {
+                      q: "حل: 2س - 5 = 11",
+                      options: ["3", "8", "16", "لا حل"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: س/2 = 6",
+                      options: ["3", "12", "8", "4"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: 4س + 2 = 18",
+                      options: ["4", "5", "6", "8"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "الدوال",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الدوال</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 تعريف الدالة:</p><p class="text-slate-300">العلاقة التي تربط كل مدخل بمخرج واحد فقط</p><p class="text-slate-300 mt-2">f(x) = 2x + 1</p></div>`,
+                  quiz: [
+                    {
+                      q: "إذا f(x) = 2x + 1، فما f(3)؟",
+                      options: ["5", "6", "7", "8"],
+                      answer: 2,
+                    },
+                    {
+                      q: "أي علاقة دالة؟",
+                      options: [
+                        "{(1,2)(1,3)}",
+                        "{(1,2)(2,3)}",
+                        "{(1,1)(1,2)}",
+                        "لا شيء",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا g(x) = x²، فما g(4)؟",
+                      options: ["8", "16", "12", "2"],
+                      answer: 1,
+                    },
+                    {
+                      q: "المجال هو:",
+                      options: ["المخرجات", "المدخلات", "النسبة", "لا شيء"],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا h(x) = 3x - 2، فما h(0)؟",
+                      options: ["3", "-2", "2", "1"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "المتتابعات الحسابية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المتتابعات الحسابية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 المتتابعة الحسابية:</p><p class="text-slate-300">تسلسل الأعداد بفرق ثابت</p><p class="text-slate-300 mt-2">2، 5، 8، 11 (الفرق = 3)</p></div>`,
+                  quiz: [
+                    {
+                      q: "الفرق في المتتابعة 3, 6, 9, 12:",
+                      options: ["2", "3", "4", "6"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الحد الخامس في 1, 4, 7, 10, ؟:",
+                      options: ["13", "14", "15", "16"],
+                      answer: 0,
+                    },
+                    {
+                      q: "هل 2, 4, 8, 16 متتابعة حسابية؟",
+                      options: ["نعم", "لا", "ربما", "غير واضح"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الحد الثالث في 10, 7, 4, ؟:",
+                      options: ["1", "2", "0", "-1"],
+                      answer: 0,
+                    },
+                    {
+                      q: "إذا الحد الأول = 5 والفرق = 2، الحد الرابع:",
+                      options: ["11", "13", "15", "17"],
+                      answer: 0,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: "الهندسة والقياس",
+              emoji: "📏",
+              lessons: [
+                {
+                  title: "الزوايا: العلاقات بين الزوايا",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">العلاقات بين الزوايا</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 أنواع الزوايا:</p><ul class="text-slate-300 space-y-1 pr-4"><li>متتامتان: مجموعهما 90°</li><li>متكاملتان: مجموعهما 180°</li><li>متقابلتان بالرأس: متساويتان</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "زاويتان متتامتان، الأولى 35°، الثانية:",
+                      options: ["55°", "145°", "65°", "125°"],
+                      answer: 0,
+                    },
+                    {
+                      q: "زاويتان متكاملتان، الأولى 60°، الثانية:",
+                      options: ["30°", "120°", "90°", "60°"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الزاويتان المتقابلتان بالرأس:",
+                      options: [
+                        "متساويتان",
+                        "متكاملتان",
+                        "متتامتان",
+                        "مختلفتان",
+                      ],
+                      answer: 0,
+                    },
+                    {
+                      q: "مجموع الزوايا المتكاملة:",
+                      options: ["90°", "180°", "360°", "270°"],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا زاوية 45°، متتامتها:",
+                      options: ["45°", "135°", "90°", "315°"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "المثلثات: تصنيف المثلثات",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">تصنيف المثلثات</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 حسب الأضلاع:</p><ul class="text-slate-300 space-y-1 pr-4"><li>متساوي الأضلاع: 3 أضلاع متساوية</li><li>متساوي الساقين: ساقان متساويتان</li><li>مختلف الأضلاع: أضلاع مختلفة</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "مثلث جميع أضلاعه متساوية هو:",
+                      options: ["حاد", "متساوي الأضلاع", "قائم", "منفرج"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مجموع زوايا أي مثلث:",
+                      options: ["90°", "180°", "270°", "360°"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مثلث قائم الزاوية إحدى زواياه:",
+                      options: ["45°", "90°", "60°", "30°"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مثلث متساوي الساقين له:",
+                      options: [
+                        "3 أضلاع متساوية",
+                        "ساقان متساويان",
+                        "أضلاع مختلفة",
+                        "لا شيء",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "المثلث الحاد كل زواياه:",
+                      options: [
+                        "أقل من 90°",
+                        "أكبر من 90°",
+                        "تساوي 90°",
+                        "مختلفة",
+                      ],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "الأشكال الرباعية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الأشكال الرباعية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 أنواع الرباعيات:</p><ul class="text-slate-300 space-y-1 pr-4"><li>المربع: 4 أضلاع متساوية وزوايا قائمة</li><li>المستطيل: أضلاع متقابلة متساوية وزوايا قائمة</li><li>المعين: 4 أضلاع متساوية</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "مجموع زوايا الشكل الرباعي:",
+                      options: ["180°", "270°", "360°", "90°"],
+                      answer: 2,
+                    },
+                    {
+                      q: "المربع فيه:",
+                      options: ["2 قطر", "3 قطور", "4 أقطار", "لا قطور"],
+                      answer: 0,
+                    },
+                    {
+                      q: "المستطيل أضلاعه المتقابلة:",
+                      options: ["متساوية", "مختلفة", "متعامدة", "متوازية"],
+                      answer: 0,
+                    },
+                    {
+                      q: "المعين جميع أضلاعه:",
+                      options: ["مختلفة", "متساوية", "متقابلة", "متعامدة"],
+                      answer: 1,
+                    },
+                    {
+                      q: "متوازي الأضلاع فيه:",
+                      options: [
+                        "زوايا قائمة",
+                        "أضلاع متقابلة متساوية",
+                        "أضلاع متساوية",
+                        "قطران متساويان",
+                      ],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "المحيط والمساحة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المحيط والمساحة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الصيغ:</p><ul class="text-slate-300 space-y-1 pr-4"><li>محيط المربع = 4 × الضلع</li><li>مساحة المربع = الضلع²</li><li>مساحة المستطيل = الطول × العرض</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "محيط مربع ضلعه 5 سم:",
+                      options: ["10", "15", "20", "25"],
+                      answer: 2,
+                    },
+                    {
+                      q: "مساحة مربع ضلعه 4 سم:",
+                      options: ["8", "16", "32", "64"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مساحة مستطيل طوله 6 وعرضه 4:",
+                      options: ["10", "20", "24", "16"],
+                      answer: 2,
+                    },
+                    {
+                      q: "محيط مستطيل طوله 8 وعرضه 3:",
+                      options: ["11", "22", "24", "32"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مساحة مثلث القاعدة 10 والارتفاع 6:",
+                      options: ["30", "60", "16", "36"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "القياس (النظام المتري)",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">القياس والنظام المتري</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 وحدات الطول:</p><ul class="text-slate-300 space-y-1 pr-4"><li>1 كم = 1000 م</li><li>1 م = 100 سم</li><li>1 سم = 10 ملم</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "5 كم = ؟ م",
+                      options: ["50", "500", "5000", "50000"],
+                      answer: 2,
+                    },
+                    {
+                      q: "3 م = ؟ سم",
+                      options: ["30", "300", "3", "0.3"],
+                      answer: 1,
+                    },
+                    {
+                      q: "250 سم = ؟ م",
+                      options: ["0.25", "2.5", "25", "250"],
+                      answer: 1,
+                    },
+                    {
+                      q: "1000 ملم = ؟ م",
+                      options: ["0.1", "0.01", "1", "10"],
+                      answer: 2,
+                    },
+                    {
+                      q: "2.5 كم = ؟ سم",
+                      options: ["250", "2500", "25000", "250000"],
+                      answer: 2,
+                    },
+                  ],
+                },
+                {
+                  title: "الأشكال الثلاثية الأبعاد",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الأشكال الثلاثية الأبعاد</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الأشكال:</p><ul class="text-slate-300 space-y-1 pr-4"><li>المكعب: 6 أوجه مربعة</li><li>متوازي المستطيلات: 6 أوجه مستطيلة</li><li>الأسطوانة: 2 قاعدة دائرية</li><li>الكرة: سطح منحنِ</li></ul></div><div class="bg-blue-900/30 rounded-xl p-6 mt-6"><p class="text-cyan-200 font-bold mb-4">📐 مثال: متوازي أبعاده 1×2×3</p><svg viewBox="0 0 300 250" class="w-full h-64 mb-4"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#38bdf8;stop-opacity:0.8" /><stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0.8" /></linearGradient><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.8" /><stop offset="100%" style="stop-color:#0891b2;stop-opacity:0.8" /></linearGradient></defs><g transform="translate(150, 125)"><polygon points="0,-60 80,-30 80,50 0,80" fill="url(#grad1)" stroke="#38bdf8" stroke-width="2"/><polygon points="0,-60 -60,-40 -60,60 0,80" fill="url(#grad2)" stroke="#06b6d4" stroke-width="2"/><polygon points="80,-30 20,-50 20,70 80,50" fill="#0ea5e9" stroke="#38bdf8" stroke-width="2"/><text x="40" y="15" font-size="14" fill="white" font-weight="bold" text-anchor="middle">3</text><text x="-45" y="25" font-size="14" fill="white" font-weight="bold" text-anchor="middle">2</text><text x="65" y="-5" font-size="14" fill="white" font-weight="bold" text-anchor="middle">1</text></g></svg><div class="bg-slate-900/50 rounded-lg p-4"><p class="text-slate-300 mb-3"><strong>📊 الحساب:</strong></p><p class="text-slate-200 mb-2">مساحة السطح = 2(طول×عرض + طول×ارتفاع + عرض×ارتفاع)</p><p class="text-slate-200 mb-2">= 2(1×2 + 1×3 + 2×3)</p><p class="text-slate-200 mb-2">= 2(2 + 3 + 6)</p><p class="text-emerald-400 font-bold">= 2(11) = <span class="text-2xl">22</span></p></div></div>`,
+                  quiz: [
+                    {
+                      q: "المكعب له ؟ وجه",
+                      options: ["4", "5", "6", "8"],
+                      answer: 2,
+                    },
+                    {
+                      q: "متوازي المستطيلات له ؟ رأس",
+                      options: ["6", "8", "12", "4"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الأسطوانة لها:",
+                      options: [
+                        "2 قاعدة دائرية",
+                        "1 قاعدة",
+                        "أوجه مربعة",
+                        "لا قواعد",
+                      ],
+                      answer: 0,
+                    },
+                    {
+                      q: "عدد أحرف المكعب:",
+                      options: ["6", "8", "12", "14"],
+                      answer: 2,
+                    },
+                    {
+                      q: "حجم المكعب = ؟",
+                      options: ["الضلع²", "الضلع³", "4 × الضلع", "6 × الضلع²"],
+                      answer: 1,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: "الإحصاء والاحتمالات",
+              emoji: "📊",
+              lessons: [
+                {
+                  title: "مقاييس النزعة المركزية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">مقاييس النزعة المركزية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 المقاييس الثلاثة:</p><ul class="text-slate-300 space-y-1 pr-4"><li>الوسط: مجموع القيم ÷ العدد</li><li>الوسيط: القيمة الوسطى</li><li>المنوال: القيمة الأكثر تكراراً</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "الوسط الحسابي لـ 2, 4, 6, 8, 10:",
+                      options: ["4", "6", "8", "10"],
+                      answer: 1,
+                    },
+                    {
+                      q: "وسيط 1, 3, 5, 7, 9:",
+                      options: ["3", "5", "7", "9"],
+                      answer: 1,
+                    },
+                    {
+                      q: "المنوال لـ 1, 2, 2, 3, 3, 3:",
+                      options: ["1", "2", "3", "2.5"],
+                      answer: 2,
+                    },
+                    {
+                      q: "الوسط الحسابي 5, 5, 5, 5:",
+                      options: ["4", "5", "6", "20"],
+                      answer: 1,
+                    },
+                    {
+                      q: "وسيط 2, 4, 6, 8:",
+                      options: ["4", "5", "6", "7"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "تمثيل البيانات",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">تمثيل البيانات</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 أنواع التمثيل:</p><ul class="text-slate-300 space-y-1 pr-4"><li>الأعمدة البيانية</li><li>المدرجات التكرارية</li><li>القطاعات الدائرية</li><li>الخطوط البيانية</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "أفضل طريقة لتمثيل النسب:",
+                      options: ["أعمدة", "خطوط", "قطاعات", "جداول"],
+                      answer: 2,
+                    },
+                    {
+                      q: "الخطوط البيانية تستخدم لـ:",
+                      options: [
+                        "النسب",
+                        "التغير بمرور الوقت",
+                        "التكرار",
+                        "المتوسط",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "المدرجات التكرارية تظهر:",
+                      options: ["النسب", "التغير", "التكرار", "الاتجاه"],
+                      answer: 2,
+                    },
+                    {
+                      q: "القطاعات الدائرية درجة 360° تمثل:",
+                      options: ["الكل", "النصف", "الربع", "الثلث"],
+                      answer: 0,
+                    },
+                    {
+                      q: "رسم بياني يظهر تطور الأسعار عبر الأسابيع:",
+                      options: ["أعمدة", "خطوط", "قطاعات", "مدرج"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "الاحتمال: حساب احتمال وقوع حدث بسيط",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">حساب الاحتمال</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 قانون الاحتمال:</p><p class="text-slate-300">الاحتمال = النواتج المرغوبة ÷ النواتج الممكنة</p><p class="text-slate-300 mt-2">الاحتمال بين 0 و 1</p></div>`,
+                  quiz: [
+                    {
+                      q: "احتمال عدد فردي عند رمي نرد:",
+                      options: ["1/6", "2/6", "3/6", "4/6"],
+                      answer: 2,
+                    },
+                    {
+                      q: "احتمال صورة في رمية عملة:",
+                      options: ["0", "1/4", "1/2", "1"],
+                      answer: 2,
+                    },
+                    {
+                      q: "احتمال الرقم 5 في نرد:",
+                      options: ["0", "1/6", "1/3", "1/2"],
+                      answer: 1,
+                    },
+                    {
+                      q: "احتمال حدث مستحيل:",
+                      options: ["1/2", "1/4", "0", "1"],
+                      answer: 2,
+                    },
+                    {
+                      q: "احتمال الحدث المؤكد:",
+                      options: ["0", "1/2", "1/4", "1"],
+                      answer: 3,
+                    },
+                  ],
+                },
+                {
+                  title: "فضاء العينة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">فضاء العينة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 التعريف:</p><p class="text-slate-300">جميع النواتج الممكنة للتجربة</p><p class="text-slate-300 mt-2">رمي عملة: {صورة، كتابة}</p><p class="text-slate-300">رمي نرد: {1, 2, 3, 4, 5, 6}</p></div>`,
+                  quiz: [
+                    {
+                      q: "فضاء العينة لرمي عملتين:",
+                      options: ["2", "4", "6", "8"],
+                      answer: 1,
+                    },
+                    {
+                      q: "عدد النواتج الممكنة لرمي 3 عملات:",
+                      options: ["6", "8", "12", "16"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الرسم الشجري يستخدم لـ:",
+                      options: ["الرسم", "إيجاد النواتج", "الحساب", "التحليل"],
+                      answer: 1,
+                    },
+                    {
+                      q: "فضاء العينة لاختيار عدد من 1 إلى 5:",
+                      options: ["5", "10", "15", "20"],
+                      answer: 0,
+                    },
+                    {
+                      q: "عدد النواتج لرمي نرد واختيار لون من 3 ألوان:",
+                      options: ["6", "9", "18", "36"],
+                      answer: 2,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        second: {
+          name: "الثاني متوسط",
+          units: [
+            {
+              title: "الأعداد والعمليات عليها",
+              emoji: "🔢",
+              lessons: [
+                {
+                  title: "الأعداد النسبية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الأعداد النسبية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 التعريف:</p><p class="text-slate-300">عدد يمكن كتابته على صورة كسر أ/ب حيث ب ≠ 0</p><p class="text-slate-300 mt-2">أمثلة: 1/2, -3/4, 5, -2</p></div>`,
+                  quiz: [
+                    {
+                      q: "أي الأعداد التالية عدد نسبي؟",
+                      options: ["جذر 3", "ط", "2/5", "جذر 5"],
+                      answer: 2,
+                    },
+                    {
+                      q: "العدد -0.5 يساوي:",
+                      options: ["-1/2", "1/2", "-5", "5/10"],
+                      answer: 0,
+                    },
+                    {
+                      q: "أي الأعداد التالية أكبر؟",
+                      options: ["-8", "-3", "-10", "-15"],
+                      answer: 1,
+                    },
+                    {
+                      q: "ترتيب الأعداد تصاعدياً: -2 ، 1 ، -5 ، 3",
+                      options: [
+                        "-5 ، -2 ، 1 ، 3",
+                        "3 ، 1 ، -2 ، -5",
+                        "-2 ، -5 ، 1 ، 3",
+                        "1 ، 3 ، -5 ، -2",
+                      ],
+                      answer: 0,
+                    },
+                    {
+                      q: "أي الأعداد نسبي؟",
+                      options: ["π", "√2", "5/3", "لا شيء"],
+                      answer: 2,
+                    },
+                    {
+                      q: "هل -5 عدد نسبي؟",
+                      options: ["نعم", "لا", "ربما", "غير محدد"],
+                      answer: 0,
+                    },
+                    {
+                      q: "أبسط صورة لـ 6/9:",
+                      options: ["2/3", "3/9", "6/9", "1/3"],
+                      answer: 0,
+                    },
+                    {
+                      q: "العدد -2/5 في الصورة العشرية:",
+                      options: ["-0.4", "-0.25", "-0.2", "-2.5"],
+                      answer: 0,
+                    },
+                    {
+                      q: "هل 0 عدد نسبي؟",
+                      options: ["نعم", "لا", "غير محدد", "ربما"],
+                      answer: 0,
+                    },
+                    {
+                      q: "العدد 3/4 = ؟",
+                      options: ["0.5", "0.75", "0.25", "0.3"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "القوى والأسس",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">القوى والأسس</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 قوانين الأسس:</p><ul class="text-slate-300 space-y-1 pr-4"><li>a^m × a^n = a^(m+n)</li><li>a^m ÷ a^n = a^(m-n)</li><li>(a^m)^n = a^(mn)</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "2³ × 2² = ؟",
+                      options: ["2⁵", "2⁶", "4⁵", "32"],
+                      answer: 0,
+                    },
+                    {
+                      q: "3⁴ ÷ 3² = ؟",
+                      options: ["3²", "3⁶", "1.5²", "9"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(2²)³ = ؟",
+                      options: ["2⁵", "2⁶", "8³", "64"],
+                      answer: 1,
+                    },
+                    {
+                      q: "5⁰ = ؟",
+                      options: ["0", "1", "5", "غير معرّف"],
+                      answer: 1,
+                    },
+                    {
+                      q: "(-2)⁴ = ؟",
+                      options: ["-16", "16", "8", "-8"],
+                      answer: 1,
+                    },
+                    {
+                      q: "2⁻² = ؟",
+                      options: ["1/4", "1/2", "4", "2"],
+                      answer: 0,
+                    },
+                    {
+                      q: "10⁵ = ؟",
+                      options: ["50000", "100000", "500000", "1000000"],
+                      answer: 1,
+                    },
+                    {
+                      q: "(3²)² = ؟",
+                      options: ["3⁴", "3⁶", "81", "كلا من أ وب"],
+                      answer: 2,
+                    },
+                    {
+                      q: "x⁵ × x³ = ؟",
+                      options: ["x⁸", "x² ", "x¹⁵", "x⁵³"],
+                      answer: 0,
+                    },
+                    { q: "4² = ؟", options: ["8", "16", "12", "2"], answer: 1 },
+                    {
+                      q: "6⁰ = ؟",
+                      options: ["0", "1", "6", "غير محدد"],
+                      answer: 1,
+                    },
+                    {
+                      q: "2⁴ × 2⁻² = ؟",
+                      options: ["2²", "2⁶", "2⁸", "4"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(5²)⁰ = ؟",
+                      options: ["0", "1", "25", "50"],
+                      answer: 1,
+                    },
+                    {
+                      q: "y² × y² × y² = ؟",
+                      options: ["y⁶", "y⁸", "3y²", "y²³"],
+                      answer: 0,
+                    },
+                    {
+                      q: "10³ ÷ 10¹ = ؟",
+                      options: ["10²", "10¹", "100", "1000"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "الجذور التربيعية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الجذور التربيعية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 قاعدة:</p><p class="text-slate-300">√(أ × ب) = √أ × √ب</p><p class="text-slate-300">√(أ/ب) = √أ / √ب</p></div>`,
+                  quiz: [
+                    {
+                      q: "√144 = ؟",
+                      options: ["11", "12", "13", "14"],
+                      answer: 1,
+                    },
+                    {
+                      q: "√(9 × 4) = ؟",
+                      options: ["6", "36", "13", "12"],
+                      answer: 0,
+                    },
+                    {
+                      q: "√0.25 = ؟",
+                      options: ["0.5", "2.5", "1.5", "0.25"],
+                      answer: 0,
+                    },
+                    {
+                      q: "√(1/4) = ؟",
+                      options: ["1/2", "1/4", "2", "4"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(√5)² = ؟",
+                      options: ["5", "25", "√5", "2.5"],
+                      answer: 0,
+                    },
+                    {
+                      q: "√81 = ؟",
+                      options: ["8", "9", "10", "11"],
+                      answer: 1,
+                    },
+                    {
+                      q: "√169 = ؟",
+                      options: ["11", "12", "13", "14"],
+                      answer: 2,
+                    },
+                    {
+                      q: "√(16/9) = ؟",
+                      options: ["4/3", "16/9", "3/4", "9/16"],
+                      answer: 0,
+                    },
+                    {
+                      q: "ما √100؟",
+                      options: ["5", "10", "50", "100"],
+                      answer: 1,
+                    },
+                    {
+                      q: "√36 + √64 = ؟",
+                      options: ["10", "12", "14", "100"],
+                      answer: 2,
+                    },
+                  ],
+                },
+                {
+                  title: "الأعداد الحقيقية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الأعداد الحقيقية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 التصنيف:</p><p class="text-slate-300">الأعداد الحقيقية = النسبية + غير النسبية</p><p class="text-slate-300 mt-2">أمثلة غير نسبية: √2, π, e</p></div>`,
+                  quiz: [
+                    {
+                      q: "π عدد:",
+                      options: ["نسبي", "غير نسبي", "صحيح", "طبيعي"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مجموعة الأعداد الحقيقية تشمل:",
+                      options: [
+                        "النسبية فقط",
+                        "غير النسبية فقط",
+                        "كليهما",
+                        "لا شيء",
+                      ],
+                      answer: 2,
+                    },
+                    {
+                      q: "√2 عدد:",
+                      options: ["صحيح", "نسبي", "غير نسبي", "طبيعي"],
+                      answer: 2,
+                    },
+                    {
+                      q: "أي من الأعداد التالية عدد حقيقي؟",
+                      options: ["∞", "غير معرّف", "√9", "جميع السابق"],
+                      answer: 2,
+                    },
+                    {
+                      q: "√4 عدد:",
+                      options: ["غير نسبي", "نسبي", "غير حقيقي", "وهمي"],
+                      answer: 1,
+                    },
+                    {
+                      q: "أي من التالي غير نسبي؟",
+                      options: ["1/3", "0.5", "√3", "2"],
+                      answer: 2,
+                    },
+                    {
+                      q: "ما النظير الضربي للعدد -2/5؟",
+                      options: ["2/5", "-5/2", "-2/5", "5/2"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الأعداد الحقيقية تشمل:",
+                      options: [
+                        "الموجبة فقط",
+                        "السالبة فقط",
+                        "الموجبة والسالبة والصفر",
+                        "الموجبة والسالبة فقط",
+                      ],
+                      answer: 2,
+                    },
+                    {
+                      q: "أي من الأعداد التالية حقيقي؟",
+                      options: ["π", "√2", "5/3", "جميع ما سبق"],
+                      answer: 3,
+                    },
+                  ],
+                },
+                {
+                  title: "التناسب المئوي",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">التناسب المئوي</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الصيغة:</p><p class="text-slate-300">الجزء / الكل = النسبة المئوية / 100</p><p class="text-slate-300 mt-2">مثال: 20/100 = 20%</p></div>`,
+                  quiz: [
+                    {
+                      q: "ما 40% من 50؟",
+                      options: ["10", "15", "20", "25"],
+                      answer: 2,
+                    },
+                    {
+                      q: "إذا 25 من 100، النسبة المئوية:",
+                      options: ["20%", "25%", "50%", "75%"],
+                      answer: 1,
+                    },
+                    {
+                      q: "ما العدد الذي 20% منه = 10؟",
+                      options: ["30", "40", "50", "60"],
+                      answer: 2,
+                    },
+                    {
+                      q: "150% من 80 = ؟",
+                      options: ["100", "110", "120", "130"],
+                      answer: 2,
+                    },
+                    {
+                      q: "حذاء سعره الأصلي 80 ريالاً، ارتفع سعره بنسبة 25%، فكم أصبح سعره الجديد؟",
+                      options: ["85", "95", "100", "105"],
+                      answer: 2,
+                    },
+                    {
+                      q: "ما 10% من 200؟",
+                      options: ["10", "20", "30", "50"],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا السعر 500 ريال وخصم 15%، السعر النهائي:",
+                      options: ["85", "315", "425", "515"],
+                      answer: 2,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: "الجبر والدوال",
+              emoji: "📐",
+              lessons: [
+                {
+                  title: "المعادلات والمتباينات",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المعادلات والمتباينات</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الفرق:</p><p class="text-slate-300"><strong>المعادلة:</strong> =</p><p class="text-slate-300"><strong>المتباينة:</strong> < ، > ، ≤ ، ≥</p></div>`,
+                  quiz: [
+                    {
+                      q: "حل: 2س + 3 < 9",
+                      options: ["س < 3", "س > 3", "س < 6", "س > 6"],
+                      answer: 0,
+                    },
+                    {
+                      q: "حل: 3س ≥ 12",
+                      options: ["س ≥ 4", "س ≤ 3", "س > 4", "س < 4"],
+                      answer: 0,
+                    },
+                    {
+                      q: "متباينة تمثل: عدد أقل من 10",
+                      options: ["x > 10", "x < 10", "x = 10", "x ≥ 10"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: س - 5 > 2",
+                      options: ["س > 7", "س < 7", "س ≤ 7", "س ≥ 7"],
+                      answer: 0,
+                    },
+                    {
+                      q: "عند ضرب/قسمة متباينة بسالب:",
+                      options: [
+                        "لا يتغير",
+                        "ينقلب الرمز",
+                        "تصبح معادلة",
+                        "تلغى",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: 4س + 5 = 21",
+                      options: ["س = 3", "س = 4", "س = 5", "س = 6"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: -2س < 8",
+                      options: ["س < -4", "س > -4", "س < 4", "س > 4"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: س/2 = 10",
+                      options: ["20", "5", "15", "25"],
+                      answer: 0,
+                    },
+                    {
+                      q: "عدد مضاف إلى 5 يساوي 12:",
+                      options: [
+                        "x + 5 < 12",
+                        "x + 5 > 12",
+                        "x + 5 = 12",
+                        "x + 5 ≥ 12",
+                      ],
+                      answer: 2,
+                    },
+                  ],
+                },
+                {
+                  title: "المتباينات الخطية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المتباينات الخطية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الحل:</p><p class="text-slate-300">تحل مثل المعادلة مع مراعاة انعكاس الإشارة عند الضرب أو القسمة بعدد سالب</p></div>`,
+                  quiz: [
+                    {
+                      q: "حل: 3x - 6 > 0",
+                      options: ["x > 2", "x < 2", "x > 6", "x < 6"],
+                      answer: 0,
+                    },
+                    {
+                      q: "حل: -x + 4 ≤ 7",
+                      options: ["x ≥ -3", "x ≤ -3", "x ≥ 3", "x ≤ 3"],
+                      answer: 0,
+                    },
+                    {
+                      q: "حل: 2x + 1 < 5",
+                      options: ["x < 2", "x > 2", "x < 3", "x > 3"],
+                      answer: 0,
+                    },
+                    {
+                      q: "حل: -4x ≥ 12",
+                      options: ["x ≥ -3", "x ≤ -3", "x ≥ 3", "x ≤ 3"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حل: x/3 + 2 > 5",
+                      options: ["x > 9", "x < 9", "x > 3", "x < 3"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "الدوال الخطية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الدوال الخطية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الصيغة العامة:</p><p class="text-slate-300">y = mx + b</p><p class="text-slate-300">m = الميل، b = الجزء المقطوع من y</p></div>`,
+                  quiz: [
+                    {
+                      q: "ميل الدالة y = 3x + 2:",
+                      options: ["2", "3", "5", "6"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الجزء المقطوع من y في y = -x + 5:",
+                      options: ["-1", "5", "-5", "1"],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا y = 2x، فما y عند x = 3؟",
+                      options: ["5", "6", "8", "9"],
+                      answer: 1,
+                    },
+                    {
+                      q: "الدالة y = 4 هي:",
+                      options: ["خطية", "تربيعية", "ثابتة", "أسية"],
+                      answer: 2,
+                    },
+                    {
+                      q: "ميل خط أفقي:",
+                      options: ["1", "0", "غير معرّف", "-1"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "أنظمة المعادلات الخطية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">أنظمة المعادلات الخطية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 طرق الحل:</p><ul class="text-slate-300 space-y-1 pr-4"><li>التعويض</li><li>الحذف</li><li>الرسم البياني</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "حل: x + y = 5, x - y = 1",
+                      options: ["x=3, y=2", "x=2, y=3", "x=4, y=1", "x=1, y=4"],
+                      answer: 0,
+                    },
+                    {
+                      q: "نقطة تقاطع خطين هي:",
+                      options: ["الميل", "الحل", "المقطع", "القمة"],
+                      answer: 1,
+                    },
+                    {
+                      q: "خطان متوازيان لهما:",
+                      options: ["حل واحد", "لا حل", "حلول لانهائية", "حلان"],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا x = 2y و x + y = 6:",
+                      options: ["x=4, y=2", "x=3, y=3", "x=2, y=4", "x=6, y=0"],
+                      answer: 0,
+                    },
+                    {
+                      q: "نظام له حلول لانهائية عندما:",
+                      options: [
+                        "الخطان متقاطعان",
+                        "الخطان متطابقان",
+                        "الخطان متوازيان",
+                        "لا شيء",
+                      ],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "كثيرات الحدود",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">كثيرات الحدود</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 المفاهيم:</p><ul class="text-slate-300 space-y-1 pr-4"><li>أحادي الحد: 3x²</li><li>ثنائي الحد: 2x + 5</li><li>ثلاثي الحد: x² + 3x + 2</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "درجة كثيرة الحدود 3x⁴ + 2x - 1:",
+                      options: ["1", "2", "3", "4"],
+                      answer: 3,
+                    },
+                    {
+                      q: "(2x + 3) + (x - 1) = ؟",
+                      options: ["3x + 2", "3x + 4", "2x + 2", "x + 2"],
+                      answer: 0,
+                    },
+                    {
+                      q: "(4x² - x) - (2x² + 3x) = ؟",
+                      options: ["2x² - 4x", "2x² + 2x", "6x² - 4x", "6x² + 2x"],
+                      answer: 0,
+                    },
+                    {
+                      q: "2(3x + 1) = ؟",
+                      options: ["6x + 1", "6x + 2", "5x + 2", "3x + 2"],
+                      answer: 1,
+                    },
+                    {
+                      q: "عدد حدود 5x³ - 2x + 7:",
+                      options: ["1", "2", "3", "4"],
+                      answer: 2,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: "الهندسة والقياس",
+              emoji: "📏",
+              lessons: [
+                {
+                  title: "نظرية فيثاغورس",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">نظرية فيثاغورس</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 النظرية:</p><p class="text-slate-300">في المثلث القائم: أ² + ب² = ج²</p><p class="text-slate-300">حيث ج هو الوتر (أطول ضلع)</p></div>`,
+                  quiz: [
+                    {
+                      q: "إذا أ=3، ب=4، الوتر=؟",
+                      options: ["5", "7", "12", "25"],
+                      answer: 0,
+                    },
+                    {
+                      q: "إذا أ=5، ج=13، ب=؟",
+                      options: ["8", "12", "18", "10"],
+                      answer: 1,
+                    },
+                    {
+                      q: "هل 6, 8, 10 ثلاثية فيثاغورس؟",
+                      options: ["نعم", "لا", "ربما", "غير واضح"],
+                      answer: 0,
+                    },
+                    {
+                      q: "الوتر هو:",
+                      options: ["أقصر ضلع", "أطول ضلع", "أي ضلع", "القاعدة"],
+                      answer: 1,
+                    },
+                    {
+                      q: "إذا أ=8، ب=15، الوتر=؟",
+                      options: ["17", "23", "113", "20"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "التحويلات الهندسية",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">التحويلات الهندسية</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الأنواع:</p><ul class="text-slate-300 space-y-1 pr-4"><li>الانسحاب (الإزاحة)</li><li>الانعكاس (المرآة)</li><li>الدوران</li><li>التمدد (التكبير/التصغير)</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "الانسحاب يغير:",
+                      options: ["الحجم", "الشكل", "الموقع", "الزوايا"],
+                      answer: 2,
+                    },
+                    {
+                      q: "الانعكاس حول محور y يغير:",
+                      options: ["x إلى -x", "y إلى -y", "كلاهما", "لا شيء"],
+                      answer: 0,
+                    },
+                    {
+                      q: "دوران 180° يعادل:",
+                      options: ["انسحاب", "انعكاس", "تمدد", "تصغير"],
+                      answer: 1,
+                    },
+                    {
+                      q: "التمدد بمعامل 2 يجعل الشكل:",
+                      options: ["أصغر", "أكبر", "نفسه", "مقلوب"],
+                      answer: 1,
+                    },
+                    {
+                      q: "أي تحويل يحافظ على الحجم؟",
+                      options: ["الانسحاب", "التمدد", "التصغير", "التكبير"],
+                      answer: 0,
+                    },
+                  ],
+                },
+                {
+                  title: "التشابه والتطابق",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">التشابه والتطابق</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الفرق:</p><p class="text-slate-300"><strong>التطابق:</strong> نفس الشكل ونفس الحجم</p><p class="text-slate-300"><strong>التشابه:</strong> نفس الشكل لكن حجم مختلف</p></div>`,
+                  quiz: [
+                    {
+                      q: "شكلان متطابقان لهما:",
+                      options: [
+                        "نفس الشكل فقط",
+                        "نفس الحجم فقط",
+                        "نفس الشكل والحجم",
+                        "لا شيء",
+                      ],
+                      answer: 2,
+                    },
+                    {
+                      q: "مثلثان متشابهان زواياهما:",
+                      options: ["مختلفة", "متساوية", "متكاملة", "متتامة"],
+                      answer: 1,
+                    },
+                    {
+                      q: "نسبة التشابه 1:2 تعني:",
+                      options: [
+                        "نفس الحجم",
+                        "الثاني ضعف الأول",
+                        "الأول ضعف الثاني",
+                        "لا علاقة",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "شكلان متشابهان أضلاعهما:",
+                      options: ["متساوية", "متناسبة", "مختلفة", "لا علاقة"],
+                      answer: 1,
+                    },
+                    {
+                      q: "كل الدوائر:",
+                      options: ["متطابقة", "متشابهة", "مختلفة", "لا علاقة"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "حجم المنشور والأسطوانة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">حجم المنشور والأسطوانة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الصيغ:</p><ul class="text-slate-300 space-y-1 pr-4"><li>حجم المنشور = مساحة القاعدة × الارتفاع</li><li>حجم الأسطوانة = π × نق² × ع</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "حجم منشور مساحة قاعدته 20 وارتفاعه 5:",
+                      options: ["25", "100", "200", "400"],
+                      answer: 1,
+                    },
+                    {
+                      q: "حجم أسطوانة نصف قطرها 3 وارتفاعها 10 (تقريباً):",
+                      options: ["90π", "30π", "9π", "100π"],
+                      answer: 0,
+                    },
+                    {
+                      q: "إذا تضاعف ارتفاع المنشور، الحجم:",
+                      options: ["يتضاعف", "يتربع", "لا يتغير", "ينتصف"],
+                      answer: 0,
+                    },
+                    {
+                      q: "وحدة قياس الحجم:",
+                      options: ["سم", "سم²", "سم³", "سم⁴"],
+                      answer: 2,
+                    },
+                    {
+                      q: "حجم مكعب ضلعه 3 سم:",
+                      options: ["9", "18", "27", "36"],
+                      answer: 2,
+                    },
+                  ],
+                },
+                {
+                  title: "مساحة سطح المنشور والأسطوانة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">مساحة سطح المنشور والأسطوانة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الصيغ:</p><ul class="text-slate-300 space-y-1 pr-4"><li>مساحة سطح المنشور = 2 × مساحة القاعدة + محيط القاعدة × الارتفاع</li><li>مساحة سطح الأسطوانة = 2πنق² + 2πنق × ع</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "مساحة سطح مكعب ضلعه 4:",
+                      options: ["64", "96", "24", "16"],
+                      answer: 1,
+                    },
+                    {
+                      q: "عدد أوجه المنشور الثلاثي:",
+                      options: ["3", "4", "5", "6"],
+                      answer: 2,
+                    },
+                    {
+                      q: "مساحة سطح أسطوانة تشمل:",
+                      options: [
+                        "قاعدتين فقط",
+                        "سطح جانبي فقط",
+                        "قاعدتين + سطح جانبي",
+                        "لا شيء",
+                      ],
+                      answer: 2,
+                    },
+                    {
+                      q: "وحدة مساحة السطح:",
+                      options: ["سم", "سم²", "سم³", "م"],
+                      answer: 1,
+                    },
+                    {
+                      q: "مساحة سطح متوازي مستطيلات أبعاده 2×3×4:",
+                      options: ["24", "52", "48", "26"],
+                      answer: 1,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: "الإحصاء والاحتمالات",
+              emoji: "📊",
+              lessons: [
+                {
+                  title: "المدى والانحراف المعياري",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">المدى والانحراف المعياري</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 المفاهيم:</p><ul class="text-slate-300 space-y-1 pr-4"><li>المدى = أكبر قيمة - أصغر قيمة</li><li>الانحراف المعياري: مقياس تشتت البيانات</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "المدى لـ 3, 7, 1, 9, 5:",
+                      options: ["4", "6", "8", "10"],
+                      answer: 2,
+                    },
+                    {
+                      q: "إذا كانت البيانات متقاربة، الانحراف المعياري:",
+                      options: ["كبير", "صغير", "صفر", "سالب"],
+                      answer: 1,
+                    },
+                    {
+                      q: "المدى لـ 10, 10, 10:",
+                      options: ["0", "10", "30", "20"],
+                      answer: 0,
+                    },
+                    {
+                      q: "الانحراف المعياري يقيس:",
+                      options: ["المركز", "التشتت", "النسبة", "الميل"],
+                      answer: 1,
+                    },
+                    {
+                      q: "المدى لـ 2, 5, 8, 11, 14:",
+                      options: ["9", "12", "3", "14"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "الاحتمالات المركبة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">الاحتمالات المركبة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 القواعد:</p><ul class="text-slate-300 space-y-1 pr-4"><li>P(A و B) = P(A) × P(B) (أحداث مستقلة)</li><li>P(A أو B) = P(A) + P(B) - P(A و B)</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "احتمال ظهور صورة مرتين في رمي عملة مرتين:",
+                      options: ["1/2", "1/4", "3/4", "1"],
+                      answer: 1,
+                    },
+                    {
+                      q: "رمي نرد مرتين، احتمال 6 مرتين:",
+                      options: ["1/6", "1/12", "1/36", "2/6"],
+                      answer: 2,
+                    },
+                    {
+                      q: "حدثان مستقلان:",
+                      options: [
+                        "يؤثران ببعض",
+                        "لا يؤثران",
+                        "متنافيان",
+                        "متكاملان",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "P(A) = 0.3, P(B) = 0.5 (مستقلان)، P(A و B):",
+                      options: ["0.8", "0.15", "0.2", "0.35"],
+                      answer: 1,
+                    },
+                    {
+                      q: "احتمال عدم وقوع حدث احتماله 0.7:",
+                      options: ["0.7", "0.3", "1", "0"],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "التمثيلات البيانية المتقدمة",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">التمثيلات البيانية المتقدمة</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 الأنواع المتقدمة:</p><ul class="text-slate-300 space-y-1 pr-4"><li>الصندوق وطرفيه (Box Plot)</li><li>الرسم النقطي (Scatter Plot)</li><li>المضلع التكراري</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "الصندوق وطرفيه يظهر:",
+                      options: [
+                        "الوسط فقط",
+                        "الوسيط والربيعيات",
+                        "المنوال",
+                        "المتوسط",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "الرسم النقطي يستخدم لـ:",
+                      options: [
+                        "المقارنة",
+                        "العلاقة بين متغيرين",
+                        "التكرار",
+                        "النسبة",
+                      ],
+                      answer: 1,
+                    },
+                    {
+                      q: "الربيع الأول (Q1) يقسم:",
+                      options: ["25% أدنى", "50% أدنى", "75% أدنى", "100%"],
+                      answer: 0,
+                    },
+                    {
+                      q: "المدى الربيعي = ؟",
+                      options: ["Q3 - Q1", "Q3 + Q1", "Q2 - Q1", "Q3 × Q1"],
+                      answer: 0,
+                    },
+                    {
+                      q: "النقاط المتطرفة (outliers):",
+                      options: [
+                        "في المنتصف",
+                        "بعيدة عن البقية",
+                        "قريبة من الوسط",
+                        "لا وجود لها",
+                      ],
+                      answer: 1,
+                    },
+                  ],
+                },
+                {
+                  title: "العد والتوافيق",
+                  content: `<h3 class="text-xl font-bold text-cyan-300 mb-4">العد والتوافيق</h3><div class="bg-slate-800/50 rounded-xl p-4 mb-4"><p class="text-cyan-200 font-bold mb-2">📌 مبادئ العد:</p><ul class="text-slate-300 space-y-1 pr-4"><li>مبدأ الضرب: إذا كان هناك m طريقة و n طريقة، فالإجمالي m × n</li><li>التباديل: ترتيب مهم P(n,r) = n!/(n-r)!</li><li>التوافيق: ترتيب غير مهم C(n,r) = n!/[r!(n-r)!]</li></ul></div>`,
+                  quiz: [
+                    {
+                      q: "عدد طرق ترتيب 3 أشخاص:",
+                      options: ["3", "6", "9", "12"],
+                      answer: 1,
+                    },
+                    {
+                      q: "4! = ؟",
+                      options: ["4", "12", "24", "120"],
+                      answer: 2,
+                    },
+                    {
+                      q: "C(5,2) = ؟",
+                      options: ["5", "10", "20", "60"],
+                      answer: 1,
+                    },
+                    {
+                      q: "عدد طرق اختيار 2 من 4 (بدون ترتيب):",
+                      options: ["4", "6", "8", "12"],
+                      answer: 1,
+                    },
+                    {
+                      q: "P(4,2) = ؟",
+                      options: ["6", "8", "12", "24"],
+                      answer: 2,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      // ── تحويل الأرقام الغربية إلى الأرقام الهندية العربية ─────
+      function toArabicDigits(str) {
+        const supMap = {
+          "⁰": "٠",
+          "¹": "١",
+          "²": "٢",
+          "³": "٣",
+          "⁴": "٤",
+          "⁵": "٥",
+          "⁶": "٦",
+          "⁷": "٧",
+          "⁸": "٨",
+          "⁹": "٩",
+        };
+        return String(str)
+          .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (d) => `<sup>${supMap[d]}</sup>`)
+          .replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
+      }
+
+      let currentGrade = null;
+      let currentUnitIndex = null;
+      let currentLeaderboardGrade = "first";
+      let _pendingGrade = null;
+
+      // ── اسم الطالبة ──────────────────────────────────────
+      function getStudentName(grade) {
+        return sessionStorage.getItem("student_name_" + grade) || null;
+      }
+
+      function showNameModal(grade) {
+        _pendingGrade = grade;
+        const inp = document.getElementById("student-name-input");
+        inp.value = "";
+        document.getElementById("name-error").classList.add("hidden");
+        document.getElementById("name-modal").classList.remove("hidden");
+        setTimeout(() => inp.focus(), 100);
+      }
+
+      function confirmName() {
+        const name = document.getElementById("student-name-input").value.trim();
+        if (!name) {
+          document.getElementById("name-error").classList.remove("hidden");
+          return;
+        }
+        sessionStorage.setItem("student_name_" + _pendingGrade, name);
+        document.getElementById("name-modal").classList.add("hidden");
+        _proceedToUnits(_pendingGrade);
+      }
+
+      document
+        .getElementById("student-name-input")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") confirmName();
+        });
+
+      function startJourney() {
+        document.getElementById("hero-section").classList.add("hidden");
+        document.getElementById("leaderboard-section").classList.add("hidden");
+        document.getElementById("subjects-section").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function showUnits(grade) {
+        const name = getStudentName(grade);
+        if (!name) {
+          showNameModal(grade);
+          return;
+        }
+        _proceedToUnits(grade);
+      }
+
+      function _proceedToUnits(grade) {
+        currentGrade = grade;
+        const data = curriculumData[grade];
+        document.getElementById("units-title").textContent = data.name;
+        const grid = document.getElementById("units-grid");
+        grid.innerHTML = "";
+
+        data.units.forEach((unit, idx) => {
+          const card = document.createElement("div");
+          card.className = "unit-card rounded-2xl p-5";
+          card.innerHTML = `
+          <div class="text-3xl mb-3">${unit.emoji}</div>
+          <h3 class="text-base font-bold mb-1" style="color:#2D2640;">${unit.title}</h3>
+          <p class="text-xs" style="color:#94a3b8;">${unit.lessons.length} دروس</p>
+        `;
+          card.onclick = () => showLessons(idx);
+          grid.appendChild(card);
+        });
+
+        document.getElementById("subjects-section").classList.add("hidden");
+        document.getElementById("units-section").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        lucide.createIcons();
+      }
+
+      async function showLessons(unitIdx) {
+        currentUnitIndex = unitIdx;
+        const unit = curriculumData[currentGrade].units[unitIdx];
+        document.getElementById("lessons-title").textContent = unit.title;
+        const grid = document.getElementById("lessons-grid");
+        grid.innerHTML = "";
+
+        unit.lessons.forEach((lesson, idx) => {
+          const card = document.createElement("div");
+          card.className = "lesson-card rounded-xl p-4 flex items-center gap-4";
+          card.innerHTML = `
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0" style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(236,72,153,0.15));color:#7C3AED;">${toArabicDigits(idx + 1)}</div>
+          <div class="flex-1">
+            <h3 class="font-bold text-sm mb-0.5" style="color:#2D2640;">${lesson.title}</h3>
+            <p class="text-xs" id="q-count-${unitIdx}-${idx}" style="color:#94a3b8;">
+              <span class="inline-block w-12 h-3 rounded animate-pulse" style="background:#e2e8f0;"></span>
+            </p>
+          </div>
+          <i data-lucide="chevron-left" style="width:18px;height:18px;color:#C4B5FD;"></i>
+        `;
+          card.onclick = () => showLessonContent(idx);
+          grid.appendChild(card);
+        });
+
+        document.getElementById("units-section").classList.add("hidden");
+        document.getElementById("lessons-section").classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        lucide.createIcons();
+
+        // جلب العدادات الحقيقية من قاعدة البيانات
+        try {
+          const resp = await fetch(
+            `/api/questions/counts?gradeKey=${currentGrade}`,
+          );
+          if (resp.ok) {
+            const counts = await resp.json();
+            unit.lessons.forEach((_, idx) => {
+              const el = document.getElementById(`q-count-${unitIdx}-${idx}`);
+              if (!el) return;
+              const n = counts[`${unitIdx}|${idx}`] || 0;
+              el.innerHTML =
+                n > 0
+                  ? `<span style="color:#7C3AED;font-weight:700;">${toArabicDigits(n)}</span> <span>سؤال ✅</span>`
+                  : `<span style="color:#f59e0b;font-weight:600;">لا توجد أسئلة بعد</span>`;
+            });
+          }
+        } catch {
+          /* إذا فشل الجلب تظل الأرقام مخفية */
+        }
+      }
+
+      async function showLessonContent(lessonIdx) {
+        window._currentLessonIndex = lessonIdx;
+        const lesson =
+          curriculumData[currentGrade].units[currentUnitIndex].lessons[
+            lessonIdx
+          ];
+        document.getElementById("lesson-detail-title").textContent =
+          lesson.title;
+        const content = document.getElementById("lesson-detail-content");
+
+        // تحميل الشرح: من قاعدة البيانات أولاً، ثم الافتراضي
+        content.innerHTML =
+          '<div class="text-center py-4 text-slate-400 text-sm">جاري تحميل الشرح...</div>';
+        try {
+          const r = await fetch(
+            `/api/lessons/content?gradeKey=${currentGrade}&unitIndex=${currentUnitIndex}&lessonIndex=${lessonIdx}`,
+            { cache: "no-store" },
+          );
+          const d = await r.json();
+          if (d.content && d.content !== "__RESET__") {
+            content.innerHTML = d.content;
+          } else {
+            content.innerHTML = lesson.content;
+          }
+        } catch {
+          content.innerHTML = lesson.content;
+        }
+
+        const quizBtn = document.createElement("button");
+        quizBtn.className =
+          "glow-btn w-full mt-6 py-3 px-6 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-2";
+        quizBtn.innerHTML =
+          '<i data-lucide="brain" style="width:20px;height:20px;"></i> <span>ابدأ الاختبار</span>';
+        quizBtn.onclick = () => openQuiz(lessonIdx);
+        content.appendChild(quizBtn);
+
+        document.getElementById("lessons-section").classList.add("hidden");
+        document
+          .getElementById("lesson-content-section")
+          .classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        lucide.createIcons();
+      }
+
+      function goBack(target) {
+        const sections = [
+          "hero-section",
+          "subjects-section",
+          "units-section",
+          "lessons-section",
+          "lesson-content-section",
+          "quiz-section",
+          "leaderboard-section",
+        ];
+        sections.forEach((s) =>
+          document.getElementById(s).classList.add("hidden"),
+        );
+
+        if (target === "subjects") {
+          document.getElementById("hero-section").classList.remove("hidden");
+          document
+            .getElementById("leaderboard-section")
+            .classList.remove("hidden");
+          document
+            .getElementById("subjects-section")
+            .classList.remove("hidden");
+        } else if (target === "units") {
+          document.getElementById("units-section").classList.remove("hidden");
+        } else if (target === "lessons") {
+          document.getElementById("lessons-section").classList.remove("hidden");
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        lucide.createIcons();
+      }
+
+      async function openQuiz(lessonIdx) {
+        window._currentLessonIndex = lessonIdx;
+        const lesson =
+          curriculumData[currentGrade].units[currentUnitIndex].lessons[
+            lessonIdx
+          ];
+        let quizArr = [];
+
+        try {
+          const resp = await fetch(
+            `/api/questions?gradeKey=${currentGrade}&unitIndex=${currentUnitIndex}&lessonIndex=${lessonIdx}`,
+          );
+          if (resp.ok) {
+            const dbQs = await resp.json();
+            if (dbQs.length > 0) {
+              quizArr = dbQs.map((q) => ({
+                q: q.question_text,
+                options: [q.option_a, q.option_b, q.option_c, q.option_d],
+                answer: Number(q.correct_answer),
+                image: q.image_url || null,
+              }));
+            }
+          }
+        } catch (e) {}
+
+        // لا يوجد رجوع احتياطي — الأسئلة تأتي من قاعدة البيانات فقط
+
+        // إذا لم توجد أسئلة في قاعدة البيانات، أظهري رسالة واضحة
+        if (quizArr.length === 0) {
+          const sections = [
+            "hero-section",
+            "subjects-section",
+            "units-section",
+            "lessons-section",
+            "lesson-content-section",
+          ];
+          sections.forEach((s) =>
+            document.getElementById(s).classList.add("hidden"),
+          );
+          document.getElementById("quiz-section").classList.remove("hidden");
+          const pb = document.getElementById("quiz-progress-bar");
+          if (pb) pb.style.display = "none";
+          const pd = document.getElementById("quiz-progress");
+          if (pd) pd.innerHTML = "";
+          document.getElementById("quiz-question-container").innerHTML = `
+            <div class="text-center py-6">
+              <div class="text-5xl mb-4">📭</div>
+              <h3 class="text-xl font-black mb-2" style="color:#7C3AED;">لا توجد أسئلة بعد</h3>
+              <p class="text-sm mb-6" style="color:#64748b;">لم يتم إضافة أسئلة لهذا الدرس من لوحة الإدارة بعد.</p>
+              <button onclick="goBack('lessons')" class="btn btn-primary px-6 py-2 text-sm"
+                style="background:linear-gradient(135deg,#7C3AED,#EC4899);">← العودة للدروس</button>
+            </div>`;
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+
+        window._quizState = {
+          quiz: quizArr,
+          currentQuestion: 0,
+          score: 0,
+          answers: [],
+          finished: false,
+        };
+
+        const progressDiv = document.getElementById("quiz-progress");
+        if (progressDiv) {
+          progressDiv.innerHTML = `السؤال <span id="current-q">1</span> من <span id="total-q">${quizArr.length}</span>`;
+        }
+        const progressBar = document.getElementById("quiz-progress-bar");
+        if (progressBar) progressBar.style.display = "";
+
+        const sections = [
+          "hero-section",
+          "subjects-section",
+          "units-section",
+          "lessons-section",
+          "lesson-content-section",
+        ];
+        sections.forEach((s) =>
+          document.getElementById(s).classList.add("hidden"),
+        );
+        document.getElementById("quiz-section").classList.remove("hidden");
+
+        displayCurrentQuestion();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function displayCurrentQuestion() {
+        const state = window._quizState;
+        const q = state.quiz[state.currentQuestion];
+        const container = document.getElementById("quiz-question-container");
+        const pct = ((state.currentQuestion + 1) / state.quiz.length) * 100;
+
+        document.getElementById("current-q").textContent =
+          state.currentQuestion + 1;
+        document.getElementById("progress-fill").style.width = pct + "%";
+        const progressDiv = document.getElementById("quiz-progress");
+        if (progressDiv) {
+          progressDiv.innerHTML = `السؤال <span id="current-q">${toArabicDigits(state.currentQuestion + 1)}</span> من <span id="total-q">${toArabicDigits(state.quiz.length)}</span>`;
+        }
+
+        let html = `<h3 class="text-xl font-bold mb-4 text-center">${toArabicDigits(q.q)}</h3>`;
+        if (q.image) {
+          html += `<div class="flex justify-center mb-5"><img src="${q.image}" alt="صورة السؤال" class="max-h-48 rounded-xl border border-white/10 object-contain"></div>`;
+        }
+        html += `<div class="space-y-3">`;
+        q.options.forEach((opt, idx) => {
+          html += `<div class="quiz-option rounded-xl p-4 text-center font-medium" onclick="selectAnswer(${idx})" id="opt-${idx}">${toArabicDigits(opt)}</div>`;
+        });
+        html += "</div>";
+        container.innerHTML = html;
+        lucide.createIcons();
+      }
+
+      function selectAnswer(idx) {
+        const state = window._quizState;
+        if (state.finished) return;
+
+        const q = state.quiz[state.currentQuestion];
+        const isCorrect = idx === q.answer;
+
+        if (isCorrect) state.score++;
+
+        state.answers.push({
+          question: q.q,
+          userAnswer: q.options[idx],
+          correctAnswer: q.options[q.answer],
+          isCorrect,
+        });
+
+        document.querySelectorAll(".quiz-option").forEach((el, i) => {
+          el.onclick = null;
+          el.style.cursor = "default";
+          if (i === q.answer) el.classList.add("correct");
+          if (i === idx && !isCorrect) el.classList.add("wrong");
+        });
+
+        const container = document.getElementById("quiz-question-container");
+        const nextBtn = document.createElement("button");
+        nextBtn.className =
+          "glow-btn w-full mt-6 py-3 px-6 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-2";
+
+        if (state.currentQuestion < state.quiz.length - 1) {
+          nextBtn.innerHTML =
+            '<span>السؤال التالي</span> <i data-lucide="arrow-left" style="width:20px;height:20px;"></i>';
+          nextBtn.onclick = () => {
+            state.currentQuestion++;
+            displayCurrentQuestion();
+          };
+        } else {
+          nextBtn.innerHTML =
+            '<span>عرض النتائج</span> <i data-lucide="check-circle" style="width:20px;height:20px;"></i>';
+          nextBtn.onclick = () => {
+            state.finished = true;
+            showQuizResults();
+          };
+        }
+
+        container.appendChild(nextBtn);
+        lucide.createIcons();
+      }
+
+      async function submitScore() {
+        try {
+          const state = window._quizState;
+          const studentName = getStudentName(currentGrade);
+          if (!studentName) return;
+          await fetch("/api/scores", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              studentName,
+              gradeKey: currentGrade,
+              unitIndex: currentUnitIndex,
+              lessonIndex: window._currentLessonIndex,
+              score: state.score,
+              total: state.quiz.length,
+            }),
+          });
+          // أعد تحميل المتصدرين بعد حفظ النتيجة
+          loadLeaderboard(currentGrade);
+        } catch (e) {}
+      }
+
+      function showQuizResults() {
+        const state = window._quizState;
+        submitScore();
+        const container = document.getElementById("quiz-question-container");
+        const pct = Math.round((state.score / state.quiz.length) * 100);
+        const emoji = pct >= 80 ? "🎉" : pct >= 50 ? "👍" : "💪";
+
+        let resultHTML = `
+        <div class="text-center mb-8">
+          <div class="text-6xl mb-4">${emoji}</div>
+          <h2 class="text-3xl font-black mb-2">النتيجة النهائية</h2>
+          <p class="text-4xl font-bold mb-4" style="color:#7C3AED;">${toArabicDigits(state.score)} / ${toArabicDigits(state.quiz.length)}</p>
+          <p class="text-xl font-bold mb-6" style="color:#EC4899;">${toArabicDigits(pct)}%</p>
+          <p class="text-base" style="color:#64748b;">${pct >= 80 ? "ممتاز! أداء رائع جداً 🌟" : pct >= 50 ? "جيد! واصلي التعلم والمراجعة 📚" : "استمري في المحاولة! أنتِ قادرة 💪"}</p>
+        </div>
+
+        <div class="quiz-results-scroll space-y-3 mb-6 max-h-96 overflow-y-auto pr-1">
+          ${state.answers
+            .map(
+              (answer, idx) => `
+            <div class="rounded-xl p-4 border-r-4" style="background:white;border-top:1px solid rgba(0,0,0,0.05);border-bottom:1px solid rgba(0,0,0,0.05);border-left:1px solid rgba(0,0,0,0.05);border-right-color:${answer.isCorrect ? "#10b981" : "#ef4444"};">
+              <p class="text-sm font-bold mb-2" style="color:${answer.isCorrect ? "#10b981" : "#ef4444"};">
+                السؤال ${toArabicDigits(idx + 1)}: ${answer.isCorrect ? "✓ صحيح" : "✗ خاطئ"}
+              </p>
+              <p class="text-sm mb-2" style="color:#2D2640;"><strong>السؤال:</strong> ${toArabicDigits(answer.question)}</p>
+              <p class="text-sm mb-1" style="color:#64748b;"><strong>إجابتك:</strong> ${toArabicDigits(answer.userAnswer)}</p>
+              ${!answer.isCorrect ? `<p class="text-sm font-semibold" style="color:#10b981;"><strong>الإجابة الصحيحة:</strong> ${toArabicDigits(answer.correctAnswer)}</p>` : ""}
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="goBack('lessons')" class="flex-1 py-3 px-4 rounded-2xl font-bold transition flex items-center justify-center gap-2" style="background:rgba(124,58,237,0.08);color:#7C3AED;border:1px solid rgba(124,58,237,0.15);">
+            <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+            <span>العودة</span>
+          </button>
+          <button onclick="retakeQuiz()" class="flex-1 glow-btn py-3 px-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2">
+            <i data-lucide="repeat-2" style="width:18px;height:18px;"></i>
+            <span>إعادة الاختبار</span>
+          </button>
+        </div>
+      `;
+
+        container.innerHTML = resultHTML;
+        document.getElementById("quiz-progress-bar").style.display = "none";
+        const progressDiv = document.getElementById("quiz-progress");
+        if (progressDiv) {
+          progressDiv.innerHTML =
+            '<span class="font-bold" style="color:#7C3AED;">✓ انتهى الاختبار</span>';
+        }
+        lucide.createIcons();
+      }
+
+      function retakeQuiz() {
+        if (!window._currentLessonIndex && window._currentLessonIndex !== 0) {
+          goBack("lessons");
+          return;
+        }
+        openQuiz(window._currentLessonIndex);
+      }
+
+      // ── لوحة المتصدرين ────────────────────────────────────
+      function switchLbTab(grade) {
+        currentLeaderboardGrade = grade;
+        const on = ["first", "second"];
+        on.forEach((g) => {
+          const btn = document.getElementById("lb-tab-" + g);
+          if (g === grade) {
+            btn.className = btn.className.replace("lb-off", "lb-on");
+          } else {
+            btn.className = btn.className.replace("lb-on", "lb-off");
+          }
+        });
+        loadLeaderboard(grade);
+      }
+
+      async function loadLeaderboard(grade) {
+        const body = document.getElementById("lb-body");
+        if (!body) return;
+        body.innerHTML =
+          '<div class="text-center text-slate-500 py-8 text-sm">جاري التحميل...</div>';
+        try {
+          const resp = await fetch("/api/scores/leaderboard?gradeKey=" + grade);
+          if (!resp.ok) throw new Error("fetch error");
+          const rows = await resp.json();
+          renderLeaderboard(rows);
+        } catch (e) {
+          body.innerHTML =
+            '<div class="text-center text-slate-600 py-8 text-sm">تعذّر تحميل البيانات</div>';
+        }
+      }
+
+      function renderLeaderboard(rows) {
+        const body = document.getElementById("lb-body");
+        if (!rows || rows.length === 0) {
+          body.innerHTML =
+            '<div class="text-center text-slate-500 py-8 text-sm">لا توجد نتائج حتى الآن — كوني أول المتصدرات! 🌟</div>';
+          return;
+        }
+        const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
+        const rankCls = ["lb-rank-1", "lb-rank-2", "lb-rank-3", "", ""];
+        body.innerHTML = rows
+          .map(
+            (r, i) => `
+        <div class="lb-card ${rankCls[i]}">
+          <div class="text-2xl w-8 text-center flex-shrink-0">${medals[i]}</div>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-sm truncate">${escapeHtml(r.student_name)}</div>
+            <div class="text-xs text-slate-400 mt-0.5">${toArabicDigits(r.lessons_count)} درس مكتمل</div>
+          </div>
+          <div class="text-left flex-shrink-0">
+            <div class="font-black text-lg" style="color:#7C3AED;">${toArabicDigits(r.pct)}%</div>
+            <div class="text-xs" style="color:#94a3b8;">${toArabicDigits(r.total_score)} / ${toArabicDigits(r.total_possible)}</div>
+          </div>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function goHome() {
+        const sections = [
+          "subjects-section",
+          "units-section",
+          "lessons-section",
+          "lesson-content-section",
+          "quiz-section",
+        ];
+        sections.forEach((s) =>
+          document.getElementById(s).classList.add("hidden"),
+        );
+        document.getElementById("hero-section").classList.remove("hidden");
+        document
+          .getElementById("leaderboard-section")
+          .classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        lucide.createIcons();
+      }
+
+      function scrollToLeaderboard() {
+        goHome();
+        setTimeout(() => {
+          document
+            .getElementById("leaderboard-section")
+            .scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+
+      // تهيئة: تحميل المتصدرين عند فتح الصفحة
+      loadLeaderboard("first");
+
+      lucide.createIcons();
+    </script>
+
+    <!-- شريط التنقل السفلي -->
+    <div
+      id="bottom-nav"
+      class="glass-bottom-nav fixed bottom-0 left-0 right-0 z-50"
+      style="padding-bottom: max(16px, env(safe-area-inset-bottom))"
+    >
+      <div class="max-w-lg mx-auto px-6 pt-3 flex justify-between items-center">
+        <button
+          onclick="goHome()"
+          class="flex flex-col items-center gap-1"
+          id="bn-home"
+        >
+          <div
+            class="w-12 h-9 rounded-2xl flex items-center justify-center"
+            style="background: rgba(124, 58, 237, 0.12)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#7C3AED"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </div>
+          <span class="text-[10px] font-bold" style="color: #7c3aed"
+            >الرئيسية</span
+          >
+        </button>
+        <button
+          onclick="startJourney()"
+          class="flex flex-col items-center gap-1"
+        >
+          <div class="w-12 h-9 rounded-2xl flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#94a3b8"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+          </div>
+          <span class="text-[10px] font-bold" style="color: #94a3b8"
+            >دروسي</span
+          >
+        </button>
+        <a
+          href="/admin.html"
+          class="flex flex-col items-center gap-1"
+          style="text-decoration: none"
+        >
+          <div class="w-12 h-9 rounded-2xl flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#94a3b8"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M20 21a8 8 0 1 0-16 0" />
+            </svg>
+          </div>
+          <span class="text-[10px] font-bold" style="color: #94a3b8"
+            >المشرفة</span
+          >
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -38,7 +38,7 @@ if ($step === 'install') {
             option_c VARCHAR(500) NOT NULL,
             option_d VARCHAR(500) NOT NULL,
             correct_answer INT NOT NULL,
-            image_url TEXT NULL,
+            image_url VARCHAR(500) NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY uniq_q (grade_key, unit_index, lesson_index, question_hash),
             INDEX idx_lookup (grade_key, unit_index, lesson_index)
@@ -71,6 +71,20 @@ if ($step === 'install') {
             UNIQUE KEY uniq_lesson (grade_key, unit_index, lesson_index)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         ok("✅ جدول محتوى الدروس (lesson_content) جاهز");
+
+        // تحويل image_url من TEXT إلى VARCHAR(500) إن كان لا يزال TEXT
+        try {
+            $col = $pdo->query("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'questions' AND COLUMN_NAME = 'image_url'")->fetchColumn();
+            if ($col === 'text') {
+                $pdo->exec("ALTER TABLE questions MODIFY COLUMN image_url VARCHAR(500) NULL");
+                ok("✅ عمود image_url تم تحويله من TEXT إلى VARCHAR(500)");
+            } else {
+                ok("ℹ️ عمود image_url هو " . strtoupper($col) . " — لا يحتاج تعديل");
+            }
+        } catch (Throwable $e) {
+            ok("ℹ️ تعذّر فحص image_url: " . $e->getMessage());
+        }
 
         // إضافة حقل التغذية الراجعة للأسئلة (إن لم يكن موجوداً)
         try {

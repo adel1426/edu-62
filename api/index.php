@@ -55,6 +55,8 @@ try {
             handle_questions_counts();
         case $path === 'questions/bulk' && $method === 'POST':
             handle_questions_bulk();
+        case $path === 'questions/random' && $method === 'GET':
+            handle_questions_random();
         case $path === 'questions' && $method === 'GET':
             handle_questions_list();
         case $path === 'questions' && $method === 'POST':
@@ -246,6 +248,23 @@ function handle_questions_list() {
     send_json($rows);
 }
 
+function handle_questions_random() {
+    $grade = $_GET['gradeKey'] ?? '';
+    $unit  = isset($_GET['unitIndex']) ? (int)$_GET['unitIndex'] : null;
+    $count = min((int)($_GET['count'] ?? 2), 20);
+    if (!$grade) send_json(['error' => 'gradeKey مطلوب'], 400);
+    $sql    = "SELECT * FROM questions WHERE grade_key = ?";
+    $params = [$grade];
+    if ($unit !== null) { $sql .= " AND unit_index = ?"; $params[] = $unit; }
+    $sql .= " ORDER BY RAND() LIMIT ?";
+    $params[] = $count;
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll();
+    foreach ($rows as &$r) $r = cast_question($r);
+    send_json($rows);
+}
+
 function handle_question_create() {
     require_admin();
     $b = read_json_body();
@@ -257,16 +276,17 @@ function handle_question_create() {
     }
     try {
         $stmt = db()->prepare(
-            "INSERT INTO questions (grade_key, unit_index, lesson_index, question_text, question_hash, option_a, option_b, option_c, option_d, correct_answer, image_url)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+            "INSERT INTO questions (grade_key, unit_index, lesson_index, question_text, question_hash, option_a, option_b, option_c, option_d, correct_answer, explanation, image_url)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
         );
         $stmt->execute([
             $b['grade_key'], (int)$b['unit_index'], (int)$b['lesson_index'],
             $b['question_text'], hash('sha256', $b['question_text']),
             $b['option_a'], $b['option_b'], $b['option_c'], $b['option_d'],
-            (int)$b['correct_answer'], $b['image_url'] ?? null
+            (int)$b['correct_answer'], $b['explanation'] ?? null, $b['image_url'] ?? null
         ]);
         $id = (int)db()->lastInsertId();
+        $row = db()->prepare("SELECT * FROM questions WHERE id=?")->execute([$id]);
         $row = db()->query("SELECT * FROM questions WHERE id=$id")->fetch();
         send_json(cast_question($row), 201);
     } catch (PDOException $e) {
@@ -290,13 +310,13 @@ function handle_question_update(int $id) {
     require_admin();
     $b = read_json_body();
     $stmt = db()->prepare(
-        "UPDATE questions SET question_text=?, option_a=?, option_b=?, option_c=?, option_d=?, correct_answer=?, image_url=?
+        "UPDATE questions SET question_text=?, option_a=?, option_b=?, option_c=?, option_d=?, correct_answer=?, explanation=?, image_url=?
          WHERE id=?"
     );
     $stmt->execute([
         $b['question_text'] ?? '', $b['option_a'] ?? '', $b['option_b'] ?? '',
         $b['option_c'] ?? '', $b['option_d'] ?? '',
-        (int)($b['correct_answer'] ?? 0), $b['image_url'] ?? null, $id
+        (int)($b['correct_answer'] ?? 0), $b['explanation'] ?? null, $b['image_url'] ?? null, $id
     ]);
     if ($stmt->rowCount() === 0) {
         $check = db()->query("SELECT id FROM questions WHERE id=$id")->fetch();
@@ -493,31 +513,32 @@ function handle_lesson_content_get() {
     $g = $_GET['gradeKey'] ?? '';
     $u = $_GET['unitIndex'] ?? null;
     $l = $_GET['lessonIndex'] ?? null;
-    if (!$g || $u === null || $l === null) send_json(['content' => null]);
+    if (!$g || $u === null || $l === null) send_json(['content' => null, 'video_url' => null]);
     $stmt = db()->prepare(
-        "SELECT content, updated_at FROM lesson_content WHERE grade_key=? AND unit_index=? AND lesson_index=?"
+        "SELECT content, video_url, updated_at FROM lesson_content WHERE grade_key=? AND unit_index=? AND lesson_index=?"
     );
     $stmt->execute([$g, (int)$u, (int)$l]);
     $row = $stmt->fetch();
-    if (!$row) send_json(['content' => null]);
-    send_json(['content' => $row['content'], 'updated_at' => $row['updated_at']]);
+    if (!$row) send_json(['content' => null, 'video_url' => null]);
+    send_json(['content' => $row['content'], 'video_url' => $row['video_url'], 'updated_at' => $row['updated_at']]);
 }
 
 function handle_lesson_content_put() {
     require_admin();
     $b = read_json_body();
-    $g = $b['grade_key'] ?? '';
-    $u = $b['unit_index'] ?? null;
-    $l = $b['lesson_index'] ?? null;
-    $c = $b['content'] ?? '';
-    if (!$g || $u === null || $l === null || !$c) {
+    $g   = $b['grade_key'] ?? '';
+    $u   = $b['unit_index'] ?? null;
+    $l   = $b['lesson_index'] ?? null;
+    $c   = $b['content'] ?? '';
+    $vid = $b['video_url'] ?? null;
+    if (!$g || $u === null || $l === null) {
         send_json(['error' => 'Missing required fields'], 400);
     }
     $stmt = db()->prepare(
-        "INSERT INTO lesson_content (grade_key, unit_index, lesson_index, content)
-         VALUES (?,?,?,?)
-         ON DUPLICATE KEY UPDATE content=VALUES(content), updated_at=NOW()"
+        "INSERT INTO lesson_content (grade_key, unit_index, lesson_index, content, video_url)
+         VALUES (?,?,?,?,?)
+         ON DUPLICATE KEY UPDATE content=VALUES(content), video_url=VALUES(video_url), updated_at=NOW()"
     );
-    $stmt->execute([$g, (int)$u, (int)$l, $c]);
+    $stmt->execute([$g, (int)$u, (int)$l, $c ?: '', $vid]);
     send_json(['success' => true]);
 }

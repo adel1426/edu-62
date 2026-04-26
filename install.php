@@ -72,6 +72,22 @@ if ($step === 'install') {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         ok("✅ جدول محتوى الدروس (lesson_content) جاهز");
 
+        // إضافة حقل التغذية الراجعة للأسئلة (إن لم يكن موجوداً)
+        try {
+            $pdo->exec("ALTER TABLE questions ADD COLUMN explanation TEXT NULL AFTER correct_answer");
+            ok("✅ حقل التغذية الراجعة (explanation) أُضيف للأسئلة");
+        } catch (Throwable $e) {
+            ok("ℹ️ حقل explanation موجود مسبقاً");
+        }
+
+        // إضافة حقل رابط الفيديو لمحتوى الدروس (إن لم يكن موجوداً)
+        try {
+            $pdo->exec("ALTER TABLE lesson_content ADD COLUMN video_url VARCHAR(500) NULL AFTER content");
+            ok("✅ حقل رابط الفيديو (video_url) أُضيف للدروس");
+        } catch (Throwable $e) {
+            ok("ℹ️ حقل video_url موجود مسبقاً");
+        }
+
         // جدول الطالبات (حسابات شخصية)
         $pdo->exec("CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,

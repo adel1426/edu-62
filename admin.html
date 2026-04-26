@@ -567,6 +567,12 @@
               >
                 <span class="text-base">📋</span> اختر درساً لعرض أسئلته
               </div>
+              <!-- اختبار شامل المرحلة -->
+              <button onclick="pickComprehensive('grade')"
+                      class="w-full mb-3 py-2 px-3 rounded-xl text-xs font-black flex items-center gap-2 transition"
+                      style="background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.1));color:#7c3aed;border:1px solid rgba(124,58,237,0.2)">
+                <span>🏆</span> اختبار شامل المرحلة
+              </button>
               <div id="lessons-tree" class="space-y-4">
                 <div class="text-center text-slate-500 py-6 text-sm">
                   جاري التحميل...
@@ -640,16 +646,31 @@
                   >
                 </div>
                 <div id="content-body" class="hidden mt-4 space-y-3">
-                  <p class="text-xs" style="color: #94a3b8">
-                    هنا تظهر الشرح الذي يراه الطالب قبل الاختبار. يمكنك تعديله
-                    بالنص أو HTML. إذا تركته فارغاً سيظهر الشرح الافتراضي.
-                  </p>
-                  <textarea
-                    id="lesson-content-editor"
-                    class="content-editor"
-                    rows="8"
-                    placeholder="اكتب شرح الدرس هنا... (يدعم HTML مثل <b>عريض</b> و<br> لسطر جديد)"
-                  ></textarea>
+                  <!-- رابط الفيديو -->
+                  <div>
+                    <label class="block text-xs font-bold mb-1" style="color:#7c3aed">🎬 رابط فيديو الدرس (YouTube)</label>
+                    <input
+                      id="lesson-video-url"
+                      type="url"
+                      dir="ltr"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      style="width:100%;border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:8px 12px;font-size:13px;font-family:Cairo,sans-serif;outline:none;background:#fffbf7;"
+                    />
+                    <p class="text-xs mt-1" style="color:#94a3b8">اتركي الحقل فارغاً إذا لم يكن هناك فيديو</p>
+                  </div>
+                  <!-- شرح الدرس -->
+                  <div>
+                    <label class="block text-xs font-bold mb-1" style="color:#7c3aed">📝 شرح الدرس</label>
+                    <p class="text-xs mb-1" style="color: #94a3b8">
+                      يدعم HTML مثل &lt;b&gt;عريض&lt;/b&gt; و&lt;br&gt; لسطر جديد. إذا تركته فارغاً سيظهر الشرح الافتراضي.
+                    </p>
+                    <textarea
+                      id="lesson-content-editor"
+                      class="content-editor"
+                      rows="8"
+                      placeholder="اكتب شرح الدرس هنا..."
+                    ></textarea>
+                  </div>
                   <div
                     id="content-status"
                     class="text-xs"
@@ -660,7 +681,7 @@
                       class="btn btn-primary py-2 px-4 text-sm"
                       onclick="saveContent()"
                     >
-                      💾 حفظ الشرح
+                      💾 حفظ الشرح والفيديو
                     </button>
                     <button
                       class="btn btn-cancel py-2 px-4 text-sm"
@@ -861,6 +882,15 @@
                       <option value="2">ج - الخيار الثالث</option>
                       <option value="3">د - الخيار الرابع</option>
                     </select>
+                  </div>
+                  <!-- التغذية الراجعة -->
+                  <div>
+                    <label class="block text-sm text-slate-400 mb-1.5">💡 شرح/تغذية راجعة (تظهر عند الإجابة الخاطئة)</label>
+                    <textarea
+                      id="f-explanation"
+                      rows="2"
+                      placeholder="اكتبي شرحاً للإجابة الصحيحة... (اختياري)"
+                    ></textarea>
                   </div>
                   <!-- الصورة -->
                   <div>
@@ -1211,8 +1241,15 @@
           .map(
             (unit, ui) => `
       <div>
-        <div class="text-xs font-black mb-2 px-1" style="color:#94a3b8;">الوحدة ${ui + 1}: ${unit.title}</div>
-        <div class="space-y-1.5">
+        <div class="text-xs font-black mb-1 px-1 flex items-center justify-between" style="color:#94a3b8;">
+          <span>الوحدة ${ui + 1}: ${unit.title}</span>
+          <button onclick="pickComprehensive('unit',${ui})"
+                  class="text-[10px] px-2 py-0.5 rounded-lg font-black transition"
+                  style="background:rgba(236,72,153,0.08);color:#ec4899;border:1px solid rgba(236,72,153,0.2)">
+            شامل الوحدة
+          </button>
+        </div>
+        <div class="space-y-1.5 mb-1">
           ${unit.lessons
             .map((lesson, li) => {
               const c = cnt(grade, ui, li);
@@ -1228,6 +1265,53 @@
     `,
           )
           .join("");
+      }
+
+      // ── اختبار شامل (عرض المعلومات في اللوحة اليمنى) ──
+      async function pickComprehensive(type, unitIdx) {
+        selU = type === 'unit' ? unitIdx : -1;
+        selL = -1;
+        buildTree();
+        document.getElementById("no-sel").classList.add("hidden");
+        document.getElementById("sel-panel").classList.remove("hidden");
+        // أغلق الأقسام
+        ["content-body","xl-body"].forEach(id => document.getElementById(id).classList.add("hidden"));
+        document.getElementById("content-arrow").textContent = "▼";
+
+        const isGrade = type === 'grade';
+        const label = isGrade
+          ? `اختبار شامل المرحلة — ${CUR[grade].name}`
+          : `اختبار شامل الوحدة — ${CUR[grade].units[unitIdx].title}`;
+
+        document.getElementById("sel-title").textContent = label;
+        document.getElementById("sel-unit").textContent = isGrade
+          ? "يأخذ سؤالين عشوائيين من جميع دروس المرحلة"
+          : "يأخذ سؤالين عشوائيين من جميع دروس الوحدة";
+
+        // جلب عدد الأسئلة المتاحة
+        const url = isGrade
+          ? `${API}/questions?gradeKey=${grade}`
+          : `${API}/questions?gradeKey=${grade}&unitIndex=${unitIdx}`;
+        try {
+          const r = await fetch(url, { credentials: "include" });
+          const qs = await r.json();
+          document.getElementById("sel-count").textContent = `${qs.length} سؤال متاح`;
+        } catch { document.getElementById("sel-count").textContent = "—"; }
+
+        document.getElementById("q-list").innerHTML = `
+          <div class="rounded-2xl p-5 text-center" style="background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(236,72,153,0.06));border:1px solid rgba(124,58,237,0.12)">
+            <div class="text-4xl mb-3">${isGrade ? '🏆' : '📚'}</div>
+            <p class="font-black mb-2" style="color:#7c3aed">${label}</p>
+            <p class="text-sm mb-4" style="color:#94a3b8">
+              ${isGrade ? 'يختار سؤالين عشوائيين من جميع وحدات ودروس المرحلة في كل مرة يبدأ فيها الطالب الاختبار.' : 'يختار سؤالين عشوائيين من جميع دروس هذه الوحدة في كل مرة.'}
+            </p>
+            <p class="text-xs px-4 py-2 rounded-xl inline-block font-bold" style="background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.2)">
+              ✅ هذا الاختبار يعمل تلقائياً — لا يحتاج إعداداً إضافياً
+            </p>
+          </div>`;
+
+        updateGradeIcon();
+        cancelEdit();
       }
 
       // ── اختيار درس ──────────────────────────────────────
@@ -1328,6 +1412,7 @@
         document.getElementById("f-c").value = q.option_c;
         document.getElementById("f-d").value = q.option_d;
         document.getElementById("f-ans").value = q.correct_answer;
+        document.getElementById("f-explanation").value = q.explanation || "";
         document.getElementById("f-img").value = q.image_url || "";
         showImgPrev(q.image_url || "");
         siTab("url");
@@ -1340,7 +1425,7 @@
 
       function cancelEdit() {
         editId = null;
-        ["f-q", "f-a", "f-b", "f-c", "f-d", "f-img"].forEach((id) => {
+        ["f-q", "f-a", "f-b", "f-c", "f-d", "f-explanation", "f-img"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.value = "";
         });
@@ -1362,6 +1447,7 @@
         const d = document.getElementById("f-d").value.trim();
         const ans = Number(document.getElementById("f-ans").value);
         const img = document.getElementById("f-img").value.trim();
+        const explanation = document.getElementById("f-explanation").value.trim();
         if (!q || !a || !b || !c || !d) {
           showToast("⚠️ يرجى ملء جميع الحقول المطلوبة", "warn");
           return;
@@ -1377,6 +1463,7 @@
           option_d: d,
           correct_answer: ans,
           image_url: img || null,
+          explanation: explanation || null,
         };
         try {
           const r = await fetch(
@@ -1809,9 +1896,11 @@
       // ── تعديل الشرح ────────────────────────────────────
       async function loadContent() {
         const editor = document.getElementById("lesson-content-editor");
+        const videoEl = document.getElementById("lesson-video-url");
         const status = document.getElementById("content-status");
         const badge = document.getElementById("content-saved-badge");
         editor.value = "";
+        videoEl.value = "";
         badge.classList.add("hidden");
         status.textContent = "جاري تحميل الشرح...";
         try {
@@ -1826,45 +1915,35 @@
             status.textContent = `آخر تعديل: ${dt}`;
             badge.classList.remove("hidden");
           } else {
-            status.textContent =
-              "لا يوجد شرح مخصص — يُستخدم الشرح الافتراضي حالياً";
+            status.textContent = "لا يوجد شرح مخصص — يُستخدم الشرح الافتراضي حالياً";
           }
+          if (d.video_url) videoEl.value = d.video_url;
         } catch {
           status.textContent = "تعذّر تحميل الشرح";
         }
       }
 
       async function saveContent() {
-        const content = document
-          .getElementById("lesson-content-editor")
-          .value.trim();
-        if (!content) {
-          showToast("⚠️ أدخلي محتوى الشرح أولاً", "warn");
-          return;
-        }
+        const content  = document.getElementById("lesson-content-editor").value.trim();
+        const videoUrl = document.getElementById("lesson-video-url").value.trim();
         try {
           const r = await fetch(`${API}/lessons/content`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({
-              grade_key: grade,
-              unit_index: selU,
+              grade_key:    grade,
+              unit_index:   selU,
               lesson_index: selL,
-              content,
+              content:      content || "",
+              video_url:    videoUrl || null,
             }),
           });
-          if (r.status === 401) {
-            showLogin();
-            return;
-          }
+          if (r.status === 401) { showLogin(); return; }
           if (!r.ok) throw new Error();
-          document.getElementById("content-status").textContent =
-            "تم الحفظ للتو ✓";
-          document
-            .getElementById("content-saved-badge")
-            .classList.remove("hidden");
-          showToast("✅ تم حفظ الشرح");
+          document.getElementById("content-status").textContent = "تم الحفظ للتو ✓";
+          document.getElementById("content-saved-badge").classList.remove("hidden");
+          showToast("✅ تم حفظ الشرح والفيديو");
         } catch {
           showToast("❌ حدث خطأ في الحفظ", "error");
         }

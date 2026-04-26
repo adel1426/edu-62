@@ -2663,23 +2663,85 @@
         },
       };
 
-      // ── تحويل الأرقام الغربية إلى الأرقام الهندية العربية ─────
+      // ── تحويل الأرقام والرموز الرياضية ─────────────────────────
+      // يدعم: الأرقام (0-9)، الأسس (x^2، ²)، المنخفضات (x_1، ₂)،
+      //        الجذور (√9، 3√8، ∛8، ∜16)، الكسور (1/2، ½، ⅓ ...)
       function toArabicDigits(str) {
-        const supMap = {
-          "⁰": "٠",
-          "¹": "١",
-          "²": "٢",
-          "³": "٣",
-          "⁴": "٤",
-          "⁵": "٥",
-          "⁶": "٦",
-          "⁷": "٧",
-          "⁸": "٨",
-          "⁹": "٩",
+        if (str === null || str === undefined) return '';
+        str = String(str);
+
+        const ar = '٠١٢٣٤٥٦٧٨٩';
+        const d2ar = s => String(s).replace(/[0-9]/g, c => ar[+c]);
+
+        // 1. الجذور: رمز درجة اختياري + رمز الجذر + (تعبير أو رقم)
+        //    أمثلة: √9  ،  3√8  ،  ∛27  ،  ∜16  ،  √(x+4)
+        const rootDeg = {'∛':'٣','∜':'٤'};
+        str = str.replace(
+          /([0-9]?)[√∛∜](\(([^)]+)\)|([0-9]+(?:[.,][0-9]+)?))/g,
+          (_, numDeg, _full, paren, num) => {
+            const inner = d2ar(paren !== undefined ? paren : num);
+            const sym = _.match(/[√∛∜]/)[0];
+            const deg = numDeg
+              ? `<sup>${d2ar(numDeg)}</sup>`
+              : (rootDeg[sym] ? `<sup>${rootDeg[sym]}</sup>` : '');
+            return `${deg}√<span style="text-decoration:overline;padding-right:2px;">${inner}</span>`;
+          }
+        );
+        // جذر تربيعي بعد رقم درجة بدون محتوى: مثل 2√
+        str = str.replace(/([0-9])[√∛∜]/g, (_, d) => `<sup>${d2ar(d)}</sup>√`);
+        // رمزا الجذر المتبقيان (∛ ∜) بدون رقم
+        str = str.replace(/∛/g, '<sup>٣</sup>√');
+        str = str.replace(/∜/g, '<sup>٤</sup>√');
+
+        // 2. الأُس بعلامة ^ — يقبل رقماً أو تعبيراً بين قوسين
+        //    أمثلة: x^2  ،  2^10  ،  x^(-1)  ،  x^(n+1)
+        str = str.replace(/\^(\(([^)]*)\)|(-?[0-9]+(?:\.[0-9]+)?))/g,
+          (_, _full, paren, num) => {
+            const inner = d2ar(paren !== undefined ? paren : num);
+            return `<sup>${inner}</sup>`;
+          }
+        );
+
+        // 3. المنخفض (subscript) بعلامة _
+        //    أمثلة: x_1  ،  H_2O
+        str = str.replace(/_([0-9]+)/g, (_, s) => `<sub>${d2ar(s)}</sub>`);
+
+        // 4. Unicode superscripts ⁰¹²³⁴⁵⁶⁷⁸⁹ (مع إشارة ⁻ اختياري)
+        const supMap = {'⁰':'٠','¹':'١','²':'٢','³':'٣','⁴':'٤',
+                        '⁵':'٥','⁶':'٦','⁷':'٧','⁸':'٨','⁹':'٩','⁻':'−'};
+        str = str.replace(/⁻?[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, m =>
+          `<sup>${m.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]/g, c => supMap[c] || c)}</sup>`
+        );
+
+        // 5. Unicode subscripts ₀₁₂₃₄₅₆₇₈₉
+        const subMap = {'₀':'٠','₁':'١','₂':'٢','₃':'٣','₄':'٤',
+                        '₅':'٥','₆':'٦','₇':'٧','₈':'٨','₉':'٩'};
+        str = str.replace(/[₀₁₂₃₄₅₆₇₈₉]+/g, m =>
+          `<sub>${m.replace(/[₀-₉]/g, c => subMap[c] || c)}</sub>`
+        );
+
+        // 6. كسور Unicode: ½ ⅓ ¼ ¾ ...
+        const fracMap = {
+          '½':'<sup>١</sup>⁄<sub>٢</sub>', '⅓':'<sup>١</sup>⁄<sub>٣</sub>',
+          '⅔':'<sup>٢</sup>⁄<sub>٣</sub>', '¼':'<sup>١</sup>⁄<sub>٤</sub>',
+          '¾':'<sup>٣</sup>⁄<sub>٤</sub>', '⅕':'<sup>١</sup>⁄<sub>٥</sub>',
+          '⅖':'<sup>٢</sup>⁄<sub>٥</sub>', '⅗':'<sup>٣</sup>⁄<sub>٥</sub>',
+          '⅘':'<sup>٤</sup>⁄<sub>٥</sub>', '⅙':'<sup>١</sup>⁄<sub>٦</sub>',
+          '⅚':'<sup>٥</sup>⁄<sub>٦</sub>', '⅛':'<sup>١</sup>⁄<sub>٨</sub>',
+          '⅜':'<sup>٣</sup>⁄<sub>٨</sub>', '⅝':'<sup>٥</sup>⁄<sub>٨</sub>',
+          '⅞':'<sup>٧</sup>⁄<sub>٨</sub>',
         };
-        return String(str)
-          .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (d) => `<sup>${supMap[d]}</sup>`)
-          .replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
+        str = str.replace(/[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/g, c => fracMap[c] || c);
+
+        // 7. كسور نصية n/d — يتجنب URLs والمسارات (/ أو : قبل الرقم)
+        str = str.replace(/(?<![:/.\w])([0-9]+)\/([0-9]+)(?![:/.\w])/g,
+          (_, n, d) => `<sup>${d2ar(n)}</sup>⁄<sub>${d2ar(d)}</sub>`
+        );
+
+        // 8. الأرقام العادية (0-9) → عربية
+        str = str.replace(/[0-9]/g, c => ar[+c]);
+
+        return str;
       }
 
       let currentGrade = null;

@@ -1130,6 +1130,7 @@
       async function openPanel() {
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("admin-panel").classList.remove("hidden");
+        await loadCurriculumFromDB();
         await loadCounts();
         buildTree();
         await pick(0, 0);
@@ -1237,34 +1238,49 @@
 
       function buildTree() {
         const tree = document.getElementById("lessons-tree");
-        tree.innerHTML = CUR[grade].units
-          .map(
-            (unit, ui) => `
+        const unitsHtml = CUR[grade].units
+          .map((unit, ui) => `
       <div>
-        <div class="text-xs font-black mb-1 px-1 flex items-center justify-between" style="color:#94a3b8;">
-          <span>الوحدة ${ui + 1}: ${unit.title}</span>
+        <div class="text-xs font-black mb-1 px-1 flex items-center gap-1" style="color:#94a3b8;">
+          <span class="flex-1 truncate" title="${unit.title}">${unit.emoji || ''} الوحدة ${ui + 1}: ${unit.title}</span>
+          <button onclick="event.stopPropagation();openCurricModal('unit-edit',${ui},null)"
+                  title="تعديل اسم الوحدة"
+                  class="text-[11px] px-1.5 py-0.5 rounded-lg transition flex-shrink-0"
+                  style="background:rgba(124,58,237,0.07);color:#7c3aed;border:1px solid rgba(124,58,237,0.18)">✏️</button>
           <button onclick="pickComprehensive('unit',${ui})"
-                  class="text-[10px] px-2 py-0.5 rounded-lg font-black transition"
-                  style="background:rgba(236,72,153,0.08);color:#ec4899;border:1px solid rgba(236,72,153,0.2)">
-            شامل الوحدة
-          </button>
+                  class="text-[10px] px-1.5 py-0.5 rounded-lg font-black transition flex-shrink-0"
+                  style="background:rgba(236,72,153,0.08);color:#ec4899;border:1px solid rgba(236,72,153,0.2)">شامل</button>
         </div>
         <div class="space-y-1.5 mb-1">
-          ${unit.lessons
-            .map((lesson, li) => {
+          ${unit.lessons.map((lesson, li) => {
               const c = cnt(grade, ui, li);
               const active = selU === ui && selL === li;
-              return `<button class="lesson-btn ${active ? "active" : ""}" onclick="pick(${ui},${li})">
-              <span class="text-sm font-bold leading-snug text-right" style="color:${active ? "#7C3AED" : "#2D2640"};">${lesson}</span>
-              <span class="cnt ${c === 0 ? "zero" : ""}">${c}</span>
-            </button>`;
-            })
-            .join("")}
+              return `<div class="flex items-center gap-1">
+                <button class="lesson-btn flex-1 ${active ? "active" : ""}" onclick="pick(${ui},${li})" style="min-width:0;">
+                  <span class="text-sm font-bold leading-snug text-right truncate" style="color:${active ? "#7C3AED" : "#2D2640"};">${lesson}</span>
+                  <span class="cnt flex-shrink-0 ${c === 0 ? "zero" : ""}">${c}</span>
+                </button>
+                <button onclick="event.stopPropagation();openCurricModal('lesson-edit',${ui},${li})"
+                        title="تعديل اسم الدرس"
+                        class="text-[11px] px-1.5 py-1 rounded-lg flex-shrink-0"
+                        style="background:rgba(124,58,237,0.07);color:#7c3aed;border:1px solid rgba(124,58,237,0.18)">✏️</button>
+              </div>`;
+            }).join("")}
+          <button onclick="openCurricModal('lesson-add',${ui},null)"
+                  class="w-full mt-1 py-1 text-[11px] font-black rounded-xl transition"
+                  style="background:rgba(16,185,129,0.07);color:#059669;border:1px dashed rgba(16,185,129,0.3)">
+            + إضافة درس
+          </button>
         </div>
       </div>
-    `,
-          )
-          .join("");
+    `).join("");
+
+        tree.innerHTML = unitsHtml + `
+      <button onclick="openCurricModal('unit-add',null,null)"
+              class="w-full mt-3 py-2 text-xs font-black rounded-xl transition"
+              style="background:rgba(124,58,237,0.07);color:#7c3aed;border:1px dashed rgba(124,58,237,0.25)">
+        + إضافة وحدة جديدة
+      </button>`;
       }
 
       // ── اختبار شامل (عرض المعلومات في اللوحة اليمنى) ──
@@ -2233,7 +2249,137 @@
         );
       }
 
+      // ── تحميل المنهج من قاعدة البيانات وتطبيقه على CUR ─────
+      async function loadCurriculumFromDB() {
+        for (const g of ['first', 'second']) {
+          try {
+            const r = await fetch(`${API}/curriculum?gradeKey=${g}`, { credentials: 'include' });
+            if (!r.ok) continue;
+            const data = await r.json();
+            if (!data.units || data.units.length === 0) continue;
+            data.units.forEach(dbUnit => {
+              const ui = dbUnit.unit_index;
+              while (CUR[g].units.length <= ui) {
+                CUR[g].units.push({ title: `وحدة ${CUR[g].units.length + 1}`, emoji: '📚', lessons: [] });
+              }
+              CUR[g].units[ui].title = dbUnit.title;
+              CUR[g].units[ui].emoji = dbUnit.emoji;
+              (dbUnit.lessons || []).forEach(dbLesson => {
+                const li = dbLesson.lesson_index;
+                while (CUR[g].units[ui].lessons.length <= li) {
+                  CUR[g].units[ui].lessons.push(`درس ${CUR[g].units[ui].lessons.length + 1}`);
+                }
+                CUR[g].units[ui].lessons[li] = dbLesson.title;
+              });
+            });
+          } catch {}
+        }
+      }
+
+      // ── نافذة تعديل المنهج ──────────────────────────────
+      let _cMode = null, _cUnitIdx = null, _cLessonIdx = null;
+
+      function openCurricModal(mode, unitIdx, lessonIdx) {
+        _cMode = mode; _cUnitIdx = unitIdx; _cLessonIdx = lessonIdx;
+        const titles = {
+          'unit-edit': 'تعديل اسم الوحدة', 'unit-add': 'إضافة وحدة جديدة',
+          'lesson-edit': 'تعديل اسم الدرس', 'lesson-add': 'إضافة درس جديد',
+        };
+        document.getElementById('c-modal-title').textContent = titles[mode] || '';
+        const emojiRow = document.getElementById('c-emoji-row');
+        emojiRow.classList.toggle('hidden', mode.startsWith('lesson'));
+        const inp = document.getElementById('c-modal-input');
+        const emojiInp = document.getElementById('c-modal-emoji');
+        if (mode === 'unit-edit') {
+          inp.value = CUR[grade].units[unitIdx].title;
+          emojiInp.value = CUR[grade].units[unitIdx].emoji || '📚';
+        } else if (mode === 'unit-add') {
+          inp.value = ''; emojiInp.value = '📚';
+        } else if (mode === 'lesson-edit') {
+          inp.value = CUR[grade].units[unitIdx].lessons[lessonIdx];
+        } else {
+          inp.value = '';
+        }
+        document.getElementById('c-modal').classList.remove('hidden');
+        setTimeout(() => inp.focus(), 80);
+      }
+
+      function closeCurricModal() {
+        document.getElementById('c-modal').classList.add('hidden');
+      }
+
+      async function saveCurricItem() {
+        const title = document.getElementById('c-modal-input').value.trim();
+        if (!title) { showToast('⚠️ أدخلي الاسم', 'warn'); return; }
+        const emoji = document.getElementById('c-modal-emoji').value.trim() || '📚';
+        const btn = document.getElementById('c-modal-save-btn');
+        btn.disabled = true;
+        try {
+          let url, body;
+          if (_cMode.startsWith('unit')) {
+            url = `${API}/curriculum/units`;
+            body = { grade_key: grade, title, emoji };
+            if (_cMode === 'unit-edit') body.unit_index = _cUnitIdx;
+            else body.hardcoded_count = CUR[grade].units.length;
+          } else {
+            url = `${API}/curriculum/lessons`;
+            body = { grade_key: grade, unit_index: _cUnitIdx, title };
+            if (_cMode === 'lesson-edit') body.lesson_index = _cLessonIdx;
+            else body.hardcoded_count = CUR[grade].units[_cUnitIdx].lessons.length;
+          }
+          const r = await fetch(url, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', body: JSON.stringify(body),
+          });
+          const d = await r.json();
+          if (!r.ok) { showToast('❌ ' + (d.error || 'خطأ'), 'error'); return; }
+          if (_cMode === 'unit-edit') {
+            CUR[grade].units[_cUnitIdx].title = title;
+            CUR[grade].units[_cUnitIdx].emoji = emoji;
+          } else if (_cMode === 'unit-add') {
+            CUR[grade].units.push({ title, emoji, lessons: [] });
+          } else if (_cMode === 'lesson-edit') {
+            CUR[grade].units[_cUnitIdx].lessons[_cLessonIdx] = title;
+          } else {
+            const idx = d.lesson_index;
+            while (CUR[grade].units[_cUnitIdx].lessons.length <= idx) {
+              CUR[grade].units[_cUnitIdx].lessons.push('');
+            }
+            CUR[grade].units[_cUnitIdx].lessons[idx] = title;
+          }
+          closeCurricModal();
+          buildTree();
+          showToast('✅ تم الحفظ');
+        } catch { showToast('❌ خطأ في الاتصال', 'error'); }
+        finally { btn.disabled = false; }
+      }
+
       checkAuth();
     </script>
+
+    <!-- نافذة تعديل المنهج -->
+    <div id="c-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeCurricModal()">
+      <div class="bg-white rounded-2xl p-6 w-full mx-4" style="max-width:380px;">
+        <h3 id="c-modal-title" class="font-black text-lg mb-4" style="color:#7c3aed"></h3>
+        <div id="c-emoji-row" class="mb-3">
+          <label class="text-xs font-bold mb-1 block" style="color:#64748b">الإيموجي</label>
+          <input id="c-modal-emoji" type="text" maxlength="4" placeholder="📚"
+                 class="w-20 border rounded-xl px-3 py-2 text-center text-xl" style="border-color:rgba(124,58,237,0.3);outline:none;">
+        </div>
+        <label class="text-xs font-bold mb-1 block" style="color:#64748b">الاسم</label>
+        <input id="c-modal-input" type="text" placeholder="اكتبي الاسم هنا..."
+               class="w-full border rounded-xl px-4 py-3 mb-4 text-sm"
+               style="border-color:rgba(124,58,237,0.3);outline:none;font-family:inherit;"
+               onkeydown="if(event.key==='Enter')saveCurricItem()">
+        <div class="flex gap-2">
+          <button id="c-modal-save-btn" onclick="saveCurricItem()"
+                  class="flex-1 py-2 px-4 rounded-xl text-white font-bold text-sm"
+                  style="background:linear-gradient(135deg,#7c3aed,#ec4899)">حفظ</button>
+          <button onclick="closeCurricModal()"
+                  class="py-2 px-4 rounded-xl font-bold text-sm"
+                  style="background:rgba(124,58,237,0.08);color:#7c3aed;border:1px solid rgba(124,58,237,0.2)">إلغاء</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

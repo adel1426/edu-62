@@ -2915,14 +2915,51 @@
           }
           if (d.video_url) videoUrl = d.video_url;
           if (videoUrl) {
+            const vidKey = `${currentGrade}|${currentUnitIndex}|${lessonIdx}`;
+            const alreadyWatched = watchedVideos.has(vidKey);
             const vidBox = document.createElement("div");
-            vidBox.className = "mt-5 rounded-2xl overflow-hidden";
+            vidBox.className = "mt-5 rounded-2xl";
             vidBox.style.cssText = "border:2px solid rgba(124,58,237,0.2);background:rgba(124,58,237,0.04);padding:16px;";
             const ytMatch = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
             if (ytMatch) {
               vidBox.innerHTML = `<p class="text-sm font-bold mb-3" style="color:#7C3AED;">🎬 فيديو الدرس</p><div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>`;
             } else {
               vidBox.innerHTML = `<p class="text-sm font-bold mb-2" style="color:#7C3AED;">🎬 فيديو الدرس</p><a href="${videoUrl}" target="_blank" rel="noopener" class="glow-btn inline-flex items-center gap-2 px-5 py-2 rounded-xl text-white text-sm font-bold" style="background:linear-gradient(135deg,#7C3AED,#EC4899);">▶ مشاهدة الفيديو</a>`;
+            }
+            // زر احتساب نقاط الفيديو (للمستخدمين المسجّلين)
+            if (currentUser) {
+              const watchBtn = document.createElement("button");
+              watchBtn.id = "video-watch-btn";
+              watchBtn.className = "w-full mt-3 py-2 px-4 rounded-xl text-sm font-bold transition";
+              if (alreadyWatched) {
+                watchBtn.textContent = "✅ تمّت مشاهدة الفيديو";
+                watchBtn.style.cssText = "background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.25);cursor:default;";
+                watchBtn.disabled = true;
+              } else {
+                watchBtn.innerHTML = "📹 أتممتُ مشاهدة الفيديو <span style='opacity:0.7;font-size:0.8em;'>(+٥ نقاط)</span>";
+                watchBtn.style.cssText = "background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(236,72,153,0.1));color:#7C3AED;border:1px solid rgba(124,58,237,0.25);cursor:pointer;";
+                watchBtn.onclick = async () => {
+                  watchBtn.disabled = true;
+                  try {
+                    const vr = await fetch('/api/progress/video', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({ gradeKey: currentGrade, unitIndex: currentUnitIndex, lessonIndex: lessonIdx }),
+                    });
+                    const vd = await vr.json();
+                    watchedVideos.add(vidKey);
+                    watchBtn.textContent = "✅ تمّت مشاهدة الفيديو";
+                    watchBtn.style.cssText = "background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.25);cursor:default;";
+                    if (vd.points_earned > 0) {
+                      currentUser.total_points += vd.points_earned;
+                      updateAuthUI();
+                      showToastMsg('🎬 +٥ نقاط على مشاهدة الفيديو!');
+                    }
+                  } catch { watchBtn.disabled = false; }
+                };
+              }
+              vidBox.appendChild(watchBtn);
             }
             content.appendChild(vidBox);
           }
@@ -3411,6 +3448,7 @@
 
       let currentUser = null;
       let completedLessons = new Set(); // "gradeKey|unitIdx|lessonIdx"
+      let watchedVideos    = new Set(); // "gradeKey|unitIdx|lessonIdx"
 
       // ── تهيئة الجلسة عند فتح الصفحة ──
       async function initAuth() {
@@ -3432,6 +3470,7 @@
           const r = await fetch('/api/progress', { credentials: 'include', cache: 'no-store' });
           const d = await r.json();
           completedLessons = new Set(d.completed || []);
+          watchedVideos    = new Set(d.videos    || []);
           currentUser.total_points = d.total_points || currentUser.total_points;
         } catch (e) {}
       }
@@ -3607,11 +3646,12 @@
         const grade = currentUser.grade_level;
         const data  = curriculumData[grade];
         const gradeLabels = { first: 'الأول متوسط', second: 'الثاني متوسط' };
-        let total = 0, done = 0;
+        let total = 0, done = 0, videoDone = 0;
         data.units.forEach((u, ui) => {
           u.lessons.forEach((_, li) => {
             total++;
             if (completedLessons.has(`${grade}|${ui}|${li}`)) done++;
+            if (watchedVideos.has(`${grade}|${ui}|${li}`))    videoDone++;
           });
         });
         const pct = total > 0 ? Math.round(done / total * 100) : 0;
@@ -3644,12 +3684,16 @@
           </div>
 
           <!-- إحصائيات -->
-          <div class="grid grid-cols-2 gap-3 mb-6">
-            <div class="rounded-2xl p-4 text-center" style="background:white;border:1px solid rgba(124,58,237,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+          <div class="grid grid-cols-3 gap-2 mb-6">
+            <div class="rounded-2xl p-3 text-center" style="background:white;border:1px solid rgba(124,58,237,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
               <p class="text-2xl font-black" style="color:#7c3aed">${toArabicDigits(done)}</p>
-              <p class="text-xs text-slate-500 mt-1">درس مكتمل</p>
+              <p class="text-xs text-slate-500 mt-1">درس مكتمل ✅</p>
             </div>
-            <div class="rounded-2xl p-4 text-center" style="background:white;border:1px solid rgba(236,72,153,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+            <div class="rounded-2xl p-3 text-center" style="background:white;border:1px solid rgba(16,185,129,0.1);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
+              <p class="text-2xl font-black" style="color:#059669">${toArabicDigits(videoDone)}</p>
+              <p class="text-xs text-slate-500 mt-1">فيديو شاهدتِه 📹</p>
+            </div>
+            <div class="rounded-2xl p-3 text-center" style="background:white;border:1px solid rgba(236,72,153,0.08);box-shadow:0 2px 8px rgba(0,0,0,0.04)">
               <p class="text-2xl font-black" style="color:#ec4899">${toArabicDigits(currentUser.total_points)}</p>
               <p class="text-xs text-slate-500 mt-1">نقطة مكتسبة ⭐</p>
             </div>
@@ -3679,10 +3723,14 @@
               </div>
               <div class="divide-y" style="border-top:1px solid rgba(124,58,237,0.06)">
                 ${unit.lessons.map((lesson, li) => {
-                  const isDone = completedLessons.has(`${grade}|${ui}|${li}`);
-                  return `<div class="px-4 py-2.5 flex items-center justify-between">
-                    <span class="text-xs" style="color:#2d2640">${lesson.title}</span>
-                    <span class="text-sm">${isDone ? '✅' : '○'}</span>
+                  const isDone    = completedLessons.has(`${grade}|${ui}|${li}`);
+                  const isWatched = watchedVideos.has(`${grade}|${ui}|${li}`);
+                  return `<div class="px-4 py-2.5 flex items-center justify-between gap-2">
+                    <span class="text-xs flex-1" style="color:#2d2640">${lesson.title}</span>
+                    <span class="flex items-center gap-1.5 flex-shrink-0">
+                      <span class="text-sm" title="الاختبار" style="opacity:${isDone ? 1 : 0.25}">${isDone ? '✅' : '○'}</span>
+                      <span class="text-sm" title="الفيديو"  style="opacity:${isWatched ? 1 : 0.25}">📹</span>
+                    </span>
                   </div>`;
                 }).join('')}
               </div>
@@ -3765,8 +3813,37 @@
         });
       };
 
+      // ── تحميل تخصيصات المنهج من قاعدة البيانات ─────────────
+      async function loadCurriculumOverrides() {
+        for (const g of ['first', 'second']) {
+          try {
+            const r = await fetch(`/api/curriculum?gradeKey=${g}`);
+            if (!r.ok) continue;
+            const data = await r.json();
+            if (!data.units || data.units.length === 0) continue;
+            data.units.forEach(dbUnit => {
+              const ui = dbUnit.unit_index;
+              while (curriculumData[g].units.length <= ui) {
+                curriculumData[g].units.push({ title: '', emoji: '📚', lessons: [] });
+              }
+              curriculumData[g].units[ui].title = dbUnit.title;
+              curriculumData[g].units[ui].emoji = dbUnit.emoji;
+              const unit = curriculumData[g].units[ui];
+              (dbUnit.lessons || []).forEach(dbLesson => {
+                const li = dbLesson.lesson_index;
+                while (unit.lessons.length <= li) {
+                  unit.lessons.push({ title: '', content: '<p class="text-slate-400 text-center py-8">محتوى الدرس قيد الإعداد</p>', quiz: [] });
+                }
+                unit.lessons[li].title = dbLesson.title;
+              });
+            });
+          } catch {}
+        }
+      }
+
       // تهيئة المصادقة عند تحميل الصفحة
       initAuth();
+      loadCurriculumOverrides();
 
       lucide.createIcons();
     </script>

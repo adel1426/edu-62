@@ -78,6 +78,18 @@ try {
         case $path === 'lessons/content' && $method === 'PUT':
             handle_lesson_content_put();
 
+        // ── المنهج الدراسي (وحدات/دروس مخصصة) ──
+        case $path === 'curriculum' && $method === 'GET':
+            handle_curriculum_get();
+        case $path === 'curriculum/units' && $method === 'PUT':
+            handle_curriculum_unit_upsert();
+        case $path === 'curriculum/lessons' && $method === 'PUT':
+            handle_curriculum_lesson_upsert();
+
+        // ── فيديو الدرس ──
+        case $path === 'progress/video' && $method === 'POST':
+            handle_progress_video();
+
         default:
             send_json(['error' => 'Route not found: ' . $method . ' /' . $path], 404);
     }
@@ -447,9 +459,10 @@ function handle_progress_mark() {
 function handle_progress_get() {
     start_session_safe();
     $studentId = $_SESSION['student_id'] ?? null;
-    if (!$studentId) send_json(['completed' => [], 'total_points' => 0]);
+    if (!$studentId) send_json(['completed' => [], 'videos' => [], 'total_points' => 0]);
     $grade = $_GET['gradeKey'] ?? null;
-    $sql    = "SELECT grade_key, unit_index, lesson_index FROM lesson_progress WHERE user_id = ?";
+
+    $sql = "SELECT grade_key, unit_index, lesson_index FROM lesson_progress WHERE user_id = ?";
     $params = [$studentId];
     if ($grade) { $sql .= " AND grade_key = ?"; $params[] = $grade; }
     $stmt = db()->prepare($sql);
@@ -458,10 +471,29 @@ function handle_progress_get() {
         fn($r) => $r['grade_key'] . '|' . $r['unit_index'] . '|' . $r['lesson_index'],
         $stmt->fetchAll()
     );
+
+    // مشاهدات الفيديو
+    $videos = [];
+    try {
+        $vSql = "SELECT grade_key, unit_index, lesson_index FROM video_progress WHERE user_id = ?";
+        $vParams = [$studentId];
+        if ($grade) { $vSql .= " AND grade_key = ?"; $vParams[] = $grade; }
+        $vStmt = db()->prepare($vSql);
+        $vStmt->execute($vParams);
+        $videos = array_map(
+            fn($r) => $r['grade_key'] . '|' . $r['unit_index'] . '|' . $r['lesson_index'],
+            $vStmt->fetchAll()
+        );
+    } catch (Throwable $e) { /* جدول قد لا يوجد بعد */ }
+
     $pts = db()->prepare("SELECT total_points FROM users WHERE id = ?");
     $pts->execute([$studentId]);
     $row = $pts->fetch();
-    send_json(['completed' => $completed, 'total_points' => $row ? (int)$row['total_points'] : 0]);
+    send_json([
+        'completed'    => $completed,
+        'videos'       => $videos,
+        'total_points' => $row ? (int)$row['total_points'] : 0,
+    ]);
 }
 
 function handle_progress_summary() {
@@ -541,4 +573,134 @@ function handle_lesson_content_put() {
     );
     $stmt->execute([$g, (int)$u, (int)$l, $c ?: '', $vid]);
     send_json(['success' => true]);
+}
+
+// ── المنهج الدراسي ──
+
+function handle_curriculum_get() {
+    $gradeKey = $_GET['gradeKey'] ?? '';
+    if (!in_array($gradeKey, ['first', 'second'])) {
+        send_json(['units' => []]);
+    }
+    $pdo = db();
+    $uStmt = $pdo->prepare(
+        "SELECT id, unit_index, title, emoji FROM curriculum_units WHERE grade_key=? ORDER BY unit_index"
+    );
+    $uStmt->execute([$gradeKey]);
+    $units = $uStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lStmt = $pdo->prepare(
+        "SELECT id, unit_index, lesson_index, title FROM curriculum_lessons WHERE grade_key=? ORDER BY unit_index, lesson_index"
+    );
+    $lStmt->execute([$gradeKey]);
+    $allLessons = $lStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lessonsByUnit = [];
+    foreach ($allLessons as $l) {
+        $lessonsByUnit[(int)$l['unit_index']][] = [
+            'id'           => (int)$l['id'],
+            'lesson_index' => (int)$l['lesson_index'],
+            'title'        => $l['title'],
+        ];
+    }
+
+    $result = [];
+    foreach ($units as $u) {
+        $ui = (int)$u['unit_index'];
+        $result[] = [
+            'id'         => (int)$u['id'],
+            'unit_index' => $ui,
+            'title'      => $u['title'],
+            'emoji'      => $u['emoji'],
+            'lessons'    => $lessonsByUnit[$ui] ?? [],
+        ];
+    }
+    send_json(['units' => $result]);
+}
+
+function handle_curriculum_unit_upsert() {
+    require_admin();
+    $b         = read_json_body();
+    $gradeKey  = $b['grade_key'] ?? '';
+    $title     = trim($b['title'] ?? '');
+    $emoji     = trim($b['emoji'] ?? '📚');
+    if (!$title || !in_array($gradeKey, ['first', 'second'])) {
+        send_json(['error' => 'بيانات غير صالحة'], 400);
+    }
+    $pdo = db();
+    if (isset($b['unit_index'])) {
+        $unitIndex = (int)$b['unit_index'];
+    } else {
+        $maxDb = (int)$pdo->prepare("SELECT COALESCE(MAX(unit_index),-1) FROM curriculum_units WHERE grade_key=?")
+                           ->execute([$gradeKey]) ? $pdo->query("SELECT COALESCE(MAX(unit_index),-1) FROM curriculum_units WHERE grade_key='$gradeKey'")->fetchColumn() : -1;
+        $hardcoded = (int)($b['hardcoded_count'] ?? 0);
+        $unitIndex = max((int)$maxDb + 1, $hardcoded);
+    }
+    $pdo->prepare(
+        "INSERT INTO curriculum_units (grade_key, unit_index, title, emoji) VALUES (?,?,?,?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title), emoji=VALUES(emoji)"
+    )->execute([$gradeKey, $unitIndex, $title, $emoji]);
+    send_json(['ok' => true, 'unit_index' => $unitIndex]);
+}
+
+function handle_curriculum_lesson_upsert() {
+    require_admin();
+    $b           = read_json_body();
+    $gradeKey    = $b['grade_key'] ?? '';
+    $unitIndex   = isset($b['unit_index']) ? (int)$b['unit_index'] : null;
+    $title       = trim($b['title'] ?? '');
+    if (!$title || !in_array($gradeKey, ['first', 'second']) || $unitIndex === null) {
+        send_json(['error' => 'بيانات غير صالحة'], 400);
+    }
+    $pdo = db();
+    if (isset($b['lesson_index'])) {
+        $lessonIndex = (int)$b['lesson_index'];
+    } else {
+        $maxRow = $pdo->prepare("SELECT COALESCE(MAX(lesson_index),-1) FROM curriculum_lessons WHERE grade_key=? AND unit_index=?");
+        $maxRow->execute([$gradeKey, $unitIndex]);
+        $maxDb     = (int)$maxRow->fetchColumn();
+        $hardcoded = (int)($b['hardcoded_count'] ?? 0);
+        $lessonIndex = max($maxDb + 1, $hardcoded);
+    }
+    $pdo->prepare(
+        "INSERT INTO curriculum_lessons (grade_key, unit_index, lesson_index, title) VALUES (?,?,?,?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title)"
+    )->execute([$gradeKey, $unitIndex, $lessonIndex, $title]);
+    send_json(['ok' => true, 'lesson_index' => $lessonIndex]);
+}
+
+// ── مشاهدة الفيديو ──
+
+function handle_progress_video() {
+    start_session_safe();
+    $userId = $_SESSION['student_id'] ?? null;
+    if (!$userId) send_json(['error' => 'غير مسجّل'], 401);
+
+    $b           = read_json_body();
+    $gradeKey    = $b['gradeKey']    ?? '';
+    $unitIndex   = isset($b['unitIndex'])   ? (int)$b['unitIndex']   : null;
+    $lessonIndex = isset($b['lessonIndex']) ? (int)$b['lessonIndex'] : null;
+    if (!$gradeKey || $unitIndex === null || $lessonIndex === null) {
+        send_json(['error' => 'بيانات ناقصة'], 400);
+    }
+
+    $pdo = db();
+    // إذا سبق المشاهدة لا نعطي نقاط ثانية
+    $check = $pdo->prepare(
+        "SELECT id FROM video_progress WHERE user_id=? AND grade_key=? AND unit_index=? AND lesson_index=?"
+    );
+    $check->execute([$userId, $gradeKey, $unitIndex, $lessonIndex]);
+    if ($check->fetch()) {
+        send_json(['ok' => true, 'points_earned' => 0, 'already_watched' => true]);
+    }
+
+    $pdo->prepare(
+        "INSERT IGNORE INTO video_progress (user_id, grade_key, unit_index, lesson_index) VALUES (?,?,?,?)"
+    )->execute([$userId, $gradeKey, $unitIndex, $lessonIndex]);
+
+    $points = 5;
+    $pdo->prepare("UPDATE users SET total_points = total_points + ? WHERE id = ?")
+        ->execute([$points, $userId]);
+
+    send_json(['ok' => true, 'points_earned' => $points]);
 }

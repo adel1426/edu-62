@@ -115,6 +115,42 @@ if ($step === 'install') {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         ok("✅ جدول التقدم (lesson_progress) جاهز");
 
+        // جدول تتبع مشاهدة الفيديو
+        $pdo->exec("CREATE TABLE IF NOT EXISTS video_progress (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            grade_key VARCHAR(20) NOT NULL,
+            unit_index INT NOT NULL,
+            lesson_index INT NOT NULL,
+            watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_video (user_id, grade_key, unit_index, lesson_index),
+            INDEX idx_vuser (user_id),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        ok("✅ جدول مشاهدة الفيديو (video_progress) جاهز");
+
+        // جدول تخصيص أسماء الوحدات
+        $pdo->exec("CREATE TABLE IF NOT EXISTS curriculum_units (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            grade_key VARCHAR(20) NOT NULL,
+            unit_index INT NOT NULL,
+            title VARCHAR(200) NOT NULL,
+            emoji VARCHAR(10) NOT NULL DEFAULT '📚',
+            UNIQUE KEY uniq_cu (grade_key, unit_index)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        ok("✅ جدول الوحدات المخصصة (curriculum_units) جاهز");
+
+        // جدول تخصيص أسماء الدروس
+        $pdo->exec("CREATE TABLE IF NOT EXISTS curriculum_lessons (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            grade_key VARCHAR(20) NOT NULL,
+            unit_index INT NOT NULL,
+            lesson_index INT NOT NULL,
+            title VARCHAR(200) NOT NULL,
+            UNIQUE KEY uniq_cl (grade_key, unit_index, lesson_index)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        ok("✅ جدول الدروس المخصصة (curriculum_lessons) جاهز");
+
         // ── خطوة 2: استيراد بيانات الأسئلة ──
         $sqlFile = __DIR__ . '/data.sql';
         if (!file_exists($sqlFile)) {

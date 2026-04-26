@@ -1,0 +1,4 @@
+# منع تشغيل PHP — الصور تُقرأ كملفات ثابتة فقط
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>

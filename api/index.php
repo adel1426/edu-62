@@ -98,6 +98,10 @@ try {
         case $path === 'progress/video' && $method === 'POST':
             handle_progress_video();
 
+        // ── رفع الصور ──
+        case $path === 'upload' && $method === 'POST':
+            handle_upload();
+
         default:
             send_json(['error' => 'Route not found: ' . $method . ' /' . $path], 404);
     }
@@ -731,7 +735,7 @@ function handle_admin_stats() {
                 COUNT(DISTINCT lp.id) AS lessons_done
          FROM users u
          LEFT JOIN lesson_progress lp ON lp.user_id = u.id
-         GROUP BY u.id
+         GROUP BY u.id, u.name, u.username, u.grade_level, u.total_points, u.created_at
          ORDER BY u.total_points DESC, u.name ASC"
     );
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -814,4 +818,66 @@ function handle_admin_student_delete(int $userId) {
     if (!$userId) send_json(['error' => 'معرّف غير صالح'], 400);
     db()->prepare("DELETE FROM users WHERE id = ?")->execute([$userId]);
     send_json(['ok' => true]);
+}
+
+// ── رفع الصور ──
+function handle_upload() {
+    require_admin();
+
+    if (empty($_FILES['image'])) {
+        send_json(['error' => 'لم يُرسَل أي ملف'], 400);
+    }
+
+    $file = $_FILES['image'];
+
+    // أخطاء رفع PHP
+    $uploadErrors = [
+        UPLOAD_ERR_INI_SIZE   => 'الملف أكبر من الحد المسموح في الخادم',
+        UPLOAD_ERR_FORM_SIZE  => 'الملف أكبر من الحد المسموح في الفورم',
+        UPLOAD_ERR_PARTIAL    => 'رُفع الملف جزئياً فقط',
+        UPLOAD_ERR_NO_FILE    => 'لم يُختر أي ملف',
+        UPLOAD_ERR_NO_TMP_DIR => 'مجلد temp غير موجود',
+        UPLOAD_ERR_CANT_WRITE => 'فشل الكتابة على القرص',
+    ];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        send_json(['error' => $uploadErrors[$file['error']] ?? 'خطأ في الرفع'], 400);
+    }
+
+    if ($file['size'] > 5 * 1024 * 1024) {
+        send_json(['error' => 'حجم الصورة يتجاوز 5MB'], 413);
+    }
+
+    // التحقق من أن الملف صورة حقيقية (getimagesize لا يحتاج finfo)
+    $info = @getimagesize($file['tmp_name']);
+    if ($info === false) {
+        send_json(['error' => 'الملف ليس صورة صالحة'], 415);
+    }
+
+    $mimeToExt = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif',
+        'image/webp' => 'webp',
+    ];
+    $mime = $info['mime'];
+    if (!isset($mimeToExt[$mime])) {
+        send_json(['error' => 'نوع غير مدعوم — يُسمح بـ JPG, PNG, GIF, WebP'], 415);
+    }
+
+    $uploadDir = dirname(__DIR__) . '/uploads/';
+    if (!is_dir($uploadDir)) {
+        if (!mkdir($uploadDir, 0755, true)) {
+            send_json(['error' => 'تعذّر إنشاء مجلد الصور على الخادم'], 500);
+        }
+    }
+
+    $ext      = $mimeToExt[$mime];
+    $filename = 'q_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+    $dest     = $uploadDir . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $dest)) {
+        send_json(['error' => 'فشل نقل الصورة — تحقق من صلاحيات مجلد uploads/'], 500);
+    }
+
+    send_json(['url' => '/uploads/' . $filename]);
 }

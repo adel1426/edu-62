@@ -7,3 +7,8 @@ Thumbs.db
 
 # سجلات PHP
 *.log
+
+# صور المستخدمين (تُحفظ على السيرفر مباشرة)
+/uploads/*
+!/uploads/.htaccess
+!/uploads/index.php

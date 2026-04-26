@@ -382,9 +382,6 @@
         background: rgba(255, 237, 213, 0.4);
       }
 
-      #name-modal input:focus {
-        border-color: #7c3aed;
-      }
 
       @media (max-width: 639px) {
         .quiz-results-scroll {
@@ -643,46 +640,6 @@
         </div>
       </section>
 
-      <!-- مودال إدخال الاسم (للزوار) -->
-      <div
-        id="name-modal"
-        class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
-        style="background: rgba(45, 38, 64, 0.6); backdrop-filter: blur(10px)"
-      >
-        <div
-          class="rounded-3xl p-8 max-w-sm w-full shadow-2xl fade-in"
-          style="background: white; border: 1px solid rgba(124, 58, 237, 0.15)"
-        >
-          <div class="text-center mb-6">
-            <div class="text-5xl mb-3">✏️</div>
-            <h3 class="text-xl font-black" style="color: #7c3aed">أدخلي اسمك</h3>
-            <p class="text-sm mt-1" style="color: #94a3b8">سيظهر اسمك في لوحة الشرف ✨</p>
-          </div>
-          <input
-            id="student-name-input"
-            type="text"
-            maxlength="50"
-            placeholder="اسمك الكامل..."
-            class="w-full border rounded-2xl px-4 py-3 text-center text-lg font-bold mb-4 focus:outline-none"
-            style="background:#fffbf7;border-color:rgba(124,58,237,0.2);color:#2d2640;font-family:Cairo,sans-serif;"
-          />
-          <div id="name-error" class="hidden text-sm text-center mb-3" style="color:#ef4444">
-            الرجاء إدخال اسمك أولاً
-          </div>
-          <button onclick="confirmName()" class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold text-lg mb-3">
-            ابدأ التعلم 🚀
-          </button>
-          <p class="text-center text-xs" style="color:#94a3b8">
-            أو
-            <button onclick="document.getElementById('name-modal').classList.add('hidden');showAuthModal('register')"
-                    class="font-black" style="color:#7c3aed;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif;">
-              سجّلي حساباً مجانياً
-            </button>
-            لحفظ تقدّمك وكسب نقاط
-          </p>
-        </div>
-      </div>
-
       <!-- مودال تسجيل / دخول -->
       <div
         id="auth-modal"
@@ -743,7 +700,7 @@
                     class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold mt-4">
               إنشاء حساب 🚀
             </button>
-            <button onclick="document.getElementById('auth-modal').classList.add('hidden')"
+            <button id="skip-auth-btn" onclick="closeAuthModal()"
                     class="w-full py-2 mt-2 text-xs font-bold rounded-2xl transition"
                     style="color:#94a3b8;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif">
               متابعة بدون حساب
@@ -772,7 +729,7 @@
                     class="glow-btn w-full py-3.5 rounded-2xl text-white font-bold mt-4">
               دخول ✨
             </button>
-            <button onclick="document.getElementById('auth-modal').classList.add('hidden')"
+            <button id="skip-auth-btn" onclick="closeAuthModal()"
                     class="w-full py-2 mt-2 text-xs font-bold rounded-2xl transition"
                     style="color:#94a3b8;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif">
               متابعة بدون حساب
@@ -2749,37 +2706,6 @@
       let currentLeaderboardGrade = "first";
       let _pendingGrade = null;
 
-      // ── اسم الطالبة ──────────────────────────────────────
-      function getStudentName(grade) {
-        return sessionStorage.getItem("student_name_" + grade) || null;
-      }
-
-      function showNameModal(grade) {
-        _pendingGrade = grade;
-        const inp = document.getElementById("student-name-input");
-        inp.value = "";
-        document.getElementById("name-error").classList.add("hidden");
-        document.getElementById("name-modal").classList.remove("hidden");
-        setTimeout(() => inp.focus(), 100);
-      }
-
-      function confirmName() {
-        const name = document.getElementById("student-name-input").value.trim();
-        if (!name) {
-          document.getElementById("name-error").classList.remove("hidden");
-          return;
-        }
-        sessionStorage.setItem("student_name_" + _pendingGrade, name);
-        document.getElementById("name-modal").classList.add("hidden");
-        _proceedToUnits(_pendingGrade);
-      }
-
-      document
-        .getElementById("student-name-input")
-        .addEventListener("keydown", (e) => {
-          if (e.key === "Enter") confirmName();
-        });
-
       function startJourney() {
         document.getElementById("hero-section").classList.add("hidden");
         document.getElementById("leaderboard-section").classList.add("hidden");
@@ -2788,12 +2714,11 @@
       }
 
       function showUnits(grade) {
-        const name = getStudentName(grade);
-        if (!name) {
-          showNameModal(grade);
-          return;
+        if (currentUser) {
+          _proceedToUnits(grade);
+        } else {
+          showAuthModal('register', grade);
         }
-        _proceedToUnits(grade);
       }
 
       function _proceedToUnits(grade) {
@@ -3255,7 +3180,7 @@
       async function submitScore() {
         try {
           const state = window._quizState;
-          const studentName = getStudentName(currentGrade);
+          const studentName = currentUser ? currentUser.name : null;
           if (!studentName) return;
           await fetch("/api/scores", {
             method: "POST",
@@ -3522,9 +3447,26 @@
       }
 
       // ── نافذة المصادقة ──
-      function showAuthModal(tab = 'register') {
+      function showAuthModal(tab = 'register', grade = null) {
+        if (grade) {
+          _pendingGrade = grade;
+          // تحديد المرحلة تلقائياً في فورم التسجيل
+          document.getElementById('reg-grade').value = grade;
+        }
+        // إخفاء "متابعة بدون حساب" إذا كان المستخدم قادماً من اختيار المرحلة
+        const skipBtn = document.getElementById('skip-auth-btn');
+        if (skipBtn) skipBtn.style.display = _pendingGrade ? 'none' : '';
+        document.getElementById('reg-error').classList.add('hidden');
+        document.getElementById('login-error').classList.add('hidden');
         document.getElementById('auth-modal').classList.remove('hidden');
         switchAuthTab(tab);
+      }
+
+      function closeAuthModal() {
+        _pendingGrade = null;
+        document.getElementById('auth-modal').classList.add('hidden');
+        const skipBtn = document.getElementById('skip-auth-btn');
+        if (skipBtn) skipBtn.style.display = '';
       }
 
       function switchAuthTab(tab) {
@@ -3570,6 +3512,11 @@
           document.getElementById('auth-modal').classList.add('hidden');
           updateAuthUI();
           showToastMsg('🎉 أهلاً ' + currentUser.name + '! تم إنشاء حسابك');
+          if (_pendingGrade) {
+            const g = _pendingGrade;
+            _pendingGrade = null;
+            _proceedToUnits(g);
+          }
         } catch (e) {
           errEl.textContent = 'تعذّر الاتصال بالخادم';
           errEl.classList.remove('hidden');
@@ -3605,6 +3552,11 @@
           document.getElementById('auth-modal').classList.add('hidden');
           updateAuthUI();
           showToastMsg('👋 مرحباً بعودتك ' + currentUser.name + '!');
+          if (_pendingGrade) {
+            const g = _pendingGrade;
+            _pendingGrade = null;
+            _proceedToUnits(g);
+          }
         } catch (e) {
           errEl.textContent = 'تعذّر الاتصال بالخادم';
           errEl.classList.remove('hidden');
@@ -3755,7 +3707,7 @@
       const _origSubmitScore = submitScore;
       submitScore = async function() {
         const state = window._quizState;
-        const name  = currentUser ? currentUser.name : getStudentName(currentGrade);
+        const name  = currentUser ? currentUser.name : null;
         if (!name) return;
         try {
           const r = await fetch('/api/scores', {
@@ -3782,15 +3734,6 @@
         } catch (e) {}
       };
 
-      // ── تحديث showUnits لاستخدام اسم المستخدم المسجّل ──
-      const _origShowUnits = showUnits;
-      showUnits = function(grade) {
-        if (currentUser) {
-          _proceedToUnits(grade);
-        } else {
-          _origShowUnits(grade);
-        }
-      };
 
       // ── تحديث بطاقات الدروس لإظهار علامة الإتمام ──
       const _origShowLessons = showLessons;

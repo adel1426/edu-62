@@ -938,7 +938,7 @@
                     <div id="iurl-sec">
                       <input
                         id="f-img"
-                        type="url"
+                        type="text"
                         placeholder="https://example.com/image.png"
                       />
                     </div>
@@ -1662,7 +1662,7 @@
         }
       }
 
-      function onFile(input) {
+      async function onFile(input) {
         const file = input.files[0];
         if (!file) return;
         if (file.size > 5 * 1024 * 1024) {
@@ -1670,14 +1670,38 @@
           input.value = "";
           return;
         }
+
+        // عرض معاينة فورية محلية
         const reader = new FileReader();
-        reader.onload = (e) => {
-          document.getElementById("f-img").value = e.target.result;
-          document.getElementById("drop-text").innerHTML =
-            `✅ <span style="color:#7C3AED;">${file.name}</span><br><span class="text-xs" style="color:#94a3b8;">اضغط لتغيير الصورة</span>`;
-          showImgPrev(e.target.result);
-        };
+        reader.onload = (e) => showImgPrev(e.target.result);
         reader.readAsDataURL(file);
+
+        // رفع الصورة للسيرفر
+        const dropText = document.getElementById("drop-text");
+        dropText.innerHTML = `⏳ <span style="color:#7C3AED;">جاري الرفع...</span>`;
+
+        try {
+          const fd = new FormData();
+          fd.append('image', file);
+          const r = await fetch(`${API}/upload`, {
+            method: 'POST',
+            credentials: 'include',
+            body: fd
+          });
+          const d = await r.json();
+          if (!r.ok) {
+            showToast("⚠️ " + (d.error || "فشل رفع الصورة"), "warn");
+            dropText.innerHTML = '🖼️ اضغط أو اسحب صورة هنا<br><span class="text-xs" style="color:#94a3b8;">PNG, JPG, WebP – حد 5MB</span>';
+            return;
+          }
+          // حفظ المسار (وليس base64)
+          document.getElementById("f-img").value = d.url;
+          dropText.innerHTML = `✅ <span style="color:#7C3AED;">${file.name}</span><br><span class="text-xs" style="color:#94a3b8;">اضغط لتغيير الصورة</span>`;
+          showToast("✅ تم رفع الصورة بنجاح");
+        } catch (e) {
+          showToast("⚠️ تعذّر الاتصال بالسيرفر", "warn");
+          dropText.innerHTML = '🖼️ اضغط أو اسحب صورة هنا<br><span class="text-xs" style="color:#94a3b8;">PNG, JPG, WebP – حد 5MB</span>';
+        }
       }
 
       function clearImg() {

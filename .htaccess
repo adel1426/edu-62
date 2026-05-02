@@ -33,3 +33,11 @@ AddDefaultCharset UTF-8
 
 # ترميز الملفات
 AddCharset UTF-8 .html .htm .css .js .json
+
+# رؤوس أمان خفيفة لا تكسر الواجهة الحالية
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>

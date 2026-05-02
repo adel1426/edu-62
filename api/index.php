@@ -399,10 +399,56 @@ function handle_questions_bulk() {
     send_json(['inserted' => $inserted, 'skipped' => $skipped, 'errors' => $errors]);
 }
 
+function ensure_student_scores_user_id_column(): void {
+    static $checked = false;
+    if ($checked) return;
+    $checked = true;
+
+    $pdo = db();
+    $col = $pdo->query(
+        "SELECT COUNT(*)
+         FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'student_scores'
+           AND COLUMN_NAME = 'user_id'"
+    )->fetchColumn();
+    if ((int)$col === 0) {
+        $pdo->exec("ALTER TABLE student_scores ADD COLUMN user_id INT NULL AFTER id");
+    }
+
+    $idx = $pdo->prepare(
+        "SELECT COUNT(*)
+         FROM INFORMATION_SCHEMA.STATISTICS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'student_scores'
+           AND INDEX_NAME = ?"
+    );
+
+    $idx->execute(['uniq_score']);
+    if ((int)$idx->fetchColumn() > 0) {
+        $pdo->exec("ALTER TABLE student_scores DROP INDEX uniq_score");
+    }
+
+    $idx->execute(['idx_score_user']);
+    if ((int)$idx->fetchColumn() === 0) {
+        $pdo->exec("ALTER TABLE student_scores ADD INDEX idx_score_user (user_id)");
+    }
+
+    $idx->execute(['uniq_score_user']);
+    if ((int)$idx->fetchColumn() === 0) {
+        $pdo->exec(
+            "ALTER TABLE student_scores
+             ADD UNIQUE KEY uniq_score_user (user_id, grade_key, unit_index, lesson_index)"
+        );
+    }
+}
+
 // ── النتائج ──
 
 function handle_score_submit() {
     start_session_safe();
+    ensure_student_scores_user_id_column();
+
     $b      = read_json_body();
     $grade  = $b['gradeKey'] ?? '';
     $unit   = $b['unitIndex'] ?? null;
@@ -423,30 +469,109 @@ function handle_score_submit() {
         send_json(['error' => 'بيانات ناقصة'], 400);
     }
     $name = mb_substr($name, 0, 100);
+    $score  = max(0, (int)$score);
+    $total  = max(1, (int)$total);
+    $unit   = (int)$unit;
+    $lesson = (int)$lesson;
 
-    $stmt = db()->prepare(
-        "INSERT INTO student_scores (student_name, grade_key, unit_index, lesson_index, score, total)
-         VALUES (?,?,?,?,?,?)
-         ON DUPLICATE KEY UPDATE
-           score = GREATEST(score, score + 0),
-           total = total,
-           created_at = NOW()"
-    );
-    $stmt->execute([$name, $grade, (int)$unit, (int)$lesson, (int)$score, (int)$total]);
+    $pdo = db();
+    $pdo->beginTransaction();
 
-    $pointsEarned = 0;
-    if ($studentId) {
-        // نقاط = ١٠ لكل إجابة صحيحة
-        $pointsEarned = (int)$score * 10;
-        db()->prepare("UPDATE users SET total_points = total_points + ? WHERE id = ?")
-            ->execute([$pointsEarned, $studentId]);
-        // تسجيل إتمام الدرس
-        db()->prepare(
-            "INSERT IGNORE INTO lesson_progress (user_id, grade_key, unit_index, lesson_index) VALUES (?,?,?,?)"
-        )->execute([$studentId, $grade, (int)$unit, (int)$lesson]);
+    try {
+        if ($studentId) {
+            $migrate = $pdo->prepare(
+                "UPDATE student_scores
+                 SET user_id = ?
+                 WHERE user_id IS NULL AND student_name = ?
+                   AND grade_key = ? AND unit_index = ? AND lesson_index = ?"
+            );
+            $migrate->execute([$studentId, $name, $grade, $unit, $lesson]);
+
+            $prevStmt = $pdo->prepare(
+                "SELECT score FROM student_scores
+                 WHERE user_id = ? AND grade_key = ? AND unit_index = ? AND lesson_index = ?
+                 LIMIT 1 FOR UPDATE"
+            );
+            $prevStmt->execute([$studentId, $grade, $unit, $lesson]);
+        } else {
+            $prevStmt = $pdo->prepare(
+                "SELECT score FROM student_scores
+                 WHERE user_id IS NULL AND student_name = ?
+                   AND grade_key = ? AND unit_index = ? AND lesson_index = ?
+                 LIMIT 1 FOR UPDATE"
+            );
+            $prevStmt->execute([$name, $grade, $unit, $lesson]);
+        }
+
+        $previousBest = (int)($prevStmt->fetchColumn() ?: 0);
+        $bestScore = max($previousBest, $score);
+
+        if ($studentId) {
+            $stmt = $pdo->prepare(
+                "INSERT INTO student_scores (user_id, student_name, grade_key, unit_index, lesson_index, score, total)
+                 VALUES (?,?,?,?,?,?,?)
+                 ON DUPLICATE KEY UPDATE
+                   student_name = VALUES(student_name),
+                   total = VALUES(total),
+                   created_at = IF(VALUES(score) > score, NOW(), created_at),
+                   score = GREATEST(score, VALUES(score))"
+            );
+            $stmt->execute([$studentId, $name, $grade, $unit, $lesson, $score, $total]);
+        } else {
+            $existing = $pdo->prepare(
+                "SELECT id FROM student_scores
+                 WHERE user_id IS NULL AND student_name = ?
+                   AND grade_key = ? AND unit_index = ? AND lesson_index = ?
+                 LIMIT 1"
+            );
+            $existing->execute([$name, $grade, $unit, $lesson]);
+            $scoreId = $existing->fetchColumn();
+            if ($scoreId) {
+                $stmt = $pdo->prepare(
+                    "UPDATE student_scores
+                     SET total = ?, created_at = IF(? > score, NOW(), created_at), score = GREATEST(score, ?)
+                     WHERE id = ?"
+                );
+                $stmt->execute([$total, $score, $score, $scoreId]);
+            } else {
+                $stmt = $pdo->prepare(
+                    "INSERT INTO student_scores (user_id, student_name, grade_key, unit_index, lesson_index, score, total)
+                     VALUES (NULL,?,?,?,?,?,?)"
+                );
+                $stmt->execute([$name, $grade, $unit, $lesson, $score, $total]);
+            }
+        }
+
+        $pointsEarned = 0;
+        $totalPoints = null;
+        if ($studentId) {
+            $pointsEarned = max(0, $score - $previousBest) * 10;
+            if ($pointsEarned > 0) {
+                $pdo->prepare("UPDATE users SET total_points = total_points + ? WHERE id = ?")
+                    ->execute([$pointsEarned, $studentId]);
+            }
+            $pdo->prepare(
+                "INSERT IGNORE INTO lesson_progress (user_id, grade_key, unit_index, lesson_index) VALUES (?,?,?,?)"
+            )->execute([$studentId, $grade, $unit, $lesson]);
+
+            $pts = $pdo->prepare("SELECT total_points FROM users WHERE id = ?");
+            $pts->execute([$studentId]);
+            $totalPoints = (int)$pts->fetchColumn();
+        }
+
+        $pdo->commit();
+        send_json([
+            'success'       => true,
+            'points_earned' => $pointsEarned,
+            'previous_best' => $previousBest,
+            'best_score'    => $bestScore,
+            'score_saved'   => $score >= $previousBest,
+            'total_points'  => $totalPoints,
+        ]);
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
     }
-
-    send_json(['success' => true, 'points_earned' => $pointsEarned]);
 }
 
 // ── التقدم ──
@@ -532,18 +657,24 @@ function handle_progress_summary() {
 }
 
 function handle_leaderboard() {
+    ensure_student_scores_user_id_column();
+
     $grade = $_GET['gradeKey'] ?? '';
     if (!$grade) send_json(['error' => 'gradeKey مطلوب'], 400);
     $stmt = db()->prepare(
         "SELECT
-           student_name,
-           SUM(score) AS total_score,
-           SUM(total) AS total_possible,
+           COALESCE(u.name, ss.student_name) AS student_name,
+           COALESCE(u.username, '') AS username,
+           SUM(ss.score) AS total_score,
+           SUM(ss.total) AS total_possible,
            COUNT(*) AS lessons_count,
-           ROUND(SUM(score) / NULLIF(SUM(total),0) * 100, 1) AS pct
-         FROM student_scores
-         WHERE grade_key = ?
-         GROUP BY student_name
+           ROUND(SUM(ss.score) / NULLIF(SUM(ss.total),0) * 100, 1) AS pct
+         FROM student_scores ss
+         LEFT JOIN users u ON u.id = ss.user_id
+         WHERE ss.grade_key = ?
+         GROUP BY COALESCE(CAST(ss.user_id AS CHAR), CONCAT('guest:', ss.student_name)),
+                  COALESCE(u.name, ss.student_name),
+                  COALESCE(u.username, '')
          ORDER BY total_score DESC, pct DESC
          LIMIT 5"
     );
@@ -721,6 +852,8 @@ function handle_progress_video() {
 
 function handle_admin_stats() {
     require_admin();
+    ensure_student_scores_user_id_column();
+
     $pdo = db();
 
     $students_count    = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -747,11 +880,51 @@ function handle_admin_stats() {
         while ($row = $vStmt->fetch()) $vCounts[(int)$row['user_id']] = (int)$row['vc'];
     } catch (Throwable $e) {}
 
+    $scoreStats = [];
+    try {
+        $scoreStmt = $pdo->query(
+            "SELECT user_id,
+                    ROUND(SUM(score) / NULLIF(SUM(total), 0) * 100, 1) AS avg_score,
+                    MAX(created_at) AS last_score_at
+             FROM student_scores
+             WHERE user_id IS NOT NULL
+             GROUP BY user_id"
+        );
+        while ($row = $scoreStmt->fetch()) {
+            $scoreStats[(int)$row['user_id']] = [
+                'avg_score'     => $row['avg_score'] !== null ? (float)$row['avg_score'] : null,
+                'last_score_at' => $row['last_score_at'],
+            ];
+        }
+    } catch (Throwable $e) {}
+
+    $lastLessons = [];
+    try {
+        $lpStmt = $pdo->query("SELECT user_id, MAX(completed_at) AS last_lesson_at FROM lesson_progress GROUP BY user_id");
+        while ($row = $lpStmt->fetch()) $lastLessons[(int)$row['user_id']] = $row['last_lesson_at'];
+    } catch (Throwable $e) {}
+
+    $lastVideos = [];
+    try {
+        $vpStmt = $pdo->query("SELECT user_id, MAX(watched_at) AS last_video_at FROM video_progress GROUP BY user_id");
+        while ($row = $vpStmt->fetch()) $lastVideos[(int)$row['user_id']] = $row['last_video_at'];
+    } catch (Throwable $e) {}
+
     foreach ($students as &$s) {
-        $s['id']           = (int)$s['id'];
+        $id                = (int)$s['id'];
+        $s['id']           = $id;
         $s['total_points'] = (int)$s['total_points'];
         $s['lessons_done'] = (int)$s['lessons_done'];
-        $s['videos_done']  = $vCounts[(int)$s['id']] ?? 0;
+        $s['videos_done']  = $vCounts[$id] ?? 0;
+        $s['avg_score']    = $scoreStats[$id]['avg_score'] ?? null;
+
+        $activityDates = array_filter([
+            $s['created_at'] ?? null,
+            $lastLessons[$id] ?? null,
+            $lastVideos[$id] ?? null,
+            $scoreStats[$id]['last_score_at'] ?? null,
+        ]);
+        $s['last_activity'] = $activityDates ? max($activityDates) : null;
     }
     unset($s);
 

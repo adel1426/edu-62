@@ -4,6 +4,7 @@ require_once __DIR__ . '/config.php';
 // ── إعداد الجلسة ──
 function start_session_safe() {
     if (session_status() === PHP_SESSION_NONE) {
+        ini_set('session.use_strict_mode', '1');
         session_name(SESSION_NAME);
         session_set_cookie_params([
             'lifetime' => SESSION_LIFETIME,
@@ -21,6 +22,9 @@ function send_json($data, int $status = 200): void {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store, no-cache, must-revalidate');
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
 }

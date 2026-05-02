@@ -48,6 +48,7 @@ if ($step === 'install') {
         // جدول النتائج
         $pdo->exec("CREATE TABLE IF NOT EXISTS student_scores (
             id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NULL,
             student_name VARCHAR(100) NOT NULL,
             grade_key VARCHAR(20) NOT NULL,
             unit_index INT NOT NULL,
@@ -55,10 +56,28 @@ if ($step === 'install') {
             score INT NOT NULL,
             total INT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY uniq_score (student_name, grade_key, unit_index, lesson_index),
+            UNIQUE KEY uniq_score_user (user_id, grade_key, unit_index, lesson_index),
+            INDEX idx_score_user (user_id),
             INDEX idx_grade (grade_key)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         ok("✅ جدول النتائج (student_scores) جاهز");
+
+        try {
+            $col = $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'student_scores' AND COLUMN_NAME = 'user_id'")->fetchColumn();
+            if ((int)$col === 0) {
+                $pdo->exec("ALTER TABLE student_scores ADD COLUMN user_id INT NULL AFTER id");
+                ok("✅ تم ربط جدول النتائج بحسابات الطالبات");
+            }
+        } catch (Throwable $e) {
+            ok("ℹ️ تعذّر فحص user_id في student_scores: " . $e->getMessage());
+        }
+
+        try { $pdo->exec("ALTER TABLE student_scores DROP INDEX uniq_score"); } catch (Throwable $e) {}
+        try { $pdo->exec("ALTER TABLE student_scores ADD INDEX idx_score_user (user_id)"); } catch (Throwable $e) {}
+        try {
+            $pdo->exec("ALTER TABLE student_scores ADD UNIQUE KEY uniq_score_user (user_id, grade_key, unit_index, lesson_index)");
+        } catch (Throwable $e) {}
 
         // جدول محتوى الدروس
         $pdo->exec("CREATE TABLE IF NOT EXISTS lesson_content (

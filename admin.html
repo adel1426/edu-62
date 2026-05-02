@@ -1060,11 +1060,13 @@
                         <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">النقاط ⭐</th>
                         <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">دروس ✅</th>
                         <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">فيديو 📹</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">متوسط</th>
+                        <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8">آخر نشاط</th>
                         <th class="text-center px-3 py-2 text-xs font-black" style="color:#94a3b8"></th>
                       </tr>
                     </thead>
                     <tbody id="students-tbody">
-                      <tr><td colspan="6" class="text-center py-10 text-slate-400">جاري التحميل...</td></tr>
+                      <tr><td colspan="8" class="text-center py-10 text-slate-400">جاري التحميل...</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -2395,7 +2397,7 @@
 
       async function loadStats() {
         document.getElementById('students-tbody').innerHTML =
-          '<tr><td colspan="6" class="text-center py-10 text-slate-400">جاري التحميل...</td></tr>';
+          '<tr><td colspan="8" class="text-center py-10 text-slate-400">جاري التحميل...</td></tr>';
         try {
           const r = await fetch(`${API}/admin/stats`, { credentials: 'include' });
           if (!r.ok) throw new Error();
@@ -2404,7 +2406,7 @@
           renderStats();
         } catch {
           document.getElementById('students-tbody').innerHTML =
-            '<tr><td colspan="6" class="text-center py-10 text-red-400">فشل تحميل البيانات</td></tr>';
+            '<tr><td colspan="8" class="text-center py-10 text-red-400">فشل تحميل البيانات</td></tr>';
         }
       }
 
@@ -2419,16 +2421,25 @@
         renderLowLessons();
       }
 
+      function formatActivityDate(value) {
+        if (!value) return '—';
+        const normalized = String(value).replace(' ', 'T');
+        const d = new Date(normalized);
+        if (Number.isNaN(d.getTime())) return value;
+        return d.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+      }
+
       function renderStudentsTable() {
         const tbody = document.getElementById('students-tbody');
         if (!_statsFiltered.length) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-sm">لا توجد نتائج</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-slate-400 text-sm">لا توجد نتائج</td></tr>';
           return;
         }
         tbody.innerHTML = _statsFiltered.map(s => {
           const gradeLabel = s.grade_level === 'first' ? 'الأول' : 'الثاني';
-          const bar = s.max_lessons > 0
-            ? Math.round(s.lessons_done / s.max_lessons * 100) : 0;
+          const avgScore = s.avg_score === null || s.avg_score === undefined
+            ? '—'
+            : `${Math.round(Number(s.avg_score))}%`;
           return `<tr class="border-b cursor-pointer transition hover:bg-purple-50/40"
                       onclick="showStudentModal(${s.id})" style="border-color:rgba(124,58,237,0.07)">
             <td class="px-3 py-3">
@@ -2442,6 +2453,8 @@
             <td class="px-3 py-3 text-center font-black text-sm" style="color:#ec4899">${s.total_points}</td>
             <td class="px-3 py-3 text-center font-bold text-sm" style="color:#10b981">${s.lessons_done}</td>
             <td class="px-3 py-3 text-center font-bold text-sm" style="color:#059669">${s.videos_done}</td>
+            <td class="px-3 py-3 text-center font-bold text-sm" style="color:#7c3aed">${avgScore}</td>
+            <td class="px-3 py-3 text-center text-xs" style="color:#64748b">${formatActivityDate(s.last_activity)}</td>
             <td class="px-3 py-3 text-center">
               <button onclick="event.stopPropagation();deleteStudent(${s.id},'${escapeHtml(s.name)}')"
                       class="text-xs px-2 py-1 rounded-lg"
@@ -2525,11 +2538,12 @@
 
       function exportStudentsCSV() {
         if (!_statsData?.students?.length) { showToast('لا توجد بيانات', 'warn'); return; }
-        const header = ['الاسم','اسم_المستخدم','الصف','النقاط','الدروس_المكتملة','الفيديوهات'];
+        const header = ['الاسم','اسم_المستخدم','الصف','النقاط','الدروس_المكتملة','الفيديوهات','متوسط_الاختبارات','آخر_نشاط'];
         const rows = _statsData.students.map(s => [
           s.name, s.username,
           s.grade_level === 'first' ? 'الأول_متوسط' : 'الثاني_متوسط',
           s.total_points, s.lessons_done, s.videos_done,
+          s.avg_score ?? '', s.last_activity ?? '',
         ]);
         const csv = '﻿' + [header, ...rows].map(r => r.join(',')).join('\n');
         const a = document.createElement('a');
@@ -2591,7 +2605,7 @@
               <div class="text-xs" style="color:#94a3b8">${gl} · @${escapeHtml(s.username)}</div>
             </div>
           </div>
-          <div class="grid grid-cols-3 gap-2 mb-4">
+          <div class="grid grid-cols-2 gap-2 mb-4">
             <div class="rounded-xl p-2 text-center" style="background:rgba(236,72,153,0.06);border:1px solid rgba(236,72,153,0.15)">
               <div class="font-black text-lg" style="color:#ec4899">${s.total_points}</div>
               <div class="text-[10px]" style="color:#94a3b8">نقطة ⭐</div>
@@ -2603,6 +2617,14 @@
             <div class="rounded-xl p-2 text-center" style="background:rgba(5,150,105,0.06);border:1px solid rgba(5,150,105,0.15)">
               <div class="font-black text-lg" style="color:#059669">${s.videos_done}</div>
               <div class="text-[10px]" style="color:#94a3b8">فيديو 📹</div>
+            </div>
+            <div class="rounded-xl p-2 text-center" style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.15)">
+              <div class="font-black text-lg" style="color:#7c3aed">${s.avg_score == null ? '—' : Math.round(Number(s.avg_score)) + '%'}</div>
+              <div class="text-[10px]" style="color:#94a3b8">متوسط الاختبارات</div>
+            </div>
+            <div class="rounded-xl p-2 text-center" style="background:rgba(100,116,139,0.06);border:1px solid rgba(100,116,139,0.15)">
+              <div class="font-black text-sm" style="color:#64748b">${formatActivityDate(s.last_activity)}</div>
+              <div class="text-[10px]" style="color:#94a3b8">آخر نشاط</div>
             </div>
           </div>
           <div class="text-xs font-black mb-3" style="color:#7c3aed">📚 التقدم بالوحدات</div>

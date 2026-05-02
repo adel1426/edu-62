@@ -554,6 +554,12 @@
                 <span class="text-white/65 text-xs">نقطة</span>
               </div>
             </div>
+            <button id="continue-learning-btn"
+                    onclick="continueLearning()"
+                    class="hidden w-full mt-4 py-2.5 px-4 rounded-2xl text-sm font-black transition"
+                    style="background:rgba(255,255,255,0.9);color:#7c3aed;border:1px solid rgba(255,255,255,0.35)">
+              تابعي من حيث توقفتِ
+            </button>
           </div>
 
           <!-- Greeting row (للزوار) -->
@@ -2729,7 +2735,10 @@
         grid.innerHTML = "";
 
         // زر الاختبار الشامل للمرحلة
+        const oldGradeCompBtn = document.getElementById("grade-comprehensive-btn");
+        if (oldGradeCompBtn) oldGradeCompBtn.remove();
         const gradeCompBtn = document.createElement("button");
+        gradeCompBtn.id = "grade-comprehensive-btn";
         gradeCompBtn.className = "glow-btn w-full mb-5 py-3 px-5 rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2";
         gradeCompBtn.style.cssText = "background:linear-gradient(135deg,#7C3AED,#EC4899);";
         gradeCompBtn.innerHTML = '<i data-lucide="zap" style="width:18px;height:18px;"></i> <span>اختبار شامل المرحلة</span>';
@@ -3134,6 +3143,8 @@
           userAnswer: q.options[idx],
           correctAnswer: q.options[q.answer],
           isCorrect,
+          explanation: q.explanation || "",
+          image: q.image || null,
         });
 
         document.querySelectorAll(".quiz-option").forEach((el, i) => {
@@ -3206,6 +3217,7 @@
         const pct = Math.round((state.score / state.quiz.length) * 100);
         const emoji = pct >= 80 ? "🎉" : pct >= 50 ? "👍" : "💪";
         const backTarget = state.comprehensive ? (state.comprehensiveType === 'grade' ? 'units' : 'lessons') : 'lessons';
+        const wrongCount = state.answers.filter((answer) => !answer.isCorrect).length;
 
         let resultHTML = `
         <div class="text-center mb-8">
@@ -3233,6 +3245,14 @@
             .join("")}
         </div>
 
+        ${wrongCount > 0 ? `
+        <button onclick="showWrongAnswersReview()" class="w-full mb-4 py-3 px-4 rounded-2xl font-bold transition flex items-center justify-center gap-2"
+                style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.18);">
+          <i data-lucide="search-check" style="width:18px;height:18px;"></i>
+          <span>راجعي ${toArabicDigits(wrongCount)} من الأخطاء</span>
+        </button>
+        ` : ""}
+
         <div class="flex gap-3">
           <button onclick="goBack('${backTarget}')" class="flex-1 py-3 px-4 rounded-2xl font-bold transition flex items-center justify-center gap-2" style="background:rgba(124,58,237,0.08);color:#7C3AED;border:1px solid rgba(124,58,237,0.15);">
             <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
@@ -3251,6 +3271,56 @@
         if (progressDiv) {
           progressDiv.innerHTML =
             '<span class="font-bold" style="color:#7C3AED;">✓ انتهى الاختبار</span>';
+        }
+        lucide.createIcons();
+      }
+
+      function showWrongAnswersReview() {
+        const state = window._quizState;
+        if (!state) return;
+        const wrongAnswers = state.answers.filter((answer) => !answer.isCorrect);
+        const container = document.getElementById("quiz-question-container");
+        const backTarget = state.comprehensive ? (state.comprehensiveType === 'grade' ? 'units' : 'lessons') : 'lessons';
+
+        if (wrongAnswers.length === 0) {
+          showQuizResults();
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="mb-6 text-center">
+            <div class="text-5xl mb-3">💡</div>
+            <h2 class="text-2xl font-black mb-2" style="color:#7C3AED;">مراجعة الأخطاء</h2>
+            <p class="text-sm" style="color:#64748b;">راجعي السؤال، إجابتك، والإجابة الصحيحة قبل إعادة المحاولة.</p>
+          </div>
+          <div class="quiz-results-scroll space-y-3 mb-6 max-h-96 overflow-y-auto pr-1">
+            ${wrongAnswers.map((answer, idx) => `
+              <div class="rounded-xl p-4 border-r-4" style="background:white;border:1px solid rgba(239,68,68,0.12);border-right-color:#ef4444;">
+                <p class="text-xs font-black mb-2" style="color:#ef4444;">خطأ ${toArabicDigits(idx + 1)}</p>
+                ${answer.image ? `<img src="${answer.image}" alt="صورة السؤال" class="max-h-40 rounded-xl mb-3 object-contain">` : ""}
+                <p class="text-sm mb-2" style="color:#2D2640;"><strong>السؤال:</strong> ${toArabicDigits(answer.question)}</p>
+                <p class="text-sm mb-1" style="color:#64748b;"><strong>إجابتك:</strong> ${toArabicDigits(answer.userAnswer)}</p>
+                <p class="text-sm font-semibold mb-2" style="color:#10b981;"><strong>الإجابة الصحيحة:</strong> ${toArabicDigits(answer.correctAnswer)}</p>
+                ${answer.explanation ? `<div class="mt-3 p-3 rounded-xl text-sm" style="background:rgba(124,58,237,0.07);color:#4b5563;line-height:1.8;">${answer.explanation}</div>` : ""}
+              </div>
+            `).join("")}
+          </div>
+          <div class="flex gap-3">
+            <button onclick="showQuizResults()" class="flex-1 py-3 px-4 rounded-2xl font-bold transition flex items-center justify-center gap-2"
+                    style="background:rgba(124,58,237,0.08);color:#7C3AED;border:1px solid rgba(124,58,237,0.15);">
+              <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+              <span>النتيجة</span>
+            </button>
+            <button onclick="retakeQuiz()" class="flex-1 glow-btn py-3 px-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2">
+              <i data-lucide="repeat-2" style="width:18px;height:18px;"></i>
+              <span>إعادة الاختبار</span>
+            </button>
+          </div>
+        `;
+        document.getElementById("quiz-progress-bar").style.display = "none";
+        const progressDiv = document.getElementById("quiz-progress");
+        if (progressDiv) {
+          progressDiv.innerHTML = `<span class="font-bold" style="color:#ef4444;">${toArabicDigits(wrongAnswers.length)} أخطاء للمراجعة</span>`;
         }
         lucide.createIcons();
       }
@@ -3315,7 +3385,9 @@
           <div class="text-2xl w-8 text-center flex-shrink-0">${medals[i]}</div>
           <div class="flex-1 min-w-0">
             <div class="font-bold text-sm truncate">${escapeHtml(r.student_name)}</div>
-            <div class="text-xs text-slate-400 mt-0.5">${toArabicDigits(r.lessons_count)} درس مكتمل</div>
+            <div class="text-xs text-slate-400 mt-0.5">
+              ${r.username ? `<span dir="ltr">@${escapeHtml(r.username)}</span> · ` : ""}${toArabicDigits(r.lessons_count)} درس مكتمل
+            </div>
           </div>
           <div class="text-left flex-shrink-0">
             <div class="font-black text-lg" style="color:#7C3AED;">${toArabicDigits(r.pct)}%</div>
@@ -3419,11 +3491,14 @@
           document.getElementById('hero-user-grade-label').textContent = gradeLabels[currentUser.grade_level] || '';
           document.getElementById('hero-points').textContent = currentUser.total_points;
           updateHeroProgress();
+          updateContinueButton();
         } else {
           document.getElementById('user-bar').classList.add('hidden');
           document.getElementById('guest-bar').classList.remove('hidden');
           document.getElementById('hero-user-card').classList.add('hidden');
           document.getElementById('hero-guest-row').classList.remove('hidden');
+          const continueBtn = document.getElementById('continue-learning-btn');
+          if (continueBtn) continueBtn.classList.add('hidden');
         }
       }
 
@@ -3444,6 +3519,48 @@
         document.getElementById('hero-progress-bar').style.width = pct + '%';
         document.getElementById('hero-progress-label').textContent =
           `أتممتِ ${toArabicDigits(done)} من ${toArabicDigits(total)} درس`;
+      }
+
+      function getNextLessonTarget() {
+        if (!currentUser) return null;
+        const grade = currentUser.grade_level;
+        const data = curriculumData[grade];
+        if (!data) return null;
+        for (let ui = 0; ui < data.units.length; ui++) {
+          const lessons = data.units[ui].lessons || [];
+          for (let li = 0; li < lessons.length; li++) {
+            const key = `${grade}|${ui}|${li}`;
+            if (!completedLessons.has(key)) {
+              return { grade, unitIndex: ui, lessonIndex: li, lesson: lessons[li], unit: data.units[ui] };
+            }
+          }
+        }
+        return null;
+      }
+
+      function updateContinueButton() {
+        const btn = document.getElementById('continue-learning-btn');
+        if (!btn || !currentUser) return;
+        const target = getNextLessonTarget();
+        if (!target) {
+          btn.textContent = 'أكملتِ كل الدروس، ممتاز!';
+          btn.disabled = true;
+          btn.classList.remove('hidden');
+          btn.style.opacity = '0.85';
+          return;
+        }
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = `تابعي: ${target.lesson.title}`;
+        btn.classList.remove('hidden');
+      }
+
+      async function continueLearning() {
+        const target = getNextLessonTarget();
+        if (!target) return;
+        currentGrade = target.grade;
+        await showLessons(target.unitIndex);
+        await showLessonContent(target.lessonIndex);
       }
 
       // ── نافذة المصادقة ──
@@ -3724,11 +3841,22 @@
             }),
           });
           const d = await r.json();
-          if (currentUser && d.points_earned > 0) {
-            currentUser.total_points += d.points_earned;
+          if (currentUser && d.success) {
             const key = `${currentGrade}|${currentUnitIndex}|${window._currentLessonIndex}`;
             completedLessons.add(key);
+            if (typeof d.total_points === 'number') {
+              currentUser.total_points = d.total_points;
+            } else if (d.points_earned > 0) {
+              currentUser.total_points += d.points_earned;
+            }
             updateAuthUI();
+            if (d.points_earned > 0) {
+              showToastMsg(`⭐ +${toArabicDigits(d.points_earned)} نقطة جديدة`);
+            } else if (d.score_saved) {
+              showToastMsg('تم حفظ النتيجة، لا توجد نقاط جديدة لأن نتيجتك السابقة مساوية أو أعلى');
+            } else {
+              showToastMsg('بقيت نتيجتك الأفضل السابقة محفوظة');
+            }
           }
           loadLeaderboard(currentGrade);
         } catch (e) {}
@@ -3784,11 +3912,13 @@
         }
       }
 
-      // تهيئة المصادقة عند تحميل الصفحة
-      initAuth();
-      loadCurriculumOverrides();
-
-      lucide.createIcons();
+      // تهيئة المنهج والمصادقة عند تحميل الصفحة
+      async function bootstrapApp() {
+        await loadCurriculumOverrides();
+        await initAuth();
+        lucide.createIcons();
+      }
+      bootstrapApp();
     </script>
 
     <!-- شريط التنقل السفلي -->

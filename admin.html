@@ -175,6 +175,66 @@
         border-color: rgba(124, 58, 237, 0.25);
         box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
       }
+      .insight-card {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      }
+      .insight-value {
+        font-size: 26px;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .quality-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+      .quality-good {
+        background: rgba(16, 185, 129, 0.08);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      }
+      .quality-warn {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.22);
+      }
+      .quality-danger {
+        background: rgba(239, 68, 68, 0.08);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.18);
+      }
+      .tool-input {
+        border: 1px solid rgba(124, 58, 237, 0.18);
+        border-radius: 12px;
+        padding: 9px 12px;
+        font-size: 13px;
+        background: #fffbf7;
+      }
+      .idea-btn {
+        border: 1px solid rgba(124, 58, 237, 0.16);
+        border-radius: 14px;
+        padding: 10px 12px;
+        background: rgba(124, 58, 237, 0.04);
+        color: #7c3aed;
+        font-size: 12px;
+        font-weight: 900;
+        text-align: right;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .idea-btn:hover {
+        background: rgba(124, 58, 237, 0.08);
+        transform: translateY(-1px);
+      }
       .toast {
         position: fixed;
         bottom: 20px;
@@ -453,6 +513,8 @@
         <!-- ── عرض الأسئلة والمنهج ── -->
         <div id="questions-view">
 
+        <div id="grade-insights" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5"></div>
+
         <!-- ── تصدير / استيراد كامل المرحلة ── -->
         <div class="flex gap-2 mb-5">
           <!-- زر التصدير -->
@@ -627,6 +689,33 @@
                 <div id="sel-count" class="cnt text-base px-3 py-1">—</div>
               </div>
 
+              <div id="lesson-insights" class="card hidden">
+                <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                  <div>
+                    <div class="font-black text-sm" style="color:#7c3aed">لوحة صحة الدرس</div>
+                    <div class="text-xs" style="color:#94a3b8">ملخص سريع يساعدك تعرفين ما يحتاج تحسين قبل نشر الدرس.</div>
+                  </div>
+                  <button onclick="copyLessonChecklist()"
+                          class="text-xs px-3 py-1.5 rounded-xl font-bold"
+                          style="background:rgba(124,58,237,0.08);color:#7c3aed;border:1px solid rgba(124,58,237,0.18)">
+                    نسخ خطة تحسين
+                  </button>
+                </div>
+                <div id="lesson-health-grid" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+                <div id="lesson-suggestions" class="space-y-2"></div>
+              </div>
+
+              <div id="idea-lab" class="card hidden">
+                <div class="font-black text-sm mb-1" style="color:#ec4899">معمل أفكار الأسئلة</div>
+                <div class="text-xs mb-3" style="color:#94a3b8">اختاري نمطًا، وسأجهز لك قالب سؤال في النموذج لتملئيه بسرعة.</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                  <button class="idea-btn" onclick="applyIdea('misconception')">خطأ شائع</button>
+                  <button class="idea-btn" onclick="applyIdea('challenge')">سؤال تحدي</button>
+                  <button class="idea-btn" onclick="applyIdea('real')">مسألة واقعية</button>
+                  <button class="idea-btn" onclick="applyIdea('visual')">سؤال بصورة</button>
+                </div>
+              </div>
+
               <!-- ── تعديل شرح الدرس (قابل للطي) ── -->
               <div class="card">
                 <div
@@ -724,6 +813,19 @@
                     </button>
                   </div>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-[1fr_190px] gap-2 mb-3">
+                  <input id="q-search" class="tool-input" type="search"
+                         placeholder="بحث داخل أسئلة هذا الدرس..."
+                         oninput="renderQ()" />
+                  <select id="q-filter" class="tool-input" onchange="renderQ()">
+                    <option value="all">كل الأسئلة</option>
+                    <option value="needs-work">تحتاج تحسين</option>
+                    <option value="no-explanation">بدون شرح</option>
+                    <option value="with-image">فيها صورة</option>
+                    <option value="no-image">بدون صورة</option>
+                  </select>
+                </div>
+                <div id="q-quality-bar" class="hidden mb-3 flex flex-wrap gap-2"></div>
                 <div id="q-list">
                   <div class="text-center text-slate-500 py-8 text-sm">
                     جاري تحميل الأسئلة...
@@ -1201,7 +1303,9 @@
         selL = -1,
         editId = null,
         questions = [],
-        counts = {};
+        counts = {},
+        allQuestions = [];
+      const LESSON_TARGET = 8;
 
       // ── Auth ─────────────────────────────────────────────
       async function checkAuth() {
@@ -1290,6 +1394,7 @@
           });
           if (!r.ok) throw new Error("not ok");
           const all = await r.json();
+          allQuestions = all;
           counts = {};
           let total = 0;
           all.forEach((q) => {
@@ -1299,6 +1404,7 @@
           });
           document.getElementById("hdr-total").innerHTML =
             `✅ ${total} سؤال في قاعدة البيانات &nbsp;<button onclick="refreshAll()" style="color:#7C3AED;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif;font-size:inherit;">🔄 تحديث</button>`;
+          renderGradeInsights();
           return total;
         } catch (e) {
           if (retry) {
@@ -1321,6 +1427,64 @@
         return counts[`${g}|${u}|${l}`] || 0;
       }
 
+      function getGradeLessonStats(g = grade) {
+        const units = CUR[g]?.units || [];
+        let lessons = 0, ready = 0, empty = 0, weak = 0, total = 0;
+        let firstPriority = null;
+        units.forEach((unit, ui) => {
+          (unit.lessons || []).forEach((lesson, li) => {
+            lessons++;
+            const c = cnt(g, ui, li);
+            total += c;
+            if (c >= LESSON_TARGET) ready++;
+            else if (c === 0) {
+              empty++;
+              if (!firstPriority) firstPriority = { ui, li, lesson, reason: "لا توجد أسئلة" };
+            } else {
+              weak++;
+              if (!firstPriority) firstPriority = { ui, li, lesson, reason: `يحتاج ${LESSON_TARGET - c} أسئلة` };
+            }
+          });
+        });
+        const coverage = lessons > 0 ? Math.round((ready / lessons) * 100) : 0;
+        return { lessons, ready, empty, weak, total, coverage, firstPriority };
+      }
+
+      function renderGradeInsights() {
+        const wrap = document.getElementById("grade-insights");
+        if (!wrap) return;
+        const s = getGradeLessonStats();
+        const priority = s.firstPriority
+          ? `<button onclick="pick(${s.firstPriority.ui},${s.firstPriority.li})" class="mt-2 text-[11px] font-black rounded-lg px-2 py-1"
+                    style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.16)">
+               ابدئي: ${esc(s.firstPriority.reason)}
+             </button>`
+          : `<div class="mt-2 text-[11px] font-black" style="color:#059669">كل الدروس جاهزة حسب الهدف</div>`;
+        wrap.innerHTML = `
+          <div class="insight-card">
+            <div class="text-xs font-black mb-2" style="color:#94a3b8">إجمالي الأسئلة</div>
+            <div class="insight-value" style="color:#7c3aed">${s.total}</div>
+            <div class="text-[11px] mt-1" style="color:#94a3b8">${CUR[grade].name}</div>
+          </div>
+          <div class="insight-card">
+            <div class="text-xs font-black mb-2" style="color:#94a3b8">دروس مكتملة بنكياً</div>
+            <div class="insight-value" style="color:#059669">${s.ready}</div>
+            <div class="text-[11px] mt-1" style="color:#94a3b8">من ${s.lessons} درس</div>
+          </div>
+          <div class="insight-card">
+            <div class="text-xs font-black mb-2" style="color:#94a3b8">دروس بلا أسئلة</div>
+            <div class="insight-value" style="color:#ef4444">${s.empty}</div>
+            ${priority}
+          </div>
+          <div class="insight-card">
+            <div class="text-xs font-black mb-2" style="color:#94a3b8">جاهزية المرحلة</div>
+            <div class="insight-value" style="color:#ec4899">${s.coverage}%</div>
+            <div class="w-full rounded-full mt-2" style="height:6px;background:rgba(124,58,237,0.1)">
+              <div class="h-full rounded-full" style="width:${s.coverage}%;background:linear-gradient(90deg,#7c3aed,#ec4899)"></div>
+            </div>
+          </div>`;
+      }
+
       // ── شجرة الدروس ─────────────────────────────────────
       function switchGrade(g) {
         grade = g;
@@ -1333,6 +1497,7 @@
         document.getElementById("sel-panel").classList.add("hidden");
         document.getElementById("no-sel").classList.remove("hidden");
         buildTree();
+        renderGradeInsights();
       }
 
       function buildTree() {
@@ -1389,6 +1554,9 @@
         buildTree();
         document.getElementById("no-sel").classList.add("hidden");
         document.getElementById("sel-panel").classList.remove("hidden");
+        document.getElementById("lesson-insights").classList.add("hidden");
+        document.getElementById("idea-lab").classList.add("hidden");
+        document.getElementById("q-quality-bar")?.classList.add("hidden");
         // أغلق الأقسام
         ["content-body","xl-body"].forEach(id => document.getElementById(id).classList.add("hidden"));
         document.getElementById("content-arrow").textContent = "▼";
@@ -1441,10 +1609,16 @@
         document.getElementById("sel-count").textContent = "...";
         document.getElementById("no-sel").classList.add("hidden");
         document.getElementById("sel-panel").classList.remove("hidden");
+        document.getElementById("lesson-insights").classList.remove("hidden");
+        document.getElementById("idea-lab").classList.remove("hidden");
         buildTree();
         updateGradeIcon();
         cancelEdit();
         clearExcel();
+        const qSearch = document.getElementById("q-search");
+        const qFilter = document.getElementById("q-filter");
+        if (qSearch) qSearch.value = "";
+        if (qFilter) qFilter.value = "all";
         // أغلق الأقسام القابلة للطي عند تغيير الدرس
         ["content-body", "xl-body"].forEach((id) => {
           document.getElementById(id).classList.add("hidden");
@@ -1469,6 +1643,7 @@
           if (!r.ok) throw new Error();
           questions = await r.json();
           renderQ();
+          updateLessonInsights();
           document.getElementById("sel-count").textContent =
             `${questions.length} سؤال`;
         } catch (e) {
@@ -1478,19 +1653,42 @@
 
       function renderQ() {
         const el = document.getElementById("q-list");
+        const qualityBar = document.getElementById("q-quality-bar");
         if (questions.length === 0) {
+          if (qualityBar) qualityBar.classList.add("hidden");
           el.innerHTML =
             '<div class="text-center py-10"><div class="text-4xl mb-3">📝</div><div style="color:#94a3b8;">لا توجد أسئلة لهذا الدرس بعد</div><div class="text-sm mt-1" style="color:#cbd5e1;">أضف أول سؤال من النموذج أدناه</div></div>';
+          updateLessonInsights();
           return;
         }
         const L = ["أ", "ب", "ج", "د"];
-        el.innerHTML = questions
+        const filtered = getFilteredQuestions();
+        renderQualityBar();
+        if (filtered.length === 0) {
+          el.innerHTML =
+            '<div class="text-center py-10"><div class="text-4xl mb-3">🔎</div><div style="color:#94a3b8;">لا توجد أسئلة تطابق البحث أو الفلتر</div><div class="text-sm mt-1" style="color:#cbd5e1;">جرّبي مسح البحث أو اختيار "كل الأسئلة"</div></div>';
+          return;
+        }
+        el.innerHTML = filtered
           .map(
-            (q, i) => `
+            ({ q, originalIndex }, i) => {
+              const issues = getQuestionIssues(q);
+              const chips = [
+                q.explanation
+                  ? '<span class="quality-chip quality-good">شرح</span>'
+                  : '<span class="quality-chip quality-warn">بدون شرح</span>',
+                q.image_url
+                  ? '<span class="quality-chip quality-good">صورة</span>'
+                  : '<span class="quality-chip quality-warn">بدون صورة</span>',
+                issues.length
+                  ? `<span class="quality-chip quality-danger">${issues.length} تنبيه</span>`
+                  : '<span class="quality-chip quality-good">جاهز</span>',
+              ].join("");
+              return `
       <div class="q-card">
         <div class="flex items-start justify-between gap-2 mb-3">
           <div class="flex items-start gap-2 flex-1 min-w-0">
-            <span class="rounded-lg px-2 py-0.5 text-xs font-black flex-shrink-0 mt-0.5" style="background:rgba(124,58,237,0.12);color:#7C3AED;">${i + 1}</span>
+            <span class="rounded-lg px-2 py-0.5 text-xs font-black flex-shrink-0 mt-0.5" style="background:rgba(124,58,237,0.12);color:#7C3AED;">${originalIndex + 1}</span>
             <div class="font-bold text-sm leading-relaxed" style="color:#2D2640;">${esc(q.question_text)}</div>
           </div>
           <div class="flex gap-1.5 flex-shrink-0">
@@ -1498,6 +1696,7 @@
             <button class="btn btn-danger py-1 px-2.5 text-xs" onclick="delQ(${q.id})">🗑️</button>
           </div>
         </div>
+        <div class="flex flex-wrap gap-1.5 mb-3">${chips}</div>
         ${q.image_url ? `<img src="${esc(q.image_url)}" alt="صورة" class="max-h-28 rounded-lg mb-2 object-contain" style="border:1px solid rgba(124,58,237,0.15);">` : ""}
         <div class="grid grid-cols-2 gap-1.5">
           ${[q.option_a, q.option_b, q.option_c, q.option_d]
@@ -1510,10 +1709,173 @@
             )
             .join("")}
         </div>
+        ${issues.length ? `<div class="mt-3 text-xs rounded-xl p-2" style="background:rgba(239,68,68,0.05);color:#ef4444;border:1px solid rgba(239,68,68,0.12)">${issues.map(esc).join(" · ")}</div>` : ""}
       </div>
-    `,
+    `;
+            },
           )
           .join("");
+      }
+
+      function getQuestionIssues(q) {
+        const issues = [];
+        const text = (q.question_text || "").trim();
+        const options = [q.option_a, q.option_b, q.option_c, q.option_d]
+          .map((o) => String(o || "").trim());
+        const uniqueOptions = new Set(options.map((o) => o.toLowerCase()));
+        if (text.length < 10) issues.push("نص السؤال قصير");
+        if (!q.explanation || !String(q.explanation).trim()) issues.push("يحتاج شرحًا");
+        if (uniqueOptions.size < 4) issues.push("خيارات مكررة");
+        if (options.some((o) => o.length < 1)) issues.push("خيار فارغ");
+        if (Number(q.correct_answer) < 0 || Number(q.correct_answer) > 3) issues.push("الإجابة الصحيحة غير صالحة");
+        return issues;
+      }
+
+      function getFilteredQuestions() {
+        const term = (document.getElementById("q-search")?.value || "").trim().toLowerCase();
+        const filter = document.getElementById("q-filter")?.value || "all";
+        return questions
+          .map((q, originalIndex) => ({ q, originalIndex }))
+          .filter(({ q }) => {
+            const haystack = [
+              q.question_text, q.option_a, q.option_b, q.option_c, q.option_d, q.explanation,
+            ].join(" ").toLowerCase();
+            if (term && !haystack.includes(term)) return false;
+            if (filter === "no-explanation") return !q.explanation;
+            if (filter === "with-image") return !!q.image_url;
+            if (filter === "no-image") return !q.image_url;
+            if (filter === "needs-work") return getQuestionIssues(q).length > 0;
+            return true;
+          });
+      }
+
+      function renderQualityBar() {
+        const bar = document.getElementById("q-quality-bar");
+        if (!bar) return;
+        const explained = questions.filter((q) => q.explanation).length;
+        const imaged = questions.filter((q) => q.image_url).length;
+        const issueCount = questions.reduce((sum, q) => sum + getQuestionIssues(q).length, 0);
+        bar.innerHTML = `
+          <span class="quality-chip ${questions.length >= LESSON_TARGET ? "quality-good" : "quality-warn"}">${questions.length}/${LESSON_TARGET} سؤال</span>
+          <span class="quality-chip ${explained === questions.length ? "quality-good" : "quality-warn"}">${explained} شرح</span>
+          <span class="quality-chip ${imaged > 0 ? "quality-good" : "quality-warn"}">${imaged} صورة</span>
+          <span class="quality-chip ${issueCount === 0 ? "quality-good" : "quality-danger"}">${issueCount} تنبيه جودة</span>
+        `;
+        bar.classList.remove("hidden");
+      }
+
+      function getLessonSuggestions() {
+        const suggestions = [];
+        const total = questions.length;
+        const explained = questions.filter((q) => q.explanation).length;
+        const imaged = questions.filter((q) => q.image_url).length;
+        const issueCount = questions.reduce((sum, q) => sum + getQuestionIssues(q).length, 0);
+        if (total === 0) {
+          suggestions.push("ابدئي بثلاثة أسئلة: سؤال مباشر، سؤال تطبيق، وسؤال خطأ شائع.");
+        } else if (total < LESSON_TARGET) {
+          suggestions.push(`أضيفي ${LESSON_TARGET - total} أسئلة ليصبح الدرس جاهزًا كبنك تدريب متوازن.`);
+        }
+        if (total > 0 && explained < Math.ceil(total * 0.6)) {
+          suggestions.push("أضيفي شروحًا قصيرة لأغلب الأسئلة، خصوصًا الأسئلة التي يتوقع أن تخطئ فيها الطالبة.");
+        }
+        if (total > 0 && imaged === 0) {
+          suggestions.push("فكرة إبداعية: أضيفي سؤالًا بصريًا واحدًا على الأقل، مثل رسم بياني أو شكل هندسي أو جدول صغير.");
+        }
+        if (issueCount > 0) {
+          suggestions.push("راجعي تنبيهات الجودة داخل البطاقات: الخيارات المكررة أو السؤال القصير يضعف تجربة الاختبار.");
+        }
+        if (suggestions.length === 0) {
+          suggestions.push("الدرس منظم جيدًا. الخطوة التالية: أضيفي سؤال تحدي يميز الطالبات المتقدمات.");
+        }
+        return suggestions;
+      }
+
+      function updateLessonInsights() {
+        const panel = document.getElementById("lesson-insights");
+        const grid = document.getElementById("lesson-health-grid");
+        const suggestionsEl = document.getElementById("lesson-suggestions");
+        if (!panel || !grid || !suggestionsEl || selU < 0 || selL < 0) return;
+        const total = questions.length;
+        const explained = questions.filter((q) => q.explanation).length;
+        const imaged = questions.filter((q) => q.image_url).length;
+        const issueCount = questions.reduce((sum, q) => sum + getQuestionIssues(q).length, 0);
+        const readiness = Math.min(100, Math.round(
+          (Math.min(total, LESSON_TARGET) / LESSON_TARGET) * 55 +
+          (total ? explained / total : 0) * 30 +
+          (imaged > 0 ? 15 : 0)
+        ));
+        grid.innerHTML = `
+          <div class="insight-card">
+            <div class="text-[11px] font-black mb-2" style="color:#94a3b8">الأسئلة</div>
+            <div class="insight-value" style="color:#7c3aed">${total}</div>
+            <div class="text-[11px] mt-1" style="color:#94a3b8">الهدف ${LESSON_TARGET}</div>
+          </div>
+          <div class="insight-card">
+            <div class="text-[11px] font-black mb-2" style="color:#94a3b8">الشروح</div>
+            <div class="insight-value" style="color:#059669">${explained}</div>
+            <div class="text-[11px] mt-1" style="color:#94a3b8">تغذية راجعة</div>
+          </div>
+          <div class="insight-card">
+            <div class="text-[11px] font-black mb-2" style="color:#94a3b8">الوسائط</div>
+            <div class="insight-value" style="color:#ec4899">${imaged}</div>
+            <div class="text-[11px] mt-1" style="color:#94a3b8">صور وأسئلة بصرية</div>
+          </div>
+          <div class="insight-card">
+            <div class="text-[11px] font-black mb-2" style="color:#94a3b8">الجاهزية</div>
+            <div class="insight-value" style="color:${readiness >= 80 ? "#059669" : readiness >= 50 ? "#d97706" : "#ef4444"}">${readiness}%</div>
+            <div class="w-full rounded-full mt-2" style="height:6px;background:rgba(124,58,237,0.1)">
+              <div class="h-full rounded-full" style="width:${readiness}%;background:${readiness >= 80 ? "#10b981" : "linear-gradient(90deg,#f59e0b,#ec4899)"}"></div>
+            </div>
+          </div>`;
+        suggestionsEl.innerHTML = getLessonSuggestions()
+          .map((s) => `<div class="rounded-xl px-3 py-2 text-xs font-bold" style="background:rgba(124,58,237,0.05);color:#4b5563;border:1px solid rgba(124,58,237,0.1)">💡 ${esc(s)}</div>`)
+          .join("");
+        panel.classList.remove("hidden");
+      }
+
+      async function copyLessonChecklist() {
+        const lesson = CUR[grade].units[selU]?.lessons[selL] || "الدرس المحدد";
+        const unit = CUR[grade].units[selU]?.title || "";
+        const text = [
+          `خطة تحسين درس: ${lesson}`,
+          `الوحدة: ${unit}`,
+          "",
+          ...getLessonSuggestions().map((s, i) => `${i + 1}. ${s}`),
+        ].join("\n");
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("✅ تم نسخ خطة التحسين");
+        } catch {
+          showToast("انسخي الخطة من بطاقة صحة الدرس", "warn");
+        }
+      }
+
+      function applyIdea(type) {
+        const lesson = CUR[grade].units[selU]?.lessons[selL] || "هذا الدرس";
+        const templates = {
+          misconception: {
+            q: `أي العبارات التالية تمثل خطأ شائعًا في ${lesson}؟`,
+            exp: "اشرحي لماذا الخيار الصحيح يعالج الخطأ الشائع، وما سبب خطأ الخيارات الأخرى.",
+          },
+          challenge: {
+            q: `مسألة تحدي: طبقي فكرة ${lesson} في موقف يحتاج أكثر من خطوة.`,
+            exp: "قسّمي الحل إلى خطوات قصيرة حتى تستطيع الطالبة مراجعة طريقة التفكير.",
+          },
+          real: {
+            q: `في موقف من الحياة اليومية، كيف نستخدم ${lesson} لحل المسألة؟`,
+            exp: "اربطي الإجابة بالموقف الواقعي ثم اكتبي العملية أو القاعدة المستخدمة.",
+          },
+          visual: {
+            q: `انظري إلى الصورة/الشكل، ما النتيجة الصحيحة المرتبطة بدرس ${lesson}؟`,
+            exp: "وضحي كيف نقرأ الصورة أو الشكل قبل اختيار الإجابة.",
+          },
+        };
+        const t = templates[type] || templates.real;
+        document.getElementById("f-q").value = t.q;
+        document.getElementById("f-explanation").value = t.exp;
+        document.getElementById("form-title").textContent = "✨ سؤال من معمل الأفكار";
+        document.querySelector(".card:last-child")?.scrollIntoView({ behavior: "smooth" });
+        showToast("✨ جهزت لك قالب سؤال، أكملي الخيارات والإجابة الصحيحة");
       }
 
       // ── CRUD ─────────────────────────────────────────────

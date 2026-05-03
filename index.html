@@ -428,6 +428,31 @@
         border: 1px solid rgba(124, 58, 237, 0.1);
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
       }
+
+      .home-panel,
+      .home-action-card {
+        background: white;
+        border: 1px solid rgba(124, 58, 237, 0.09);
+        box-shadow: 0 4px 18px rgba(45, 38, 64, 0.06);
+      }
+
+      .home-action-card {
+        min-height: 108px;
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .home-action-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(124, 58, 237, 0.2);
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
+      }
+
+      .home-action-card:active {
+        transform: scale(0.98);
+      }
     </style>
   </head>
   <body class="h-full" style="background: #fffbf7; color: #2d2640">
@@ -595,6 +620,55 @@
           <div class="mt-5 text-center text-xs text-white/65 leading-relaxed">
             <p>إعداد: فاطمة الأسمري · مريم الجبري · منى المخلفي</p>
             <p class="mt-0.5">إشراف: زينب عسكر الحربي</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="home-actions-section" class="px-4 py-6" style="background:#fffbf7">
+        <div class="max-w-lg mx-auto space-y-4">
+          <div class="home-panel rounded-2xl p-4">
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="min-w-0">
+                <p id="home-next-eyebrow" class="text-xs font-black mb-1" style="color:#7c3aed">
+                  مسارك اليوم
+                </p>
+                <h2 id="home-next-title" class="text-lg font-black leading-snug" style="color:#2d2640">
+                  ابدئي من الدروس
+                </h2>
+                <p id="home-next-meta" class="text-xs mt-1 leading-5" style="color:#64748b">
+                  اختاري المرحلة المناسبة لك.
+                </p>
+              </div>
+              <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                   style="background:rgba(124,58,237,0.08);color:#7c3aed">
+                <i data-lucide="map" style="width:20px;height:20px"></i>
+              </div>
+            </div>
+            <button id="home-next-btn"
+                    onclick="startJourney()"
+                    class="glow-btn w-full py-3 px-4 rounded-2xl text-white text-sm font-black flex items-center justify-center gap-2">
+              <i data-lucide="arrow-left" style="width:18px;height:18px"></i>
+              <span>استكشفي الدروس</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="startJourney()" class="home-action-card rounded-2xl p-4 text-right">
+              <div class="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
+                   style="background:rgba(236,72,153,0.09);color:#ec4899">
+                <i data-lucide="book-open" style="width:19px;height:19px"></i>
+              </div>
+              <p class="text-sm font-black" style="color:#2d2640">الدروس</p>
+              <p class="text-xs mt-1" style="color:#94a3b8">الوحدات والشرح</p>
+            </button>
+            <button onclick="showMyResults()" class="home-action-card rounded-2xl p-4 text-right">
+              <div class="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
+                   style="background:rgba(16,185,129,0.1);color:#059669">
+                <i data-lucide="bar-chart-3" style="width:19px;height:19px"></i>
+              </div>
+              <p class="text-sm font-black" style="color:#2d2640">نتائجي</p>
+              <p class="text-xs mt-1" style="color:#94a3b8">الإنجاز والنقاط</p>
+            </button>
           </div>
         </div>
       </section>
@@ -2711,12 +2785,71 @@
       let currentUnitIndex = null;
       let currentLeaderboardGrade = "first";
       let _pendingGrade = null;
+      const APP_SECTIONS = [
+        "hero-section",
+        "home-actions-section",
+        "leaderboard-section",
+        "subjects-section",
+        "units-section",
+        "lessons-section",
+        "lesson-content-section",
+        "quiz-section",
+        "results-section",
+      ];
+
+      function showOnlySections(visibleIds) {
+        APP_SECTIONS.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle("hidden", !visibleIds.includes(id));
+        });
+      }
+
+      function scrollAppTop() {
+        const wrapper = document.getElementById("app-wrapper");
+        if (wrapper && typeof wrapper.scrollTo === "function") {
+          wrapper.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function clearLessonUrl() {
+        if (!window.history || !window.location.search.includes("lesson=")) {
+          return;
+        }
+        const url = new URL(window.location.href);
+        url.searchParams.delete("lesson");
+        window.history.pushState({}, "", url.pathname + url.search + url.hash);
+      }
+
+      function setLessonUrl(grade, unitIndex, lessonIndex, replace = false) {
+        if (!window.history) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set("lesson", `${grade}-${unitIndex}-${lessonIndex}`);
+        url.hash = "";
+        const method = replace ? "replaceState" : "pushState";
+        window.history[method]({}, "", url.pathname + url.search);
+      }
+
+      function getLessonRouteFromUrl() {
+        const raw = new URLSearchParams(window.location.search).get("lesson");
+        if (!raw) return null;
+        const match = raw.match(/^(first|second)-(\d+)-(\d+)$/);
+        if (!match) return null;
+        return {
+          grade: match[1],
+          unitIndex: Number(match[2]),
+          lessonIndex: Number(match[3]),
+        };
+      }
 
       function startJourney() {
-        document.getElementById("hero-section").classList.add("hidden");
-        document.getElementById("leaderboard-section").classList.add("hidden");
-        document.getElementById("subjects-section").classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        clearLessonUrl();
+        if (currentUser && currentUser.grade_level) {
+          _proceedToUnits(currentUser.grade_level);
+          return;
+        }
+        showOnlySections(["subjects-section"]);
+        scrollAppTop();
       }
 
       function showUnits(grade) {
@@ -2757,9 +2890,8 @@
           grid.appendChild(card);
         });
 
-        document.getElementById("subjects-section").classList.add("hidden");
-        document.getElementById("units-section").classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        showOnlySections(["units-section"]);
+        scrollAppTop();
         lucide.createIcons();
       }
 
@@ -2791,13 +2923,12 @@
           </div>
           <i data-lucide="chevron-left" style="width:18px;height:18px;color:#C4B5FD;"></i>
         `;
-          card.onclick = () => showLessonContent(idx);
+          card.onclick = () => openLessonPage(currentGrade, currentUnitIndex, idx);
           grid.appendChild(card);
         });
 
-        document.getElementById("units-section").classList.add("hidden");
-        document.getElementById("lessons-section").classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        showOnlySections(["lessons-section"]);
+        scrollAppTop();
         lucide.createIcons();
 
         // جلب العدادات الحقيقية من قاعدة البيانات
@@ -2822,12 +2953,32 @@
         }
       }
 
-      async function showLessonContent(lessonIdx) {
+      async function openLessonPage(grade, unitIndex, lessonIndex, options = {}) {
+        const data = curriculumData[grade];
+        const unit = data && data.units[unitIndex];
+        const lesson = unit && unit.lessons[lessonIndex];
+        if (!lesson) {
+          clearLessonUrl();
+          goHome();
+          return;
+        }
+        currentGrade = grade;
+        currentUnitIndex = unitIndex;
+        await showLessonContent(lessonIndex, {
+          updateUrl: options.updateUrl !== false,
+          replaceUrl: Boolean(options.replaceUrl),
+        });
+      }
+
+      async function showLessonContent(lessonIdx, options = {}) {
         window._currentLessonIndex = lessonIdx;
         const lesson =
           curriculumData[currentGrade].units[currentUnitIndex].lessons[
             lessonIdx
           ];
+        if (options.updateUrl !== false) {
+          setLessonUrl(currentGrade, currentUnitIndex, lessonIdx, options.replaceUrl);
+        }
         document.getElementById("lesson-detail-title").textContent =
           lesson.title;
         const content = document.getElementById("lesson-detail-content");
@@ -2909,42 +3060,31 @@
         quizBtn.onclick = () => openQuiz(lessonIdx);
         content.appendChild(quizBtn);
 
-        document.getElementById("lessons-section").classList.add("hidden");
-        document
-          .getElementById("lesson-content-section")
-          .classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        showOnlySections(["lesson-content-section"]);
+        scrollAppTop();
         lucide.createIcons();
       }
 
       function goBack(target) {
-        const sections = [
-          "hero-section",
-          "subjects-section",
-          "units-section",
-          "lessons-section",
-          "lesson-content-section",
-          "quiz-section",
-          "leaderboard-section",
-        ];
-        sections.forEach((s) =>
-          document.getElementById(s).classList.add("hidden"),
-        );
-
         if (target === "subjects") {
-          document.getElementById("hero-section").classList.remove("hidden");
-          document
-            .getElementById("leaderboard-section")
-            .classList.remove("hidden");
-          document
-            .getElementById("subjects-section")
-            .classList.remove("hidden");
+          clearLessonUrl();
+          showOnlySections(["subjects-section"]);
         } else if (target === "units") {
-          document.getElementById("units-section").classList.remove("hidden");
+          clearLessonUrl();
+          showOnlySections(["units-section"]);
         } else if (target === "lessons") {
-          document.getElementById("lessons-section").classList.remove("hidden");
+          clearLessonUrl();
+          const grid = document.getElementById("lessons-grid");
+          if (currentGrade && currentUnitIndex !== null && (!grid || grid.children.length === 0)) {
+            showLessons(currentUnitIndex);
+            return;
+          }
+          showOnlySections(["lessons-section"]);
+        } else {
+          goHome();
+          return;
         }
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollAppTop();
         lucide.createIcons();
       }
 
@@ -2978,17 +3118,7 @@
 
         // إذا لم توجد أسئلة في قاعدة البيانات، أظهري رسالة واضحة
         if (quizArr.length === 0) {
-          const sections = [
-            "hero-section",
-            "subjects-section",
-            "units-section",
-            "lessons-section",
-            "lesson-content-section",
-          ];
-          sections.forEach((s) =>
-            document.getElementById(s).classList.add("hidden"),
-          );
-          document.getElementById("quiz-section").classList.remove("hidden");
+          showOnlySections(["quiz-section"]);
           const pb = document.getElementById("quiz-progress-bar");
           if (pb) pb.style.display = "none";
           const pd = document.getElementById("quiz-progress");
@@ -3001,7 +3131,7 @@
               <button onclick="goBack('lessons')" class="btn btn-primary px-6 py-2 text-sm"
                 style="background:linear-gradient(135deg,#7C3AED,#EC4899);">← العودة للدروس</button>
             </div>`;
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          scrollAppTop();
           return;
         }
 
@@ -3020,20 +3150,10 @@
         const progressBar = document.getElementById("quiz-progress-bar");
         if (progressBar) progressBar.style.display = "";
 
-        const sections = [
-          "hero-section",
-          "subjects-section",
-          "units-section",
-          "lessons-section",
-          "lesson-content-section",
-        ];
-        sections.forEach((s) =>
-          document.getElementById(s).classList.add("hidden"),
-        );
-        document.getElementById("quiz-section").classList.remove("hidden");
+        showOnlySections(["quiz-section"]);
 
         displayCurrentQuestion();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollAppTop();
       }
 
       async function openComprehensiveQuiz(type, unitIdx) {
@@ -3060,9 +3180,7 @@
         } catch (e) {}
 
         if (quizArr.length === 0) {
-          const sections = ["hero-section","subjects-section","units-section","lessons-section","lesson-content-section"];
-          sections.forEach((s) => document.getElementById(s).classList.add("hidden"));
-          document.getElementById("quiz-section").classList.remove("hidden");
+          showOnlySections(["quiz-section"]);
           const pb = document.getElementById("quiz-progress-bar");
           if (pb) pb.style.display = "none";
           const pd = document.getElementById("quiz-progress");
@@ -3075,7 +3193,7 @@
               <button onclick="goBack('${type === 'grade' ? 'units' : 'lessons'}')" class="btn btn-primary px-6 py-2 text-sm"
                 style="background:linear-gradient(135deg,#7C3AED,#EC4899);">← رجوع</button>
             </div>`;
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          scrollAppTop();
           return;
         }
 
@@ -3095,11 +3213,9 @@
         const progressBar = document.getElementById("quiz-progress-bar");
         if (progressBar) progressBar.style.display = "";
 
-        const sections = ["hero-section","subjects-section","units-section","lessons-section","lesson-content-section"];
-        sections.forEach((s) => document.getElementById(s).classList.add("hidden"));
-        document.getElementById("quiz-section").classList.remove("hidden");
+        showOnlySections(["quiz-section"]);
         displayCurrentQuestion();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollAppTop();
       }
 
       function displayCurrentQuestion() {
@@ -3408,22 +3524,13 @@
       }
 
       function goHome() {
-        const sections = [
-          "subjects-section",
-          "units-section",
-          "lessons-section",
-          "lesson-content-section",
-          "quiz-section",
-          "results-section",
-        ];
-        sections.forEach((s) =>
-          document.getElementById(s).classList.add("hidden"),
-        );
-        document.getElementById("hero-section").classList.remove("hidden");
-        document
-          .getElementById("leaderboard-section")
-          .classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        clearLessonUrl();
+        showOnlySections([
+          "hero-section",
+          "home-actions-section",
+          "leaderboard-section",
+        ]);
+        scrollAppTop();
         lucide.createIcons();
       }
 
@@ -3492,6 +3599,7 @@
           document.getElementById('hero-points').textContent = currentUser.total_points;
           updateHeroProgress();
           updateContinueButton();
+          updateHomePanel();
         } else {
           document.getElementById('user-bar').classList.add('hidden');
           document.getElementById('guest-bar').classList.remove('hidden');
@@ -3499,6 +3607,7 @@
           document.getElementById('hero-guest-row').classList.remove('hidden');
           const continueBtn = document.getElementById('continue-learning-btn');
           if (continueBtn) continueBtn.classList.add('hidden');
+          updateHomePanel();
         }
       }
 
@@ -3555,12 +3664,52 @@
         btn.classList.remove('hidden');
       }
 
+      function updateHomePanel() {
+        const title = document.getElementById('home-next-title');
+        const meta = document.getElementById('home-next-meta');
+        const btn = document.getElementById('home-next-btn');
+        const eyebrow = document.getElementById('home-next-eyebrow');
+        if (!title || !meta || !btn || !eyebrow) return;
+
+        if (!currentUser) {
+          eyebrow.textContent = 'ابدئي الرحلة';
+          title.textContent = 'اختاري مرحلتك الدراسية';
+          meta.textContent = 'الدروس مرتبة حسب المرحلة والوحدة.';
+          btn.disabled = false;
+          btn.onclick = startJourney;
+          btn.innerHTML = '<i data-lucide="arrow-left" style="width:18px;height:18px"></i><span>استكشفي الدروس</span>';
+          btn.style.opacity = '1';
+          lucide.createIcons();
+          return;
+        }
+
+        const target = getNextLessonTarget();
+        if (!target) {
+          eyebrow.textContent = 'مسارك اليوم';
+          title.textContent = 'أكملتِ كل الدروس';
+          meta.textContent = 'راجعي نتائجك أو اختاري اختبارا شاملا.';
+          btn.disabled = false;
+          btn.onclick = showMyResults;
+          btn.innerHTML = '<i data-lucide="bar-chart-3" style="width:18px;height:18px"></i><span>عرض نتائجي</span>';
+          btn.style.opacity = '1';
+          lucide.createIcons();
+          return;
+        }
+
+        eyebrow.textContent = 'مسارك اليوم';
+        title.textContent = target.lesson.title;
+        meta.textContent = `${target.unit.title} · ${toArabicDigits(target.unitIndex + 1)} / ${toArabicDigits(curriculumData[target.grade].units.length)}`;
+        btn.disabled = false;
+        btn.onclick = continueLearning;
+        btn.innerHTML = '<i data-lucide="play" style="width:18px;height:18px"></i><span>تابعي الدرس</span>';
+        btn.style.opacity = '1';
+        lucide.createIcons();
+      }
+
       async function continueLearning() {
         const target = getNextLessonTarget();
         if (!target) return;
-        currentGrade = target.grade;
-        await showLessons(target.unitIndex);
-        await showLessonContent(target.lessonIndex);
+        await openLessonPage(target.grade, target.unitIndex, target.lessonIndex);
       }
 
       // ── نافذة المصادقة ──
@@ -3697,11 +3846,9 @@
           showAuthModal('login');
           return;
         }
-        const sections = ['hero-section','leaderboard-section','subjects-section',
-          'units-section','lessons-section','lesson-content-section','quiz-section'];
-        sections.forEach(s => document.getElementById(s).classList.add('hidden'));
-        document.getElementById('results-section').classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        clearLessonUrl();
+        showOnlySections(['results-section']);
+        scrollAppTop();
         await renderResults();
         lucide.createIcons();
       }
@@ -3912,13 +4059,33 @@
         }
       }
 
+      async function restoreRouteFromUrl() {
+        const route = getLessonRouteFromUrl();
+        if (!route) return false;
+        await openLessonPage(route.grade, route.unitIndex, route.lessonIndex, {
+          replaceUrl: true,
+        });
+        return true;
+      }
+
       // تهيئة المنهج والمصادقة عند تحميل الصفحة
       async function bootstrapApp() {
         await loadCurriculumOverrides();
         await initAuth();
+        await restoreRouteFromUrl();
         lucide.createIcons();
       }
       bootstrapApp();
+      window.addEventListener("popstate", async () => {
+        const route = getLessonRouteFromUrl();
+        if (route) {
+          await openLessonPage(route.grade, route.unitIndex, route.lessonIndex, {
+            updateUrl: false,
+          });
+        } else {
+          goHome();
+        }
+      });
     </script>
 
     <!-- شريط التنقل السفلي -->

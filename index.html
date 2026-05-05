@@ -408,30 +408,6 @@
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
       }
 
-      .home-panel,
-      .home-action-card {
-        background: white;
-        border: 1px solid rgba(124, 58, 237, 0.09);
-        box-shadow: 0 4px 18px rgba(45, 38, 64, 0.06);
-      }
-
-      .home-action-card {
-        min-height: 108px;
-        transition:
-          transform 0.2s ease,
-          border-color 0.2s ease,
-          box-shadow 0.2s ease;
-      }
-
-      .home-action-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(124, 58, 237, 0.2);
-        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
-      }
-
-      .home-action-card:active {
-        transform: scale(0.98);
-      }
     </style>
   </head>
   <body class="h-full" style="background: #fffbf7; color: #2d2640">
@@ -603,54 +579,6 @@
         </div>
       </section>
 
-      <section id="home-actions-section" class="px-4 py-6" style="background:#fffbf7">
-        <div class="max-w-lg mx-auto space-y-4">
-          <div class="home-panel rounded-2xl p-4">
-            <div class="flex items-start justify-between gap-3 mb-4">
-              <div class="min-w-0">
-                <p id="home-next-eyebrow" class="text-xs font-black mb-1" style="color:#7c3aed">
-                  مسارك اليوم
-                </p>
-                <h2 id="home-next-title" class="text-lg font-black leading-snug" style="color:#2d2640">
-                  ابدئي من الدروس
-                </h2>
-                <p id="home-next-meta" class="text-xs mt-1 leading-5" style="color:#64748b">
-                  اختاري المرحلة المناسبة لك.
-                </p>
-              </div>
-              <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                   style="background:rgba(124,58,237,0.08);color:#7c3aed">
-                <i data-lucide="map" style="width:20px;height:20px"></i>
-              </div>
-            </div>
-            <button id="home-next-btn"
-                    onclick="startJourney()"
-                    class="glow-btn w-full py-3 px-4 rounded-2xl text-white text-sm font-black flex items-center justify-center gap-2">
-              <i data-lucide="arrow-left" style="width:18px;height:18px"></i>
-              <span>استكشفي الدروس</span>
-            </button>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <button onclick="startJourney()" class="home-action-card rounded-2xl p-4 text-right">
-              <div class="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
-                   style="background:rgba(236,72,153,0.09);color:#ec4899">
-                <i data-lucide="book-open" style="width:19px;height:19px"></i>
-              </div>
-              <p class="text-sm font-black" style="color:#2d2640">الدروس</p>
-              <p class="text-xs mt-1" style="color:#94a3b8">الوحدات والشرح</p>
-            </button>
-            <button onclick="showMyResults()" class="home-action-card rounded-2xl p-4 text-right">
-              <div class="w-10 h-10 rounded-2xl flex items-center justify-center mb-3"
-                   style="background:rgba(16,185,129,0.1);color:#059669">
-                <i data-lucide="bar-chart-3" style="width:19px;height:19px"></i>
-              </div>
-              <p class="text-sm font-black" style="color:#2d2640">نتائجي</p>
-              <p class="text-xs mt-1" style="color:#94a3b8">الإنجاز والنقاط</p>
-            </button>
-          </div>
-        </div>
-      </section>
 
       <!-- قسم المتصدرين -->
       <section
@@ -2771,7 +2699,6 @@
       let _pendingGrade = null;
       const APP_SECTIONS = [
         "hero-section",
-        "home-actions-section",
         "leaderboard-section",
         "subjects-section",
         "units-section",
@@ -3502,7 +3429,6 @@
         clearLessonUrl();
         showOnlySections([
           "hero-section",
-          "home-actions-section",
           "leaderboard-section",
         ]);
         scrollAppTop();
@@ -3574,7 +3500,6 @@
           document.getElementById('hero-points').textContent = currentUser.total_points;
           updateHeroProgress();
           updateContinueButton();
-          updateHomePanel();
         } else {
           document.getElementById('user-bar').classList.add('hidden');
           document.getElementById('guest-bar').classList.remove('hidden');
@@ -3582,7 +3507,6 @@
           document.getElementById('hero-guest-row').classList.remove('hidden');
           const continueBtn = document.getElementById('continue-learning-btn');
           if (continueBtn) continueBtn.classList.add('hidden');
-          updateHomePanel();
         }
       }
 
@@ -3639,47 +3563,6 @@
         btn.classList.remove('hidden');
       }
 
-      function updateHomePanel() {
-        const title = document.getElementById('home-next-title');
-        const meta = document.getElementById('home-next-meta');
-        const btn = document.getElementById('home-next-btn');
-        const eyebrow = document.getElementById('home-next-eyebrow');
-        if (!title || !meta || !btn || !eyebrow) return;
-
-        if (!currentUser) {
-          eyebrow.textContent = 'ابدئي الرحلة';
-          title.textContent = 'اختاري مرحلتك الدراسية';
-          meta.textContent = 'الدروس مرتبة حسب المرحلة والوحدة.';
-          btn.disabled = false;
-          btn.onclick = startJourney;
-          btn.innerHTML = '<i data-lucide="arrow-left" style="width:18px;height:18px"></i><span>استكشفي الدروس</span>';
-          btn.style.opacity = '1';
-          lucide.createIcons();
-          return;
-        }
-
-        const target = getNextLessonTarget();
-        if (!target) {
-          eyebrow.textContent = 'مسارك اليوم';
-          title.textContent = 'أكملتِ كل الدروس';
-          meta.textContent = 'راجعي نتائجك أو اختاري اختبارا شاملا.';
-          btn.disabled = false;
-          btn.onclick = showMyResults;
-          btn.innerHTML = '<i data-lucide="bar-chart-3" style="width:18px;height:18px"></i><span>عرض نتائجي</span>';
-          btn.style.opacity = '1';
-          lucide.createIcons();
-          return;
-        }
-
-        eyebrow.textContent = 'مسارك اليوم';
-        title.textContent = target.lesson.title;
-        meta.textContent = `${target.unit.title} · ${toArabicDigits(target.unitIndex + 1)} / ${toArabicDigits(curriculumData[target.grade].units.length)}`;
-        btn.disabled = false;
-        btn.onclick = continueLearning;
-        btn.innerHTML = '<i data-lucide="play" style="width:18px;height:18px"></i><span>تابعي الدرس</span>';
-        btn.style.opacity = '1';
-        lucide.createIcons();
-      }
 
       async function continueLearning() {
         const target = getNextLessonTarget();

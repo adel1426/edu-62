@@ -34,8 +34,12 @@ define('DB_PASS',    _env('DB_PASS',    'Your_Password_Here'));
 define('DB_CHARSET', _env('DB_CHARSET', 'utf8mb4'));
 
 // ── إعدادات لوحة الإدارة ──
-define('ADMIN_USERNAME', _env('ADMIN_USERNAME', 'admin'));
-define('ADMIN_PASSWORD', _env('ADMIN_PASSWORD', '62'));
+define('ADMIN_USERNAME',  _env('ADMIN_USERNAME',  'admin'));
+define('ADMIN_PASSWORD',  _env('ADMIN_PASSWORD',  '62'));
+
+// ── مشرف عرض فقط (بدون صلاحيات تعديل) ──
+define('VIEWER_USERNAME', _env('VIEWER_USERNAME', 'drop_color'));
+define('VIEWER_PASSWORD', _env('VIEWER_PASSWORD', 'drop_color'));
 
 // ── إعدادات الجلسة ──
 define('SESSION_NAME',     _env('SESSION_NAME',     'nour_session'));

@@ -158,6 +158,10 @@
         transform: scale(0.97);
       }
 
+      /* إخفاء زر إظهار كلمة المرور في المتصفحات */
+      input[type="password"]::-ms-reveal,
+      input[type="password"]::-ms-clear { display: none !important; }
+
       .glow-btn {
         transition: all 0.3s ease;
         background: linear-gradient(135deg, #7c3aed, #ec4899);
@@ -720,7 +724,7 @@
             <button id="skip-auth-btn" onclick="closeAuthModal()"
                     class="w-full py-2 mt-2 text-xs font-bold rounded-2xl transition"
                     style="color:#94a3b8;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif">
-              متابعة بدون حساب
+              👁 تصفح كزائر
             </button>
           </div>
 
@@ -749,7 +753,7 @@
             <button id="skip-auth-btn" onclick="closeAuthModal()"
                     class="w-full py-2 mt-2 text-xs font-bold rounded-2xl transition"
                     style="color:#94a3b8;background:none;border:none;cursor:pointer;font-family:Cairo,sans-serif">
-              متابعة بدون حساب
+              👁 تصفح كزائر
             </button>
           </div>
         </div>
@@ -2084,11 +2088,7 @@
       }
 
       function showUnits(grade) {
-        if (currentUser) {
-          _proceedToUnits(currentUser.grade_level);
-        } else {
-          showAuthModal('register', grade);
-        }
+        _proceedToUnits(currentUser ? currentUser.grade_level : grade);
       }
 
       function _proceedToUnits(grade) {
@@ -2930,14 +2930,7 @@
 
       // ── نافذة المصادقة ──
       function showAuthModal(tab = 'register', grade = null) {
-        if (grade) {
-          _pendingGrade = grade;
-          // تحديد المرحلة تلقائياً في فورم التسجيل
-          document.getElementById('reg-grade').value = grade;
-        }
-        // إخفاء "متابعة بدون حساب" إذا كان المستخدم قادماً من اختيار المرحلة
-        const skipBtn = document.getElementById('skip-auth-btn');
-        if (skipBtn) skipBtn.style.display = _pendingGrade ? 'none' : '';
+        if (grade) document.getElementById('reg-grade').value = grade;
         document.getElementById('reg-error').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
         document.getElementById('auth-modal').classList.remove('hidden');
@@ -2945,10 +2938,7 @@
       }
 
       function closeAuthModal() {
-        _pendingGrade = null;
         document.getElementById('auth-modal').classList.add('hidden');
-        const skipBtn = document.getElementById('skip-auth-btn');
-        if (skipBtn) skipBtn.style.display = '';
       }
 
       function switchAuthTab(tab) {
@@ -2994,11 +2984,6 @@
           document.getElementById('auth-modal').classList.add('hidden');
           updateAuthUI();
           showToastMsg('🎉 أهلاً ' + currentUser.name + '! تم إنشاء حسابك');
-          if (_pendingGrade) {
-            const g = _pendingGrade;
-            _pendingGrade = null;
-            _proceedToUnits(g);
-          }
         } catch (e) {
           errEl.textContent = 'تعذّر الاتصال بالخادم';
           errEl.classList.remove('hidden');
@@ -3034,11 +3019,6 @@
           document.getElementById('auth-modal').classList.add('hidden');
           updateAuthUI();
           showToastMsg('👋 مرحباً بعودتك ' + currentUser.name + '!');
-          if (_pendingGrade) {
-            const g = _pendingGrade;
-            _pendingGrade = null;
-            _proceedToUnits(g);
-          }
         } catch (e) {
           errEl.textContent = 'تعذّر الاتصال بالخادم';
           errEl.classList.remove('hidden');

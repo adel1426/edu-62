@@ -45,6 +45,9 @@ function require_admin(): void {
     }
     $reqMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     if (in_array($reqMethod, ['POST', 'PUT', 'DELETE'], true)) {
+        if (!empty($_SESSION['is_viewer'])) {
+            send_json(['error' => 'صلاحية عرض فقط — لا يمكن إجراء تعديلات.'], 403);
+        }
         verify_csrf();
     }
 }

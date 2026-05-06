@@ -53,6 +53,10 @@
         padding: 10px 22px;
         transition: all 0.2s;
       }
+      /* إخفاء زر إظهار كلمة المرور في المتصفحات */
+      input[type="password"]::-ms-reveal,
+      input[type="password"]::-ms-clear { display: none !important; }
+
       .btn-primary {
         background: linear-gradient(135deg, #7c3aed, #ec4899);
         color: white;
@@ -451,6 +455,11 @@
 
     <!-- ── لوحة التحكم ─────────────────────────────────── -->
     <div id="admin-panel" class="hidden min-h-screen">
+      <!-- بانر وضع العرض فقط -->
+      <div id="viewer-banner" class="hidden text-center py-2 text-sm font-bold"
+           style="background:rgba(245,158,11,0.12);border-bottom:1px solid rgba(245,158,11,0.3);color:#92400e;font-family:Cairo,sans-serif;position:sticky;top:0;z-index:200;">
+        👁 وضع العرض فقط — لا يمكن إجراء تعديلات
+      </div>
       <!-- رأس الصفحة -->
       <div
         style="
@@ -1443,7 +1452,8 @@
         editId = null,
         questions = [],
         counts = {},
-        allQuestions = [];
+        allQuestions = [],
+        isViewer = false;
       const LESSON_TARGET = 8;
 
       // ── Auth ─────────────────────────────────────────────
@@ -1456,6 +1466,7 @@
           const d = await r.json();
           if (d.isAdmin) {
             if (d.csrf_token) csrfToken = d.csrf_token;
+            isViewer = !!d.is_viewer;
             await openPanel();
           } else {
             showLogin();
@@ -1477,6 +1488,31 @@
         await loadCounts();
         buildTree();
         await pick(0, 0);
+        if (isViewer) activateViewerMode();
+      }
+
+      function activateViewerMode() {
+        document.getElementById('viewer-banner').classList.remove('hidden');
+        // إخفاء جميع عناصر الكتابة
+        const writeSelectors = [
+          'button[onclick*="saveContent"]',
+          'button[onclick*="resetContent"]',
+          'button[onclick*="addVideoUrlRow"]',
+          'button[onclick*="saveQ"]',
+          'button[onclick*="cancelEdit"]',
+          'button[onclick*="resetScores"]',
+          'button[onclick*="resetStudents"]',
+          'button[onclick*="resetAll"]',
+          'button[onclick*="resetCurriculum"]',
+          'button[onclick*="handleBulk"]',
+          'button[onclick*="downloadTemplate"]',
+        ];
+        writeSelectors.forEach(sel =>
+          document.querySelectorAll(sel).forEach(el => el.style.display = 'none')
+        );
+        // إخفاء قسم إضافة/تعديل الأسئلة
+        const formCard = document.getElementById('form-title')?.closest('.card');
+        if (formCard) formCard.style.display = 'none';
       }
 
       async function doLogin() {
@@ -1499,6 +1535,7 @@
           const d = await r.json();
           if (d.success) {
             if (d.csrf_token) csrfToken = d.csrf_token;
+            isViewer = !!d.is_viewer;
             document.getElementById("login-user").value = "";
             document.getElementById("login-pass").value = "";
             await openPanel();
@@ -2986,11 +3023,11 @@
             <td class="px-3 py-3 text-center font-bold text-sm" style="color:#7c3aed">${avgScore}</td>
             <td class="px-3 py-3 text-center text-xs" style="color:#64748b">${formatActivityDate(s.last_activity)}</td>
             <td class="px-3 py-3 text-center">
-              <button onclick="event.stopPropagation();deleteStudent(${s.id},'${escapeHtml(s.name)}','${g}')"
+              ${isViewer ? '' : `<button onclick="event.stopPropagation();deleteStudent(${s.id},'${escapeHtml(s.name)}','${g}')"
                       class="text-xs px-2 py-1 rounded-lg"
                       style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.2)">
                 🗑️
-              </button>
+              </button>`}
             </td>
           </tr>`;
         }).join('');

@@ -5,11 +5,16 @@ function handle_login(): void {
     $body = read_json_body();
     $u = $body['username'] ?? '';
     $p = $body['password'] ?? '';
-    if ($u === ADMIN_USERNAME && $p === ADMIN_PASSWORD) {
+
+    $isAdmin  = ($u === ADMIN_USERNAME  && $p === ADMIN_PASSWORD);
+    $isViewer = ($u === VIEWER_USERNAME && $p === VIEWER_PASSWORD);
+
+    if ($isAdmin || $isViewer) {
         start_session_safe();
-        $_SESSION['is_admin'] = true;
-        Logger::info('Admin login success');
-        send_json(['success' => true, 'csrf_token' => csrf_token()]);
+        $_SESSION['is_admin']  = true;
+        $_SESSION['is_viewer'] = $isViewer;
+        Logger::info($isViewer ? 'Viewer login' : 'Admin login');
+        send_json(['success' => true, 'csrf_token' => csrf_token(), 'is_viewer' => $isViewer]);
     } else {
         Logger::warn('Admin login failed', ['username' => $u]);
         send_json(['error' => 'اسم المستخدم أو كلمة المرور غير صحيحة'], 401);
@@ -32,9 +37,10 @@ function handle_logout(): void {
 function handle_me(): void {
     start_session_safe();
     $isAdmin   = !empty($_SESSION['is_admin']);
+    $isViewer  = !empty($_SESSION['is_viewer']);
     $studentId = $_SESSION['student_id'] ?? null;
 
-    $extra = $isAdmin ? ['csrf_token' => csrf_token()] : [];
+    $extra = $isAdmin ? ['csrf_token' => csrf_token(), 'is_viewer' => $isViewer] : [];
 
     if ($studentId) {
         $stmt = db()->prepare("SELECT id, name, grade_level, total_points FROM users WHERE id = ?");

@@ -878,11 +878,6 @@
                       style="background:rgba(109,40,217,0.08);color:#7c3aed;border:1px solid rgba(124,58,237,0.2)">
                 ⚠️ بدء مرحلة جديدة (حذف الكل)
               </button>
-              <button onclick="resetCurriculum('first')"
-                      class="text-xs px-3 py-2 rounded-xl font-bold"
-                      style="background:rgba(239,68,68,0.06);color:#b91c1c;border:1px solid rgba(185,28,28,0.2)">
-                📚 مسح المنهج (الوحدات والدروس)
-              </button>
             </div>
             <!-- جدول الطالبات + الجانب -->
             <div class="flex flex-col lg:flex-row gap-4">
@@ -972,11 +967,6 @@
                       class="text-xs px-3 py-2 rounded-xl font-bold"
                       style="background:rgba(109,40,217,0.08);color:#7c3aed;border:1px solid rgba(124,58,237,0.2)">
                 ⚠️ بدء مرحلة جديدة (حذف الكل)
-              </button>
-              <button onclick="resetCurriculum('second')"
-                      class="text-xs px-3 py-2 rounded-xl font-bold"
-                      style="background:rgba(239,68,68,0.06);color:#b91c1c;border:1px solid rgba(185,28,28,0.2)">
-                📚 مسح المنهج (الوحدات والدروس)
               </button>
             </div>
             <!-- جدول الطالبات + الجانب -->
@@ -1124,7 +1114,6 @@
           'button[onclick*="resetScores"]',
           'button[onclick*="resetStudents"]',
           'button[onclick*="resetAll"]',
-          'button[onclick*="resetCurriculum"]',
           'button[onclick*="handleBulk"]',
           'button[onclick*="onFile"]',
           'button[onclick*="clearImg"]',
@@ -1975,17 +1964,6 @@
         } catch { showToast('❌ خطأ في الاتصال', 'error'); }
       }
 
-      async function resetCurriculum(g) {
-        const label = g === 'first' ? 'أول متوسط' : 'ثاني متوسط';
-        if (!confirm(`⚠️ مسح المنهج الدراسي لـ ${label}؟\nستُحذف جميع الوحدات والدروس والأسئلة لهذه المرحلة من قاعدة البيانات.\nهذا الإجراء لا يمكن التراجع عنه!`)) return;
-        try {
-          const r = await apiFetch(`${API}/admin/reset/curriculum?grade=${g}`, { method: 'DELETE' });
-          const d = await r.json();
-          if (r.ok) {
-            showToast(`✅ تم مسح المنهج الدراسي لـ ${label}`);
-          } else { showToast('❌ ' + (d.error || 'فشل المسح'), 'error'); }
-        } catch { showToast('❌ خطأ في الاتصال', 'error'); }
-      }
 
       async function showStudentModal(id) {
         const s = _statsData?.students?.find(x => x.id === id);

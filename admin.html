@@ -1493,8 +1493,9 @@
 
       function activateViewerMode() {
         document.getElementById('viewer-banner').classList.remove('hidden');
-        // إخفاء جميع عناصر الكتابة
-        const writeSelectors = [
+
+        // إخفاء أزرار الكتابة الثابتة في الصفحة
+        [
           'button[onclick*="saveContent"]',
           'button[onclick*="resetContent"]',
           'button[onclick*="addVideoUrlRow"]',
@@ -1506,13 +1507,19 @@
           'button[onclick*="resetCurriculum"]',
           'button[onclick*="handleBulk"]',
           'button[onclick*="downloadTemplate"]',
-        ];
-        writeSelectors.forEach(sel =>
+          'button[onclick*="onFile"]',
+          'button[onclick*="clearImg"]',
+        ].forEach(sel =>
           document.querySelectorAll(sel).forEach(el => el.style.display = 'none')
         );
-        // إخفاء قسم إضافة/تعديل الأسئلة
+
+        // إخفاء قسم إضافة/تعديل الأسئلة بالكامل
         const formCard = document.getElementById('form-title')?.closest('.card');
         if (formCard) formCard.style.display = 'none';
+
+        // إخفاء قسم رفع الأسئلة من Excel
+        const xlCard = document.getElementById('xl-body')?.closest('.card');
+        if (xlCard) xlCard.style.display = 'none';
       }
 
       async function doLogin() {
@@ -1868,8 +1875,8 @@
             <div class="font-bold text-sm leading-relaxed" style="color:#2D2640;">${esc(q.question_text)}</div>
           </div>
           <div class="flex gap-1.5 flex-shrink-0">
-            <button class="btn btn-edit py-1 px-2.5 text-xs" onclick="startEdit(${q.id})">✏️</button>
-            <button class="btn btn-danger py-1 px-2.5 text-xs" onclick="delQ(${q.id})">🗑️</button>
+            ${isViewer ? '' : `<button class="btn btn-edit py-1 px-2.5 text-xs" onclick="startEdit(${q.id})">✏️</button>
+            <button class="btn btn-danger py-1 px-2.5 text-xs" onclick="delQ(${q.id})">🗑️</button>`}
           </div>
         </div>
         <div class="flex flex-wrap gap-1.5 mb-3">${chips}</div>

@@ -159,8 +159,6 @@
       }
 
       /* إخفاء زر إظهار كلمة المرور في المتصفحات */
-      input[type="password"]::-ms-reveal,
-      input[type="password"]::-ms-clear { display: none !important; }
 
       .glow-btn {
         transition: all 0.3s ease;
@@ -717,9 +715,14 @@
               </div>
               <div>
                 <label class="text-xs font-bold mb-1 block" style="color:#64748b">كلمة المرور</label>
-                <input id="reg-password" type="password" placeholder="٦ أحرف على الأقل" dir="ltr"
-                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+                <div class="relative">
+                  <input id="reg-password" type="password" placeholder="٦ أحرف على الأقل" dir="ltr"
+                         class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none pr-10"
+                         style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+                  <button type="button" onclick="togglePass('reg-password',this)"
+                          class="absolute left-3 top-1/2 -translate-y-1/2 text-base"
+                          style="background:none;border:none;cursor:pointer;color:#94a3b8;line-height:1">👁</button>
+                </div>
               </div>
             </div>
             <div id="reg-error" class="hidden mt-3 text-xs text-center px-3 py-2 rounded-xl" style="background:#fee2e2;color:#ef4444"></div>
@@ -746,9 +749,14 @@
               </div>
               <div>
                 <label class="text-xs font-bold mb-1 block" style="color:#64748b">كلمة المرور</label>
-                <input id="login-password-student" type="password" placeholder="كلمة المرور" dir="ltr"
-                       class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                       style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+                <div class="relative">
+                  <input id="login-password-student" type="password" placeholder="كلمة المرور" dir="ltr"
+                         class="w-full border rounded-2xl px-4 py-3 text-sm focus:outline-none pr-10"
+                         style="border-color:rgba(124,58,237,0.2);font-family:Cairo,sans-serif;color:#2d2640"/>
+                  <button type="button" onclick="togglePass('login-password-student',this)"
+                          class="absolute left-3 top-1/2 -translate-y-1/2 text-base"
+                          style="background:none;border:none;cursor:pointer;color:#94a3b8;line-height:1">👁</button>
+                </div>
               </div>
             </div>
             <div id="login-error" class="hidden mt-3 text-xs text-center px-3 py-2 rounded-xl" style="background:#fee2e2;color:#ef4444"></div>
@@ -2034,6 +2042,14 @@
         const target = getNextLessonTarget();
         if (!target) return;
         await openLessonPage(target.grade, target.unitIndex, target.lessonIndex);
+      }
+
+      function togglePass(inputId, btn) {
+        const inp = document.getElementById(inputId);
+        if (!inp) return;
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.textContent = show ? '🙈' : '👁';
       }
 
       // ── نافذة المصادقة ──

@@ -1,7 +1,7 @@
 <?php
 
 function handle_login(): void {
-    rate_limit('admin_login', 3, 1800);
+    rate_limit('admin_login', 30, 1800);
     $body = read_json_body();
     $u = $body['username'] ?? '';
     $p = $body['password'] ?? '';
@@ -105,7 +105,7 @@ function handle_register(): void {
 }
 
 function handle_student_login(): void {
-    rate_limit('student_login', 10, 900);
+    rate_limit('student_login', 30, 1800);
     $b        = read_json_body();
     $username = strtolower(trim($b['username'] ?? ''));
     $password = $b['password'] ?? '';

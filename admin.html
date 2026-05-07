@@ -53,8 +53,6 @@
         transition: all 0.2s;
       }
       /* إخفاء زر إظهار كلمة المرور في المتصفحات */
-      input[type="password"]::-ms-reveal,
-      input[type="password"]::-ms-clear { display: none !important; }
 
       .btn-primary {
         background: linear-gradient(135deg, #7c3aed, #ec4899);
@@ -418,12 +416,18 @@
             <label class="block text-sm font-semibold mb-1.5"
               >كلمة المرور</label
             >
-            <input
-              id="login-pass"
-              type="password"
-              placeholder="أدخل كلمة المرور"
-              autocomplete="current-password"
-            />
+            <div style="position:relative">
+              <input
+                id="login-pass"
+                type="password"
+                placeholder="أدخل كلمة المرور"
+                autocomplete="current-password"
+                style="padding-left:2.5rem"
+              />
+              <button type="button"
+                      onclick="const i=document.getElementById('login-pass');const s=i.type==='password';i.type=s?'text':'password';this.textContent=s?'🙈':'👁';"
+                      style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#94a3b8;line-height:1">👁</button>
+            </div>
           </div>
           <div
             id="login-error"

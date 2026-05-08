@@ -1485,6 +1485,81 @@
         }
       }
 
+      // ── فيديوهات وشرح الدرس ──────────────────────────────
+      function addVideoUrlRow(url = '') {
+        const list = document.getElementById('video-urls-list');
+        const row = document.createElement('div');
+        row.className = 'flex gap-2 items-center';
+        row.innerHTML = `
+          <input type="url" dir="ltr" value="${url.replace(/"/g,'&quot;')}"
+                 placeholder="https://www.youtube.com/watch?v=..."
+                 class="video-url-input"
+                 style="flex:1;border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:8px 12px;font-size:13px;font-family:Cairo,sans-serif;outline:none;background:#fffbf7;"/>
+          <button type="button" onclick="this.parentElement.remove()"
+                  style="flex-shrink:0;width:30px;height:30px;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.06);color:#ef4444;font-size:14px;cursor:pointer;">✕</button>
+        `;
+        list.appendChild(row);
+      }
+
+      function getVideoUrls() {
+        return Array.from(document.querySelectorAll('#video-urls-list .video-url-input'))
+          .map(i => i.value.trim()).filter(Boolean);
+      }
+
+      async function loadContent() {
+        const editor = document.getElementById("lesson-content-editor");
+        const status = document.getElementById("content-status");
+        const badge  = document.getElementById("content-saved-badge");
+        editor.value = "";
+        document.getElementById('video-urls-list').innerHTML = '';
+        badge.classList.add("hidden");
+        status.textContent = "جاري تحميل الشرح...";
+        try {
+          const r = await fetch(
+            `${API}/lessons/content?gradeKey=${grade}&unitIndex=${selU}&lessonIndex=${selL}`,
+            { credentials: "include", cache: "no-store" },
+          );
+          const d = await r.json();
+          if (d.content) {
+            editor.value = d.content;
+            const dt = new Date(d.updated_at).toLocaleDateString("ar-SA");
+            status.textContent = `آخر تعديل: ${dt}`;
+            badge.classList.remove("hidden");
+          } else {
+            status.textContent = "لا يوجد شرح مخصص — يُستخدم الشرح الافتراضي حالياً";
+          }
+          const urls = Array.isArray(d.video_urls) ? d.video_urls : [];
+          urls.forEach(u => addVideoUrlRow(u));
+        } catch {
+          status.textContent = "تعذّر تحميل الشرح";
+        }
+      }
+
+      async function saveContent() {
+        const content   = document.getElementById("lesson-content-editor").value.trim();
+        const videoUrls = getVideoUrls();
+        try {
+          const r = await apiFetch(`${API}/lessons/content`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              grade_key:    grade,
+              unit_index:   selU,
+              lesson_index: selL,
+              content:      content || "",
+              video_urls:   videoUrls,
+            }),
+          });
+          if (r.status === 401) { showLogin(); return; }
+          if (!r.ok) throw new Error();
+          document.getElementById("content-status").textContent = "تم الحفظ للتو ✓";
+          document.getElementById("content-saved-badge").classList.remove("hidden");
+          showToast(`✅ تم حفظ الشرح${videoUrls.length > 0 ? ` و${videoUrls.length} فيديو` : ''}`);
+        } catch {
+          showToast("❌ حدث خطأ في الحفظ", "error");
+        }
+      }
+
       function renderQ() {
         const el = document.getElementById("q-list");
         const qualityBar = document.getElementById("q-quality-bar");

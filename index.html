@@ -1055,7 +1055,7 @@
             const deg = numDeg
               ? `<sup>${d2ar(numDeg)}</sup>`
               : (rootDeg[sym] ? `<sup>${rootDeg[sym]}</sup>` : '');
-            return `<span dir="ltr" style="display:inline-block;">${deg}√<span style="text-decoration:overline;padding-right:2px;">${inner}</span></span>`;
+            return `<span dir="ltr" style="display:inline-block;unicode-bidi:bidi-override;">${deg}√<span style="text-decoration:overline;padding-right:2px;">${inner}</span></span>`;
           }
         );
         // جذر تربيعي بعد رقم درجة بدون محتوى: مثل 2√
@@ -1106,7 +1106,7 @@
 
         // 7. كسور نصية n/d — يتجنب URLs والمسارات (/ أو : قبل الرقم)
         str = str.replace(/(?<![:/.\w])([0-9]+)\/([0-9]+)(?![:/.\w])/g,
-          (_, n, d) => `<span dir="ltr" style="display:inline-block;"><sup>${d2ar(n)}</sup>⁄<sub>${d2ar(d)}</sub></span>`
+          (_, n, d) => `<span dir="ltr" style="display:inline-block;unicode-bidi:bidi-override;"><sup>${d2ar(n)}</sup>⁄<sub>${d2ar(d)}</sub></span>`
         );
 
         // 8. الأرقام العادية (0-9) → عربية
@@ -1491,7 +1491,7 @@
                 q: q.question_text,
                 options: [q.option_a, q.option_b, q.option_c, q.option_d],
                 answer: Number(q.correct_answer),
-                image: q.image_url || null,
+                image: (q.image_url && q.image_url !== '—' && q.image_url.trim() !== '') ? q.image_url : null,
                 explanation: q.explanation || null,
               }));
             }
@@ -1556,7 +1556,7 @@
                 q: q.question_text,
                 options: [q.option_a, q.option_b, q.option_c, q.option_d],
                 answer: Number(q.correct_answer),
-                image: q.image_url || null,
+                image: (q.image_url && q.image_url !== '—' && q.image_url.trim() !== '') ? q.image_url : null,
                 explanation: q.explanation || null,
               }));
             }

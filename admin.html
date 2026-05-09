@@ -1440,12 +1440,13 @@
         selL = li;
         const unit = CUR[grade].units[ui];
         const lesson = unit.lessons[li];
-        document.getElementById("sel-title").textContent = lesson;
-        document.getElementById("sel-unit").textContent =
-          `الوحدة ${ui + 1}: ${unit.title}`;
-        document.getElementById("sel-count").textContent = "...";
-        document.getElementById("no-sel").classList.add("hidden");
-        document.getElementById("sel-panel").classList.remove("hidden");
+        const _set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+        const _cls = (id, m, c) => { const e = document.getElementById(id); if (e) e.classList[m](c); };
+        _set("sel-title", lesson);
+        _set("sel-unit", `الوحدة ${ui + 1}: ${unit.title}`);
+        _set("sel-count", "...");
+        _cls("no-sel", "add", "hidden");
+        _cls("sel-panel", "remove", "hidden");
         showLessonDetailMode();
         buildTree();
         updateGradeIcon();

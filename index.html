@@ -1616,13 +1616,13 @@
           progressDiv.innerHTML = `السؤال <span id="current-q">${toArabicDigits(state.currentQuestion + 1)}</span> من <span id="total-q">${toArabicDigits(state.quiz.length)}</span>`;
         }
 
-        let html = `<h3 class="text-xl font-bold mb-4 text-center">${toArabicDigits(q.q)}</h3>`;
+        let html = `<h3 class="text-xl font-bold mb-4 text-center" dir="auto">${toArabicDigits(q.q)}</h3>`;
         if (q.image) {
           html += `<div class="flex justify-center mb-5"><img src="${q.image}" alt="صورة السؤال" class="max-h-48 rounded-xl border border-white/10 object-contain"></div>`;
         }
         html += `<div class="space-y-3">`;
         q.options.forEach((opt, idx) => {
-          html += `<div class="quiz-option rounded-xl p-4 text-center font-medium" onclick="selectAnswer(${idx})" id="opt-${idx}">${toArabicDigits(opt)}</div>`;
+          html += `<div class="quiz-option rounded-xl p-4 text-center font-medium" dir="auto" onclick="selectAnswer(${idx})" id="opt-${idx}">${toArabicDigits(opt)}</div>`;
         });
         html += "</div>";
         container.innerHTML = html;

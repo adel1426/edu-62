@@ -1457,14 +1457,13 @@
         if (qFilter) qFilter.value = "all";
         // أغلق قسم الشرح عند تغيير الدرس
         ["content-body"].forEach((id) => {
-          document.getElementById(id).classList.add("hidden");
+          const el = document.getElementById(id); if (el) el.classList.add("hidden");
         });
-        document.getElementById("content-arrow").textContent = "▼";
-        document.getElementById("xl-arrow").textContent = "▼";
+        const _ca = document.getElementById("content-arrow"); if (_ca) _ca.textContent = "▼";
+        const _xa = document.getElementById("xl-arrow"); if (_xa) _xa.textContent = "▼";
         await Promise.all([loadQ(), loadContent()]);
-        document
-          .getElementById("questions-view")
-          .scrollIntoView({ behavior: "smooth", block: "start" });
+        const _qv = document.getElementById("questions-view");
+        if (_qv) _qv.scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
       // ── تحميل الأسئلة ────────────────────────────────────

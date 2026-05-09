@@ -1481,6 +1481,8 @@
           document.getElementById("sel-count").textContent =
             `${questions.length} سؤال`;
         } catch (e) {
+          document.getElementById("q-list").innerHTML =
+            '<div class="text-center py-10"><div class="text-4xl mb-3">⚠️</div><div style="color:#ef4444;">تعذّر تحميل الأسئلة</div><div class="text-sm mt-2" style="color:#94a3b8;">تحقق من الاتصال أو أعد تحميل الصفحة</div><button onclick="loadQ()" style="margin-top:12px;padding:6px 16px;border-radius:8px;background:#7C3AED;color:#fff;border:none;cursor:pointer;font-family:Cairo,sans-serif;">🔄 إعادة المحاولة</button></div>';
           showToast("❌ خطأ في جلب الأسئلة", "error");
         }
       }

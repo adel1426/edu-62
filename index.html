@@ -1641,7 +1641,7 @@
         }
         html += `<div class="space-y-3">`;
         q.options.forEach((opt, idx) => {
-          html += `<div class="quiz-option rounded-xl p-4 text-center font-medium" dir="auto" onclick="selectAnswer(${idx})" id="opt-${idx}">${toArabicDigits(opt)}</div>`;
+          html += `<div class="quiz-option rounded-xl p-4 text-center font-medium" dir="rtl" onclick="selectAnswer(${idx})" id="opt-${idx}">${toArabicDigits(opt)}</div>`;
         });
         html += "</div>";
         container.innerHTML = html;
@@ -1679,7 +1679,7 @@
           const expBox = document.createElement("div");
           expBox.className = "mt-4 p-4 rounded-xl text-sm";
           expBox.style.cssText = "background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);color:#4B5563;line-height:1.8;";
-          expBox.innerHTML = `<span style="color:#7C3AED;font-weight:700;">💡 التغذية الراجعة:</span> ${q.explanation}`;
+          expBox.innerHTML = `<span style="color:#7C3AED;font-weight:700;">💡 التغذية الراجعة:</span> ${toArabicDigits(q.explanation)}`;
           container.appendChild(expBox);
         }
 
@@ -1821,7 +1821,7 @@
                 <p class="text-sm mb-2" style="color:#2D2640;"><strong>السؤال:</strong> ${toArabicDigits(answer.question)}</p>
                 <p class="text-sm mb-1" style="color:#64748b;"><strong>إجابتك:</strong> ${toArabicDigits(answer.userAnswer)}</p>
                 <p class="text-sm font-semibold mb-2" style="color:#10b981;"><strong>الإجابة الصحيحة:</strong> ${toArabicDigits(answer.correctAnswer)}</p>
-                ${answer.explanation ? `<div class="mt-3 p-3 rounded-xl text-sm" style="background:rgba(124,58,237,0.07);color:#4b5563;line-height:1.8;">${answer.explanation}</div>` : ""}
+                ${answer.explanation ? `<div class="mt-3 p-3 rounded-xl text-sm" style="background:rgba(124,58,237,0.07);color:#4b5563;line-height:1.8;">${toArabicDigits(answer.explanation)}</div>` : ""}
               </div>
             `).join("")}
           </div>
